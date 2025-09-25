@@ -82,6 +82,10 @@
             font-weight: 500;
             cursor: pointer;
             text-align: center;
+            /* PERUBAHAN CSS: Menambahkan flex untuk ikon */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .auth-button {
             padding: 0.5rem 1rem;
@@ -91,6 +95,11 @@
             font-weight: 500;
             transition: background-color 0.2s;
             width: 100%; /* Make it full width on mobile stack */
+            /* PERUBAHAN CSS: Menambahkan flex untuk ikon */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
         }
         .login-btn { background-color: var(--primary-blue); color: white; }
         .logout-btn { background-color: var(--danger-red); color: white; }
@@ -330,7 +339,7 @@
             .header-controls .filter-input,
             .header-controls .auth-button,
             .header-controls #add-prompt-link {
-                display: inline-block !important;
+                display: inline-flex !important; /* Diubah dari inline-block */
             }
             .search-form-overlay { display: none !important; }
         }
@@ -346,7 +355,7 @@
             </select>
             <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
             
-            <a href="#" id="add-prompt-link">Tambah Prompt</a>
+            <a href="#" id="add-prompt-link"><span class="material-icons">add</span></a>
             
             <div id="auth-container-desktop"></div>
 
@@ -652,11 +661,13 @@
             
             // Atur tampilan Desktop
             if (user) {
-                authContainerDesktop.innerHTML = `<button class="auth-button logout-btn" id="logout-btn-desktop">Logout</button>`;
+                // PERUBAHAN JAVASCRIPT: Menambahkan ikon logout di desktop
+                authContainerDesktop.innerHTML = `<button class="auth-button logout-btn" id="logout-btn-desktop"><span class="material-icons">logout</span>Logout</button>`;
                 document.getElementById('logout-btn-desktop').addEventListener('click', logoutUser);
-                addPromptLinkDesktop.style.display = 'inline-block';
+                addPromptLinkDesktop.style.display = 'inline-flex';
             } else {
-                authContainerDesktop.innerHTML = `<button class="auth-button login-btn" id="login-btn-desktop">Login</button>`;
+                // PERUBAHAN JAVASCRIPT: Menambahkan ikon login di desktop
+                authContainerDesktop.innerHTML = `<button class="auth-button login-btn" id="login-btn-desktop"><span class="material-icons">login</span>Login</button>`;
                 document.getElementById('login-btn-desktop').addEventListener('click', () => showModal('login-modal'));
                 addPromptLinkDesktop.style.display = 'none';
             }
