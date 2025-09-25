@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galeri Prompt Banana</title>
-    <!-- Memuat Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS Reset and Basic Styles */
         :root {
             --soft-blue-bg: #EFF6FF;
             --text-dark: #1F2937;
@@ -22,84 +20,102 @@
             --light-gray-bg: #F9FAFB;
             --light-gray-border: #E5E7EB;
             --white: #FFFFFF;
+            --danger-red: #EF4444;
             --font-family-sans: 'Inter', sans-serif;
         }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: var(--font-family-sans);
             background-color: var(--soft-blue-bg);
             color: var(--text-dark);
             line-height: 1.6;
+            padding-top: 80px;
         }
-        
-        /* Container */
         .container {
             width: 100%;
             max-width: 1280px;
             margin-left: auto;
             margin-right: auto;
-            padding: 1rem;
+            padding: 2rem;
         }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: var(--white);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-
-        .header h1 {
-            font-size: 1.875rem;
-            font-weight: 700;
+        .header-title h1 {
+            font-size: 1.5rem;
             color: var(--primary-blue-dark);
         }
-
-        .header p {
-            margin-top: 0.75rem;
-            font-size: 1.125rem;
-            color: var(--primary-blue);
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-
-        /* Main Grid for Cards */
+        .filter-input, .filter-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--light-gray-border);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+        }
+        #add-prompt-link {
+            display: none;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-green);
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .auth-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .login-btn { background-color: var(--primary-blue); color: white; }
+        .logout-btn { background-color: var(--danger-red); color: white; }
         .prompt-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
         }
-
-        /* Card Styling */
         .card {
             background-color: var(--white);
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
         }
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .prompt-section {
-            padding: 1.5rem;
-            flex-grow: 1;
-        }
-
+        .prompt-section { padding: 1.5rem; flex-grow: 1; }
         .card-title {
             font-size: 1.25rem;
             font-weight: 700;
             color: var(--primary-blue-dark);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
-
+        .card-category {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+            background-color: #D1FAE5;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            display: inline-block;
+        }
         .prompt-label {
             display: block;
             font-size: 0.875rem;
@@ -107,218 +123,397 @@
             color: var(--text-medium);
             margin-bottom: 0.5rem;
         }
-
-        .prompt-wrapper {
-            position: relative;
-        }
-
         .prompt-textarea {
             width: 100%;
             height: 7rem;
-            padding: 0.75rem 3.5rem 0.75rem 0.75rem; /* Make space for button */
+            padding: 0.75rem;
             background-color: #F3F4F6;
             border: 1px solid var(--light-gray-border);
             border-radius: 0.5rem;
             font-family: inherit;
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
             resize: none;
         }
-
-        .prompt-textarea:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
-        }
-        
-        .copy-button {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            padding: 0.5rem;
-            background-color: var(--primary-blue-light);
-            color: var(--white);
-            border: none;
-            border-radius: 9999px; /* full circle */
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .copy-button:hover {
-            background-color: var(--primary-blue);
-        }
-
-        .copy-button.copied {
-            background-color: var(--success-green);
-        }
-
-        .copy-button svg {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-
-        /* Image Section */
         .image-section {
             padding: 1.5rem;
             background-color: var(--light-gray-bg);
             border-top: 1px solid var(--light-gray-border);
         }
-
         .image-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             text-align: center;
         }
-        
         .image-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
-
-        .image-title.input {
-            color: var(--primary-blue-dark);
-        }
-
-        .image-title.output {
-            color: var(--primary-green);
-        }
-
+        .image-title.input { color: var(--primary-blue-dark); }
+        .image-title.output { color: var(--primary-green); }
         .image-grid img {
             width: 100%;
             height: auto;
             aspect-ratio: 1 / 1;
             object-fit: cover;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
-        /* Responsive Media Queries */
-        @media (min-width: 640px) {
-            .container {
-                padding: 1.5rem;
-            }
-            .header h1 {
-                font-size: 2.25rem;
-            }
+        .card-actions {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
         }
-
-        @media (min-width: 768px) {
-            .prompt-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .action-btn {
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
         }
-        
-        @media (min-width: 1024px) {
-            .container {
-                padding: 2rem;
-            }
-            .prompt-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .header h1 {
-                font-size: 3rem;
-            }
+        .edit-btn { background-color: var(--primary-blue-light); }
+        .delete-btn { background-color: var(--danger-red); }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
         }
-
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray-border);
+            padding-bottom: 1rem;
+        }
+        .modal-header h2 { color: var(--primary-blue-dark); }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .modal-body form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .modal-body input, .modal-body textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray-border);
+            border-radius: 0.5rem;
+        }
+        .modal-body button { align-self: flex-end; }
     </style>
 </head>
 <body>
 
+    <header class="sticky-header">
+        <div class="header-title"><h1>Galeri Prompt</h1></div>
+        <div class="header-controls">
+            <select id="category-filter" class="filter-select">
+                <option value="all">Semua Kategori</option>
+            </select>
+            <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
+            <a id="add-prompt-link">Tambah Prompt</a>
+            <div id="auth-container">
+                <button class="auth-button login-btn" id="login-btn">Login</button>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-
-        <header class="header">
-            <h1>Galeri Prompt Banana</h1>
-            <p>Kumpulan prompt kreatif untuk menghasilkan gambar AI yang menakjubkan.</p>
-        </header>
-
-        <!-- Kartu prompt akan dimuat di sini oleh JavaScript -->
-        <main class="prompt-grid"></main>
+        <main class="prompt-grid" id="prompt-grid"><p>Memuat prompt...</p></main>
     </div>
 
+    <div id="prompt-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Tambah Prompt Baru</h2>
+                <button class="close-btn" data-modal="prompt-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="prompt-form">
+                    <input type="hidden" id="prompt-id">
+                    <input type="text" id="prompt-title" placeholder="Judul" required>
+                    <input type="text" id="prompt-category" placeholder="Kategori (cth: Karakter, Pemandangan)" required>
+                    <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
+                    <input type="url" id="prompt-inputImage" placeholder="URL Gambar Input" required>
+                    <input type="url" id="prompt-outputImage" placeholder="URL Gambar Output" required>
+                    <button type="submit" class="auth-button login-btn">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button class="close-btn" data-modal="login-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="auth-button login-btn">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <script>
-        // Fungsi untuk menyalin teks dari textarea ke clipboard
-        function copyPrompt(elementId, buttonElement) {
-            const promptTextarea = document.getElementById(elementId);
-            
-            promptTextarea.select();
-            promptTextarea.setSelectionRange(0, 99999); 
+        // === KONFIGURASI FIREBASE ===
+        const firebaseConfig = {
+            // TODO: MASUKKAN KONFIGURASI FIREBASE ANDA DI SINI
+    apiKey: "AIzaSyD5dhh4a3835uJGxxvKL27KcTAtu0f7bT4",
+    authDomain: "all-auth-1509.firebaseapp.com",
+    projectId: "all-auth-1509",
+    storageBucket: "all-auth-1509.firebasestorage.app",
+    messagingSenderId: "23681152443",
+    appId: "1:23681152443:web:8f86c9b89e14c90692809e",
+    measurementId: "G-D3Y0WHY83V"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-            try {
-                document.execCommand('copy');
+        // === ELEMEN DOM ===
+        const promptGrid = document.getElementById('prompt-grid');
+        const authContainer = document.getElementById('auth-container');
+        const addPromptLink = document.getElementById('add-prompt-link');
+        const categoryFilter = document.getElementById('category-filter');
+        const textFilter = document.getElementById('filter-input');
+        let allPrompts = []; 
+        let currentUser = null;
 
-                const originalIcon = buttonElement.innerHTML;
-                
-                buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
-                buttonElement.classList.add('copied');
-                buttonElement.title = "Disalin!";
+        // === FUNGSI UTAMA ===
 
-                setTimeout(() => {
-                    buttonElement.innerHTML = originalIcon;
-                    buttonElement.classList.remove('copied');
-                    buttonElement.title = "Salin Prompt";
-                }, 2000);
-
-            } catch (err) {
-                console.error('Gagal menyalin teks: ', err);
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                authContainer.innerHTML = `<button class="auth-button logout-btn" id="logout-btn">Logout</button>`;
+                addPromptLink.style.display = 'inline-block';
+                document.getElementById('logout-btn').addEventListener('click', logoutUser);
+            } else {
+                authContainer.innerHTML = `<button class="auth-button login-btn" id="login-btn">Login</button>`;
+                addPromptLink.style.display = 'none';
+                document.getElementById('login-btn').addEventListener('click', () => showModal('login-modal'));
             }
-
-            window.getSelection().removeAllRanges();
-        }
-
-        // Fungsi untuk memuat dan menampilkan data prompt dari JSON
-        document.addEventListener('DOMContentLoaded', () => {
-            const promptGrid = document.querySelector('.prompt-grid');
-
-            fetch('prompts.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(prompts => {
-                    let cardsHtml = '';
-                    prompts.forEach(prompt => {
-                        cardsHtml += `
-                            <div class="card">
-                                <div class="prompt-section">
-                                    <h3 class="card-title">${prompt.title}</h3>
-                                    <label for="${prompt.id}" class="prompt-label">Prompt:</label>
-                                    <div class="prompt-wrapper">
-                                        <textarea id="${prompt.id}" readonly class="prompt-textarea" rows="4">${prompt.promptText}</textarea>
-                                        <button onclick="copyPrompt('${prompt.id}', this)" title="Salin Prompt" class="copy-button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="image-section">
-                                    <div class="image-grid">
-                                        <div>
-                                            <h4 class="image-title input">Input (Bahan)</h4>
-                                            <img src="${prompt.inputImage}" alt="${prompt.inputAlt}" onerror="this.onerror=null;this.src='https://placehold.co/400x400/E0E0E0/333333?text=Gagal+Muat';">
-                                        </div>
-                                        <div>
-                                            <h4 class="image-title output">Output (Hasil)</h4>
-                                            <img src="${prompt.outputImage}" alt="${prompt.outputAlt}" onerror="this.onerror=null;this.src='https://placehold.co/400x400/E0E0E0/333333?text=Gagal+Muat';">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    promptGrid.innerHTML = cardsHtml;
-                })
-                .catch(error => {
-                    console.error('Gagal memuat atau memproses prompt:', error);
-                    promptGrid.innerHTML = '<p style="text-align: center; color: red;">Gagal memuat data prompt. Silakan coba lagi nanti.</p>';
-                });
+            applyFilters();
         });
-    </script>
 
+        const fetchAndRenderPrompts = async () => {
+            try {
+                const snapshot = await db.collection("prompts").orderBy("title").get();
+                allPrompts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                populateCategoryFilter();
+                applyFilters();
+            } catch (error) {
+                console.error("Gagal mengambil data: ", error);
+                promptGrid.innerHTML = `<p>Gagal memuat data. Periksa aturan keamanan (security rules) Firestore Anda.</p>`;
+            }
+        };
+        
+        const populateCategoryFilter = () => {
+            const categories = [...new Set(allPrompts.map(p => p.category).filter(Boolean))];
+            categoryFilter.innerHTML = '<option value="all">Semua Kategori</option>';
+            categories.sort().forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        };
+        
+        const applyFilters = () => {
+            const category = categoryFilter.value;
+            const searchTerm = textFilter.value.toLowerCase();
+            let filtered = allPrompts;
+
+            if (category !== 'all') {
+                filtered = filtered.filter(p => p.category === category);
+            }
+            if (searchTerm) {
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm));
+            }
+            renderPrompts(filtered);
+        };
+        
+        const renderPrompts = (promptsToRender) => {
+            promptGrid.innerHTML = '';
+            if (promptsToRender.length === 0) {
+                promptGrid.innerHTML = '<p>Tidak ada prompt yang ditemukan.</p>';
+                return;
+            }
+            promptsToRender.forEach(prompt => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                let cardHTML = `
+                    <div class="prompt-section">
+                        <h3 class="card-title">${prompt.title}</h3>
+                        ${prompt.category ? `<span class="card-category">${prompt.category}</span>` : ''}
+                        <label class="prompt-label">Prompt:</label>
+                        <textarea readonly class="prompt-textarea">${prompt.promptText}</textarea>
+                    </div>
+                    <div class="image-section">
+                        <div class="image-grid">
+                            <div><h4 class="image-title input">Input</h4><img src="${prompt.inputImage}" alt="Input image"></div>
+                            <div><h4 class="image-title output">Output</h4><img src="${prompt.outputImage}" alt="Output image"></div>
+                        </div>
+                    </div>
+                `;
+                if (currentUser) {
+                     cardHTML += `<div class="card-actions">
+                        <button class="action-btn edit-btn" data-id="${prompt.id}">Edit</button>
+                        <button class="action-btn delete-btn" data-id="${prompt.id}">Hapus</button>
+                    </div>`;
+                }
+                card.innerHTML = cardHTML;
+                promptGrid.appendChild(card);
+            });
+        };
+
+        const loginUser = (email, password) => {
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => hideModal('login-modal'))
+                .catch(error => alert(`Login Gagal: ${error.message}`));
+        };
+
+        const logoutUser = () => {
+            auth.signOut();
+        };
+
+        const savePrompt = async (data) => {
+            try {
+                if (data.id) {
+                    const docId = data.id;
+                    delete data.id;
+                    await db.collection("prompts").doc(docId).update(data);
+                } else {
+                    await db.collection("prompts").add(data);
+                }
+                hideModal('prompt-modal');
+                fetchAndRenderPrompts();
+            } catch (error) {
+                console.error("Gagal menyimpan prompt: ", error);
+                alert("Gagal menyimpan prompt.");
+            }
+        };
+
+        const deletePrompt = async (id) => {
+            if (confirm("Apakah Anda yakin ingin menghapus prompt ini?")) {
+                try {
+                    await db.collection("prompts").doc(id).delete();
+                    fetchAndRenderPrompts();
+                } catch (error) {
+                    console.error("Gagal menghapus prompt: ", error);
+                    alert("Gagal menghapus prompt.");
+                }
+            }
+        };
+
+        const showModal = (modalId, data = null) => {
+            const modal = document.getElementById(modalId);
+            if (modalId === 'prompt-modal') {
+                const form = document.getElementById('prompt-form');
+                form.reset();
+                if (data) { // Mode edit
+                    document.getElementById('modal-title').innerText = 'Edit Prompt';
+                    document.getElementById('prompt-id').value = data.id;
+                    document.getElementById('prompt-title').value = data.title;
+                    document.getElementById('prompt-category').value = data.category || '';
+                    document.getElementById('prompt-text').value = data.promptText;
+                    document.getElementById('prompt-inputImage').value = data.inputImage;
+                    document.getElementById('prompt-outputImage').value = data.outputImage;
+                } else { // Mode tambah
+                    document.getElementById('modal-title').innerText = 'Tambah Prompt Baru';
+                    document.getElementById('prompt-id').value = '';
+                }
+            }
+            modal.style.display = 'flex';
+        };
+
+        const hideModal = (modalId) => {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        // === EVENT LISTENERS ===
+        
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            loginUser(email, password);
+        });
+
+        document.getElementById('prompt-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('prompt-id').value,
+                title: document.getElementById('prompt-title').value,
+                category: document.getElementById('prompt-category').value,
+                promptText: document.getElementById('prompt-text').value,
+                inputImage: document.getElementById('prompt-inputImage').value,
+                outputImage: document.getElementById('prompt-outputImage').value,
+            };
+            if (!data.id) delete data.id;
+            savePrompt(data);
+});
+
+        addPromptLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('prompt-modal');
+        });
+
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', () => hideModal(btn.dataset.modal));
+        });
+        
+        promptGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                const id = e.target.dataset.id;
+                const promptToEdit = allPrompts.find(p => p.id === id);
+                showModal('prompt-modal', promptToEdit);
+            }
+            if (e.target.classList.contains('delete-btn')) {
+                const id = e.target.dataset.id;
+                deletePrompt(id);
+            }
+        });
+
+        categoryFilter.addEventListener('change', applyFilters);
+        textFilter.addEventListener('input', applyFilters);
+
+        document.addEventListener('DOMContentLoaded', fetchAndRenderPrompts);
+
+    </script>
 </body>
 </html>
-
