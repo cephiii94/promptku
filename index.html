@@ -20,10 +20,6 @@
             </select>
             <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
             
-            <a href="#" id="add-prompt-link"><span class="material-icons">add</span></a>
-            
-            <div id="auth-container-desktop"></div>
-
             <button id="search-btn" class="search-icon-btn icon-btn" type="button" style="background-color: var(--primary-blue)">
                 <span class="material-icons">search</span>
                 <span class="tooltip">Cari Prompt</span>
@@ -53,17 +49,18 @@
                 <form id="prompt-form">
                     <input type="hidden" id="prompt-id">
                     <input type="text" id="prompt-title" placeholder="Judul" required>
-<div class="form-row">
-    <div class="form-group">
-        <label for="prompt-category">Kategori</label>
-        <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
-    </div>
-    <div class="form-group">
-        <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
-        <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
-    </div>
-</div>
-<textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>                    <input type="url" id="prompt-inputImage" placeholder="URL Gambar Input" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prompt-category">Kategori</label>
+                            <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
+                            <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
+                        </div>
+                    </div>
+                    <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
+                    <input type="url" id="prompt-inputImage" placeholder="URL Gambar Input" required>
                     <input type="url" id="prompt-outputImage" placeholder="URL Gambar Output" required>
                     <button type="submit" class="auth-button login-btn">Simpan</button>
                 </form>
@@ -90,8 +87,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <script src="script.js">   </script> 
-
+    <script src="script.js"></script> 
 </body>
 </html>

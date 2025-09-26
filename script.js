@@ -28,9 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryFilter = document.getElementById('category-filter');
     const textFilterDesktop = document.getElementById('filter-input');
     const textFilterMobile = document.getElementById('filter-input-mobile');
-    const addPromptLinkDesktop = document.getElementById('add-prompt-link');
     const addPromptLinkMobile = document.getElementById('add-prompt-link-mobile');
-    const authContainerDesktop = document.getElementById('auth-container-desktop');
     const authContainerMobile = document.getElementById('auth-container-mobile');
     const searchBtn = document.getElementById('search-btn');
     const searchOverlay = document.getElementById('search-form-overlay');
@@ -90,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 5. RENDERING LOGIC
+    // 5. RENDERING LOGIC (UPDATED)
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
@@ -98,12 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
             promptGrid.innerHTML = '<p>Tidak ada prompt yang ditemukan.</p>';
             return;
         }
-
         const allCardsHTML = promptsToRender.map(prompt => {
             const adminActions = currentUser ? `
                 <div class="card-actions">
-                    <button class="action-btn edit-btn" data-id="${prompt.id}">Edit</button>
-                    <button class="action-btn delete-btn" data-id="${prompt.id}">Hapus</button>
+                    <button class="action-btn edit-btn" data-id="${prompt.id}">
+                        <span class="material-icons">edit</span>
+                        <span class="tooltip">Edit</span>
+                    </button>
+                    <button class="action-btn delete-btn" data-id="${prompt.id}">
+                        <span class="material-icons">delete</span>
+                        <span class="tooltip">Hapus</span>
+                    </button>
                 </div>` : '';
 
             const categoryTag = prompt.category ? `<span class="tag tag-category" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` : '';
@@ -133,11 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${categoryTag}
                             ${otherTags}
                         </div>
+                        ${adminActions}
                     </div>
-                    ${adminActions}
                 </div>`;
         }).join('');
-
         promptGrid.innerHTML = allCardsHTML;
     };
 
@@ -160,14 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (!formData.tags) {
                 formData.tags = [];
             }
-
             const { id, ...data } = formData;
             if (id) {
                 await db.collection("prompts").doc(id).update(data);
             } else {
                 await db.collection("prompts").add(data);
             }
-
             hideModal('prompt-modal');
             await fetchAndRenderPrompts();
         } catch (error) {
@@ -214,28 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateAuthStateUI = (user) => {
         if (user) {
-            // Logged In State
-            authContainerDesktop.innerHTML = `<button class="auth-button logout-btn" id="logout-btn-desktop"><span class="material-icons">logout</span>Logout</button>`;
             authContainerMobile.innerHTML = `<button class="auth-icon-btn logout" id="logout-btn-mobile-icon"><span class="material-icons">logout</span><span class="tooltip">Logout</span></button>`;
-            
-            document.getElementById('logout-btn-desktop').addEventListener('click', logoutUser);
             document.getElementById('logout-btn-mobile-icon').addEventListener('click', logoutUser);
-
-            addPromptLinkDesktop.style.display = 'inline-flex';
             addPromptLinkMobile.style.display = 'flex';
         } else {
-            // Logged Out State
-            authContainerDesktop.innerHTML = `<button class="auth-button login-btn" id="login-btn-desktop"><span class="material-icons">login</span>Login</button>`;
             authContainerMobile.innerHTML = `<button class="auth-icon-btn" id="login-btn-mobile-icon"><span class="material-icons">login</span><span class="tooltip">Login</span></button>`;
-
-            document.getElementById('login-btn-desktop').addEventListener('click', () => showModal('login-modal'));
             document.getElementById('login-btn-mobile-icon').addEventListener('click', () => showModal('login-modal'));
-
-            addPromptLinkDesktop.style.display = 'none';
             addPromptLinkMobile.style.display = 'none';
         }
     };
-
 
     // =========================================================================
     // 8. EVENT LISTENERS
@@ -326,11 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('input', applyFilters);
     });
 
-    [addPromptLinkDesktop, addPromptLinkMobile].forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            showModal('prompt-modal');
-        });
+    addPromptLinkMobile.addEventListener('click', (e) => {
+        e.preventDefault();
+        showModal('prompt-modal');
     });
 
     // =========================================================================

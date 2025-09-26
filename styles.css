@@ -120,6 +120,7 @@ body {
 /* 4. CARD COMPONENT
    ========================================================================== */
 .card {
+    position: relative; /* Penting untuk positioning absolut child */
     background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 20%), var(--white);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
@@ -171,8 +172,7 @@ body {
 }
 
 .card-header {
-    /* Kita tidak butuh flexbox lagi di sini */
-    /* Cukup pastikan ada jarak yang pas ke elemen berikutnya */
+    /* Tidak butuh flexbox lagi di sini */
 }
 
 .card-title {
@@ -228,7 +228,7 @@ body {
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
     border: 1px solid var(--light-gray-border);
-        cursor: pointer;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 .tag:hover {
@@ -243,6 +243,61 @@ body {
     color: var(--primary-blue-dark);
     font-weight: 600;
 }
+
+
+/* == [START] PERBAIKAN & PENAMBAHAN UNTUK CARD ACTIONS == */
+
+/* GANTI KODE .card-actions LAMA DENGAN YANG INI */
+.card-actions {
+    display: flex; /* Gunakan flexbox untuk alignment */
+    justify-content: flex-end; /* Posisikan tombol ke kanan */
+    gap: 0.5rem; /* Jarak antar tombol */
+    margin-top: 1rem; /* Beri jarak dari tags di atasnya */
+    border-top: 1px solid var(--light-gray-border); /* (Opsional) Garis pemisah */
+    padding-top: 1rem; /* (Opsional) Jarak dari garis pemisah */
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0; /* Hapus padding lama */
+    border-radius: 50%; /* Buat menjadi lingkaran */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.1) translateY(-2px); /* Sedikit membesar dan terangkat */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.edit-btn { background-color: var(--primary-blue); }
+.edit-btn:hover { background-color: var(--primary-blue-dark); }
+
+.delete-btn { background-color: var(--danger-red); }
+.delete-btn:hover { opacity: 0.8; }
+
+/* Pastikan tooltip tetap berfungsi dengan baik */
+.action-btn .tooltip {
+    top: 120%; /* Sedikit turunkan posisi tooltip */
+    font-size: 0.75rem;
+    pointer-events: none; /* Pastikan tooltip tidak bisa di-klik */
+}
+
+.action-btn:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* == [END] PERBAIKAN & PENAMBAHAN UNTUK CARD ACTIONS == */
+
 
 /* 5. MODAL
    ========================================================================== */
@@ -298,16 +353,15 @@ body {
     align-self: flex-end;
 }
 
-/* Tambahkan di dalam bagian CSS untuk MODAL */
 .form-row {
     display: flex;
-    flex-wrap: wrap; /* Agar responsif di layar kecil */
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
 .form-group {
     flex: 1;
-    min-width: 150px; /* Lebar minimum sebelum wrap */
+    min-width: 150px;
 }
 
 .form-group label {
@@ -335,18 +389,7 @@ body {
 
 .login-btn { background-color: var(--primary-blue); color: white; }
 .logout-btn { background-color: var(--danger-red); color: white; }
-#add-prompt-link { display: none; } /* Default state controlled by JS */
-
-.action-btn {
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    color: white;
-    font-weight: 500;
-}
-.edit-btn { background-color: var(--primary-blue-light); }
-.delete-btn { background-color: var(--danger-red); }
+#add-prompt-link { display: none; }
 
 .copy-btn {
     background: none;
@@ -361,7 +404,7 @@ body {
     color: var(--text-medium);
     transition: all 0.2s ease;
     align-self: flex-end;
-    margin-bottom: 0.5rem; /* Beri sedikit jarak ke textarea di bawahnya */
+    margin-bottom: 0.5rem;
 }
 .copy-btn.copied {
     background-color: var(--success-green);
@@ -405,7 +448,7 @@ body {
     pointer-events: none;
 }
 .icon-btn .tooltip, .auth-icon-btn .tooltip {
-    /* Tooltip is now a separate class but can be nested for context if needed */
+    /* Tooltip is a separate class */
 }
 
 .close-btn {
@@ -458,7 +501,6 @@ body {
         gap: 1rem;
     }
 
-    /* Hide text-based elements on mobile header */
     .header-controls .filter-input,
     .header-controls .auth-button,
     .header-controls #add-prompt-link,
@@ -466,7 +508,6 @@ body {
         display: none;
     }
 
-    /* Show icon-based elements on mobile header (JS handles show/hide logic) */
     .header-controls .icon-btn,
     .header-controls .search-icon-btn,
     .header-controls .auth-icon-btn {
@@ -475,14 +516,8 @@ body {
 }
 
 @media (min-width: 769px) {
-    /* Hide icon-based elements on desktop header */
-    .header-controls .icon-btn,
-    .header-controls .search-icon-btn,
-    .header-controls .auth-icon-btn {
-        display: none;
-    }
+    #search-btn { display: none; }
 
-    /* Show text-based elements on desktop header (JS handles show/hide logic) */
     .header-controls .filter-input,
     .header-controls .auth-button,
     .header-controls #add-prompt-link,
@@ -491,6 +526,6 @@ body {
     }
     
     .search-form-overlay {
-        display: none !important; /* This is an exception, as it's an overlay managed by a class toggle */
+        display: none !important;
     }
 }
