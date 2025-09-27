@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = firebase.firestore();
 
     // =========================================================================
-    // 2. DOM ELEMENT SELECTORS
+    // 2. DOM ELEMENT SELECTORS & HELPER
     // =========================================================================
 
     const promptGrid = document.getElementById('prompt-grid');
@@ -34,6 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchOverlay = document.getElementById('search-form-overlay');
     const loginForm = document.getElementById('login-form');
     const promptForm = document.getElementById('prompt-form');
+
+    // FUNGSI BARU UNTUK GOOGLE DRIVE
+    const convertGoogleDriveUrl = (url) => {
+        if (!url || typeof url !== 'string') return ''; // Kembalikan string kosong jika URL tidak valid
+        const regex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+        const match = url.match(regex);
+        if (match && match[1]) {
+            const fileId = match[1];
+            return `https://drive.google.com/uc?export=view&id=${fileId}`;
+        }
+        return url; // Kembalikan URL asli jika bukan format Google Drive
+    };
 
     // =========================================================================
     // 3. APPLICATION STATE
@@ -115,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <div class="card">
                     <div class="card-image-container">
-                        <img src="${prompt.outputImage}" alt="Hasil gambar dari prompt: ${prompt.title}">
+                        <img src="${convertGoogleDriveUrl(prompt.imageUrl)}" alt="Hasil gambar dari prompt: ${prompt.title}">
                         <span class="image-overlay-text">Hasil Generator</span>
                     </div>
                     <div class="card-content">
@@ -201,8 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prompt-title').value = data?.title || '';
             document.getElementById('prompt-category').value = data?.category || '';
             document.getElementById('prompt-text').value = data?.promptText || '';
-            document.getElementById('prompt-inputImage').value = data?.inputImage || '';
-            document.getElementById('prompt-outputImage').value = data?.outputImage || '';
+            document.getElementById('prompt-imageUrl').value = data?.imageUrl || '';
             document.getElementById('prompt-tags').value = (data?.tags && Array.isArray(data.tags)) ? data.tags.join(', ') : '';
         }
         modal.style.display = 'flex';
@@ -243,8 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: document.getElementById('prompt-title').value,
             category: document.getElementById('prompt-category').value,
             promptText: document.getElementById('prompt-text').value,
-            inputImage: document.getElementById('prompt-inputImage').value,
-            outputImage: document.getElementById('prompt-outputImage').value,
+            imageUrl: document.getElementById('prompt-imageUrl').value,
             tags: document.getElementById('prompt-tags').value,
         };
         savePrompt(formData);
