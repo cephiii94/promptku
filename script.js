@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = firebase.firestore();
 
     // =========================================================================
-    // 2. DOM ELEMENT SELECTORS & HELPER
+    // 2. DOM ELEMENT SELECTORS
     // =========================================================================
 
     const promptGrid = document.getElementById('prompt-grid');
@@ -35,29 +35,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const promptForm = document.getElementById('prompt-form');
 
-    // FUNGSI BARU UNTUK GOOGLE DRIVE (DENGAN PERBAIKAN)
-// FUNGSI GOOGLE DRIVE DENGAN SOLUSI PROXY (FINAL)
-const convertGoogleDriveUrl = (url) => {
-    if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) {
-        // Jika bukan URL Google Drive yang valid, kembalikan URL asli
-        return url;
-    }
+    // =========================================================================
+    // 3. HELPER FUNCTION
+    // =========================================================================
     
-    // Gunakan layanan proxy untuk mengambil gambar dengan benar
-    // Cukup teruskan URL asli Google Drive ke layanan proxy
-    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
-};
-
+    const extractUsernameFromUrl = (url) => {
+        if (!url || typeof url !== 'string') return '';
+        try {
+            const cleanedUrl = url.split('?')[0].replace(/\/$/, '');
+            const parts = cleanedUrl.split('/');
+            const username = parts[parts.length - 1];
+            return username.charAt(0).toUpperCase() + username.slice(1);
+        } catch (error) {
+            console.error("Gagal mengekstrak username dari URL:", url, error);
+            return '';
+        }
+    };
 
     // =========================================================================
-    // 3. APPLICATION STATE
+    // 4. APPLICATION STATE
     // =========================================================================
 
     let allPrompts = [];
     let currentUser = null;
 
     // =========================================================================
-    // 4. DATA FETCHING & FILTERING
+    // 5. DATA FETCHING & FILTERING
     // =========================================================================
 
     const fetchAndRenderPrompts = async () => {
@@ -102,7 +105,7 @@ const convertGoogleDriveUrl = (url) => {
     };
 
     // =========================================================================
-    // 5. RENDERING LOGIC (UPDATED)
+    // 6. RENDERING LOGIC (UPDATED)
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
@@ -111,16 +114,24 @@ const convertGoogleDriveUrl = (url) => {
             return;
         }
         const allCardsHTML = promptsToRender.map(prompt => {
+            let userDisplayHtml;
+            const userName = prompt.user || 'Anonymous';
+            
+            if (prompt.user && prompt.socialUrl) {
+                userDisplayHtml = `<a href="${prompt.socialUrl}" target="_blank" rel="noopener noreferrer" class="card-user">by ${userName}</a>`;
+            } else {
+                userDisplayHtml = `<span class="card-user">by ${userName}</span>`;
+            }
+
+            // MODIFIKASI: Overlay gambar dibuat clickable
+            const overlayCategoryHtml = prompt.category 
+                ? `<span class="image-overlay-text tag" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
+                : ''; 
+
             const adminActions = currentUser ? `
                 <div class="card-actions">
-                    <button class="action-btn edit-btn" data-id="${prompt.id}">
-                        <span class="material-icons">edit</span>
-                        <span class="tooltip">Edit</span>
-                    </button>
-                    <button class="action-btn delete-btn" data-id="${prompt.id}">
-                        <span class="material-icons">delete</span>
-                        <span class="tooltip">Hapus</span>
-                    </button>
+                    <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
+                    <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
                 </div>` : '';
 
             const categoryTag = prompt.category ? `<span class="tag tag-category" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` : '';
@@ -129,14 +140,14 @@ const convertGoogleDriveUrl = (url) => {
             return `
                 <div class="card">
                     <div class="card-image-container">
-                        <img src="${convertGoogleDriveUrl(prompt.imageUrl)}" alt="Hasil gambar dari prompt: ${prompt.title}">
-                        <span class="image-overlay-text">Hasil Generator</span>
+                        <img src="${prompt.imageUrl}" alt="Hasil gambar dari prompt: ${prompt.title}">
+                        ${overlayCategoryHtml}
                     </div>
                     <div class="card-content">
                         <div class="card-header">
                             <div>
                                 <h3 class="card-title">${prompt.title}</h3>
-                                <span class="card-user">by User</span>
+                                ${userDisplayHtml}
                             </div>
                         </div>
                         <button class="copy-btn" data-prompt-text="${encodeURIComponent(prompt.promptText)}">
@@ -158,15 +169,10 @@ const convertGoogleDriveUrl = (url) => {
     };
 
     // =========================================================================
-    // 6. AUTHENTICATION & CRUD OPERATIONS
+    // 7. AUTHENTICATION & CRUD OPERATIONS
     // =========================================================================
 
-    const loginUser = (email, password) => {
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => hideModal('login-modal'))
-            .catch(error => alert(`Login Gagal: ${error.message}`));
-    };
-
+    const loginUser = (email, password) => auth.signInWithEmailAndPassword(email, password).then(() => hideModal('login-modal')).catch(error => alert(`Login Gagal: ${error.message}`));
     const logoutUser = () => auth.signOut();
 
     const savePrompt = async (formData) => {
@@ -203,7 +209,7 @@ const convertGoogleDriveUrl = (url) => {
     };
 
     // =========================================================================
-    // 7. MODAL & UI LOGIC
+    // 8. MODAL & UI LOGIC
     // =========================================================================
 
     const showModal = (modalId, data = null) => {
@@ -213,10 +219,13 @@ const convertGoogleDriveUrl = (url) => {
             document.getElementById('modal-title').innerText = data ? 'Edit Prompt' : 'Tambah Prompt Baru';
             document.getElementById('prompt-id').value = data?.id || '';
             document.getElementById('prompt-title').value = data?.title || '';
+            document.getElementById('prompt-socialUrl').value = data?.socialUrl || '';
             document.getElementById('prompt-category').value = data?.category || '';
             document.getElementById('prompt-text').value = data?.promptText || '';
-            document.getElementById('prompt-imageUrl').value = data?.imageUrl || '';
+            document.getElementById('prompt-imageUrl').value = data?.imageUrl || ''; 
             document.getElementById('prompt-tags').value = (data?.tags && Array.isArray(data.tags)) ? data.tags.join(', ') : '';
+            const fileInput = document.getElementById('prompt-imageFile');
+            fileInput.required = !data;
         }
         modal.style.display = 'flex';
     };
@@ -238,28 +247,71 @@ const convertGoogleDriveUrl = (url) => {
     };
 
     // =========================================================================
-    // 8. EVENT LISTENERS
+    // 9. EVENT LISTENERS
     // =========================================================================
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        loginUser(
-            document.getElementById('login-email').value,
-            document.getElementById('login-password').value
-        );
+        loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value);
     });
-
-    promptForm.addEventListener('submit', (e) => {
+    
+    promptForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = {
-            id: document.getElementById('prompt-id').value,
+    
+        const fileInput = document.getElementById('prompt-imageFile');
+        const file = fileInput.files[0];
+        const existingImageUrl = document.getElementById('prompt-imageUrl').value;
+        const promptId = document.getElementById('prompt-id').value;
+    
+        if (!file && !promptId) {
+            alert("Silakan pilih file gambar untuk diunggah.");
+            return;
+        }
+    
+        const submitButton = promptForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Menyimpan...';
+    
+        let imageUrl = existingImageUrl; 
+    
+        if (file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'galeri-prompt-uploads'); // ⚠️ GANTI DENGAN NAMA PRESET ANDA
+                const CLOUD_NAME = 'dx4pxe7ji'; // ⚠️ GANTI DENGAN CLOUD NAME ANDA
+                const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+                const response = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Upload gambar ke Cloudinary gagal.');
+                const data = await response.json();
+                imageUrl = data.secure_url;
+            } catch (error) {
+                console.error("Gagal mengunggah gambar: ", error);
+                alert("Gagal mengunggah gambar. Silakan coba lagi.");
+                submitButton.disabled = false;
+                submitButton.textContent = 'Simpan';
+                return;
+            }
+        }
+    
+        const socialUrl = document.getElementById('prompt-socialUrl').value;
+        const extractedUser = extractUsernameFromUrl(socialUrl);
+
+        const promptData = {
+            id: promptId,
             title: document.getElementById('prompt-title').value,
+            user: extractedUser,
+            socialUrl: socialUrl,
             category: document.getElementById('prompt-category').value,
             promptText: document.getElementById('prompt-text').value,
-            imageUrl: document.getElementById('prompt-imageUrl').value,
+            imageUrl: imageUrl,
             tags: document.getElementById('prompt-tags').value,
         };
-        savePrompt(formData);
+    
+        await savePrompt(promptData); 
+    
+        submitButton.disabled = false;
+        submitButton.textContent = 'Simpan';
     });
 
     promptGrid.addEventListener('click', (e) => {
@@ -267,7 +319,8 @@ const convertGoogleDriveUrl = (url) => {
         const editBtn = target.closest('.edit-btn');
         const deleteBtn = target.closest('.delete-btn');
         const copyBtn = target.closest('.copy-btn');
-        const clickedTag = target.closest('.tag');
+        // Listener ini sekarang akan menangkap klik dari overlay dan tag di bawah
+        const clickedTag = target.closest('.tag'); 
 
         if (clickedTag) {
             const { filterType, filterValue } = clickedTag.dataset;
@@ -284,18 +337,15 @@ const convertGoogleDriveUrl = (url) => {
             window.scrollTo(0, 0);
             return;
         }
-
         if (editBtn) {
             const promptToEdit = allPrompts.find(p => p.id === editBtn.dataset.id);
             if (promptToEdit) showModal('prompt-modal', promptToEdit);
             return;
         }
-
         if (deleteBtn) {
             deletePrompt(deleteBtn.dataset.id);
             return;
         }
-
         if (copyBtn) {
             const textToCopy = decodeURIComponent(copyBtn.dataset.promptText);
             navigator.clipboard.writeText(textToCopy).then(() => {
@@ -312,33 +362,24 @@ const convertGoogleDriveUrl = (url) => {
         }
     });
     
-    document.querySelectorAll('.close-btn').forEach(btn => {
-        btn.addEventListener('click', () => hideModal(btn.dataset.modal));
-    });
-
-    searchBtn.addEventListener('click', () => {
-        searchOverlay.classList.toggle('active');
-        if (searchOverlay.classList.contains('active')) textFilterMobile.focus();
-    });
-
-    [categoryFilter, textFilterDesktop, textFilterMobile].forEach(el => {
-        el.addEventListener('input', applyFilters);
-    });
-
-    addPromptLinkMobile.addEventListener('click', (e) => {
-        e.preventDefault();
-        showModal('prompt-modal');
-    });
+    document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => hideModal(btn.dataset.modal)));
+    searchBtn.addEventListener('click', () => searchOverlay.classList.toggle('active'));
+    [categoryFilter, textFilterDesktop, textFilterMobile].forEach(el => el.addEventListener('input', applyFilters));
+    addPromptLinkMobile.addEventListener('click', (e) => { e.preventDefault(); showModal('prompt-modal'); });
 
     // =========================================================================
-    // 9. INITIALIZATION
+    // 10. INITIALIZATION
     // =========================================================================
 
     auth.onAuthStateChanged(user => {
         currentUser = user;
         updateAuthStateUI(user);
-        applyFilters(); // Re-render cards to show/hide admin buttons
+        applyFilters(); 
     });
 
     fetchAndRenderPrompts();
+
+        // [START] TAMBAHKAN BARIS INI UNTUK FOOTER
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    // [END] TAMBAHKAN BARIS INI
 });

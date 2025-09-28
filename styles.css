@@ -137,16 +137,15 @@ body {
 }
 
 .card-image-container {
-    position: relative;
+    position: relative;     
     width: 100%;
-    aspect-ratio: 16 / 9;
     overflow: hidden;
 }
 
 .card-image-container img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;          /* <-- JADIKAN 'auto' */
+    object-fit: contain;   /* <-- JADIKAN 'contain' (atau hapus saja) */
     display: block;
 }
 
@@ -158,9 +157,18 @@ body {
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
+    border-color: #10B981;
     font-size: 0.75rem;
     font-weight: 500;
     backdrop-filter: blur(4px);
+}
+
+/* Menyesuaikan style overlay agar tetap bagus saat dijadikan tag */
+.image-overlay-text.tag {
+    cursor: pointer;
+    border: none;
+    /* Pastikan background tetap sama seperti aslinya */
+    background-color: rgba(255, 254, 254, 0.5);
 }
 
 .card-content {
@@ -528,4 +536,31 @@ body {
     .search-form-overlay {
         display: none !important;
     }
+}
+
+/* 9. FOOTER
+   ========================================================================== */
+.site-footer {
+    width: 100%;
+    padding: 2.5rem 1rem; /* Jarak atas-bawah dan kiri-kanan */
+    margin-top: 2rem; /* Beri jarak dari grid kartu di atasnya */
+    border-top: 1px solid var(--light-gray-border); /* Garis pemisah tipis */
+    background-color: var(--white); /* Warna latar putih agar bersih */
+}
+
+.site-footer p {
+    text-align: center; /* Teks di tengah */
+    color: var(--text-medium); /* Warna teks abu-abu */
+    font-size: 0.875rem; /* Ukuran font sedikit lebih kecil */
+}
+
+.site-footer a {
+    color: var(--primary-blue-dark); /* Warna link biru gelap */
+    text-decoration: none; /* Hilangkan garis bawah default */
+    font-weight: 500;
+    transition: text-decoration 0.2s ease;
+}
+
+.site-footer a:hover {
+    text-decoration: underline; /* Tampilkan garis bawah saat di-hover */
 }

@@ -46,13 +46,18 @@
                 <button class="close-btn" data-modal="prompt-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="prompt-form">
-                    <input type="hidden" id="prompt-id">
-                    <input type="text" id="prompt-title" placeholder="Judul" required>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="prompt-category">Kategori</label>
-                            <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
+            <form id="prompt-form">
+                <input type="hidden" id="prompt-id">
+                <input type="text" id="prompt-title" placeholder="Judul" required>
+
+            <div class="form-row">
+                <div class="form-group" style="flex-basis: 100%;"> <label for="prompt-socialUrl">Link Sumber (Facebook, Twitter, dll.)</label>
+                    <input type="url" id="prompt-socialUrl" placeholder="cth: https://www.facebook.com/cecep">
+                </div>
+            </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="prompt-category">Kategori</label>                            <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
                         </div>
                         <div class="form-group">
                             <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
@@ -60,8 +65,11 @@
                         </div>
                     </div>
                     <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
-                    <input type="url" id="prompt-imageUrl" placeholder="URL Gambar Hasil (Google Drive)" required>
-                    <button type="submit" class="auth-button login-btn">Simpan</button>
+                    <div class="form-group">
+                        <label for="prompt-imageFile">Upload Gambar Hasil</label>
+                        <input type="file" id="prompt-imageFile" accept="image/*" required>
+                        <input type="hidden" id="prompt-imageUrl">
+                    </div>                    <button type="submit" class="auth-button login-btn">Simpan</button>
                 </form>
             </div>
         </div>
@@ -87,5 +95,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="script.js"></script> 
-</body>
+    
+        <footer class="site-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat oleh <a href="#" target="_blank" rel="noopener noreferrer">Cecep Hardiansyah</a></p>
+        </div>
+    </footer>
+    </body>
 </html>
