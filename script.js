@@ -35,17 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const promptForm = document.getElementById('prompt-form');
 
-    // FUNGSI BARU UNTUK GOOGLE DRIVE
-    const convertGoogleDriveUrl = (url) => {
-        if (!url || typeof url !== 'string') return ''; // Kembalikan string kosong jika URL tidak valid
-        const regex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-        const match = url.match(regex);
-        if (match && match[1]) {
-            const fileId = match[1];
-            return `https://drive.google.com/uc?export=view&id=${fileId}`;
-        }
-        return url; // Kembalikan URL asli jika bukan format Google Drive
-    };
+    // FUNGSI BARU UNTUK GOOGLE DRIVE (DENGAN PERBAIKAN)
+// FUNGSI GOOGLE DRIVE DENGAN SOLUSI PROXY (FINAL)
+const convertGoogleDriveUrl = (url) => {
+    if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) {
+        // Jika bukan URL Google Drive yang valid, kembalikan URL asli
+        return url;
+    }
+    
+    // Gunakan layanan proxy untuk mengambil gambar dengan benar
+    // Cukup teruskan URL asli Google Drive ke layanan proxy
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+};
+
 
     // =========================================================================
     // 3. APPLICATION STATE
