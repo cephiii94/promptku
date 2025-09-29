@@ -59,9 +59,11 @@ body {
 }
 
 .prompt-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
+    display: block; /* Bukan 'grid' lagi */
+    
+    /* Mengatur jumlah kolom berdasarkan lebar layar */
+    column-count: 4; /* Default untuk desktop besar */
+    column-gap: 1.5rem; /* Jarak antar kolom */
 }
 
 /* 3. HEADER
@@ -125,7 +127,10 @@ body {
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
-    display: flex;
+    display: inline-block; /* Agar kartu bisa masuk ke dalam kolom */
+    width: 100%;
+    margin-bottom: 1.5rem; /* Jarak antar kartu di kolom yang sama */
+    break-inside: avoid; /* Ajaib! Mencegah kartu terpotong */
     flex-direction: column;
     border: 1px solid rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
@@ -504,10 +509,14 @@ body {
     .container {
         padding: 1rem 0.5rem;
     }
-    .prompt-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
+/* styles.css */
+
+.prompt-grid {
+    display: grid;
+    /* Inilah baris yang paling penting untuk ukuran kartu */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 2rem;
+}
 
     .header-controls .filter-input,
     .header-controls .auth-button,
