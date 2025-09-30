@@ -349,6 +349,12 @@ body {
     color: var(--primary-blue-dark);
 }
 
+.modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Jarak antar tombol */
+}
+
 .modal-body form {
     display: flex;
     flex-direction: column;
@@ -362,9 +368,6 @@ body {
     border-radius: var(--border-radius-md);
 }
 
-.modal-body button {
-    align-self: flex-end;
-}
 
 .form-row {
     display: flex;
@@ -572,4 +575,160 @@ body {
 
 .site-footer a:hover {
     text-decoration: underline; /* Tampilkan garis bawah saat di-hover */
+}
+
+/* ==========================================================================
+   10. BOTTOM NAVIGATION (MOBILE ONLY)
+   ========================================================================== */
+
+.bottom-nav-mobile {
+    /* Sembunyikan di desktop secara default */
+    display: none; 
+    
+    /* Styling dasar */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1010; /* Pastikan di atas elemen lain */
+    height: 65px; /* Tinggi navigasi */
+    background-color: var(--white);
+    
+    /* Layout untuk item di dalamnya */
+    display: flex;
+    justify-content: space-around; /* Sebar item secara merata */
+    align-items: center;
+
+    /* Efek visual */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Bayangan di atas */
+    border-top: 1px solid var(--light-gray-border);
+}
+
+.nav-item {
+    /* Layout untuk ikon dan label */
+    display: flex;
+    flex-direction: column; /* Susun ikon di atas, label di bawah */
+    align-items: center;
+    justify-content: center;
+
+    /* Styling teks & link */
+    flex: 1; /* Agar setiap item punya lebar yang sama */
+    color: var(--text-medium);
+    text-decoration: none;
+    padding: 4px 0;
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-item:hover {
+    color: var(--primary-blue);
+}
+
+.nav-item.active {
+    color: var(--primary-blue-dark); /* Warna untuk item yang aktif */
+    font-weight: 500;
+}
+
+.nav-item .material-icons {
+    font-size: 24px; /* Ukuran ikon standar */
+}
+
+.nav-label {
+    font-size: 11px; /* Ukuran teks label */
+    margin-top: 2px;
+}
+
+/* === Styling Khusus untuk Tombol "Add Prompt" === */
+.nav-add-fab {
+    /* Posisikan agar sedikit naik ke atas */
+    transform: translateY(-20px);
+    
+    /* Bentuk lingkaran */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    
+    /* Warna dan bayangan agar menonjol */
+    background-color: var(--primary-green);
+    color: var(--white);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--white); /* Border putih agar terlihat rapi */
+    
+    /* Hapus flex-grow agar ukurannya tetap */
+    flex: none; 
+}
+
+.nav-add-fab .material-icons {
+    font-size: 32px; /* Ikon lebih besar */
+}
+
+.nav-add-fab:hover {
+    background-color: var(--success-green);
+    color: var(--white);
+}
+
+/* === Media Query untuk Menampilkan/Menyembunyikan === */
+
+/* Sembunyikan di layar besar (desktop) */
+@media (min-width: 769px) {
+    .bottom-nav-mobile {
+        display: none !important; /* Pakai !important untuk memastikan tersembunyi */
+    }
+}
+
+/* Tampilkan di layar kecil (mobile) */
+@media (max-width: 768px) {
+    body {
+        /* Beri ruang di bawah agar konten tidak tertutup nav */
+        padding-bottom: 80px; 
+    }
+    .bottom-nav-mobile {
+        display: flex; /* Tampilkan navigasi */
+    }
+}
+
+/* ==========================================================================
+   11. IMAGE PREVIEW IN MODAL
+   ========================================================================== */
+
+/* Wadah untuk gambar dan tombol hapus */
+.image-container-with-delete {
+    position: relative; /* Penting agar tombol bisa diposisikan */
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* Gaya untuk gambar pratinjau */
+#prompt-image-preview {
+    max-width: 100%;
+    max-height: 50px;
+    width: 100%;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--light-gray-border);
+    display: block;
+    background-color: #f9fafb;
+}
+
+/* Gaya untuk tombol hapus (silang) */
+.delete-image-btn {
+    position: absolute;
+    top: -10px; /* Sedikit di luar pojok atas */
+    right: -10px; /* Sedikit di luar pojok kanan */
+    width: 28px;
+    height: 28px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%; /* Membuatnya bulat */
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 24px; /* Menengahkan simbol 'x' secara vertikal */
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10; /* Pastikan di atas gambar */
+    transition: background-color 0.2s ease;
+}
+
+.delete-image-btn:hover {
+    background-color: var(--danger-red); /* Warna berubah saat di-hover */
 }

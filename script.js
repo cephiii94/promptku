@@ -35,6 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const promptForm = document.getElementById('prompt-form');
 
+    // [BARU] Selector untuk Navigasi Bawah
+    const navSearch = document.getElementById('nav-search');
+    const navAddPrompt = document.getElementById('nav-add-prompt');
+    const navAuthContainer = document.getElementById('nav-auth-container');
+    const navTheme = document.getElementById('nav-theme');
+
+    // [BARU] Selector untuk Pratinjau Gambar di Modal
+    const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
+    const fileInputWrapper = document.getElementById('file-input-wrapper');
+    const promptImagePreview = document.getElementById('prompt-image-preview');
+    const deleteImageBtn = document.getElementById('delete-image-btn');
+    
+
     // =========================================================================
     // 3. HELPER FUNCTION
     // =========================================================================
@@ -105,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 6. RENDERING LOGIC (UPDATED)
+    // 6. RENDERING LOGIC
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
@@ -123,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 userDisplayHtml = `<span class="card-user">by ${userName}</span>`;
             }
 
-            // MODIFIKASI: Overlay gambar dibuat clickable
             const overlayCategoryHtml = prompt.category 
                 ? `<span class="image-overlay-text tag" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
                 : ''; 
@@ -212,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. MODAL & UI LOGIC
     // =========================================================================
 
+    // [MODIFIKASI] Fungsi showModal dengan logika pratinjau gambar
     const showModal = (modalId, data = null) => {
         const modal = document.getElementById(modalId);
         if (modalId === 'prompt-modal') {
@@ -222,10 +235,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prompt-socialUrl').value = data?.socialUrl || '';
             document.getElementById('prompt-category').value = data?.category || '';
             document.getElementById('prompt-text').value = data?.promptText || '';
-            document.getElementById('prompt-imageUrl').value = data?.imageUrl || ''; 
+            document.getElementById('prompt-imageUrl').value = data?.imageUrl || '';
             document.getElementById('prompt-tags').value = (data?.tags && Array.isArray(data.tags)) ? data.tags.join(', ') : '';
+            
             const fileInput = document.getElementById('prompt-imageFile');
-            fileInput.required = !data;
+            
+            if (data && data.imageUrl) {
+                // Mode EDIT: Tampilkan pratinjau gambar
+                promptImagePreview.src = data.imageUrl;
+                imagePreviewWrapper.style.display = 'block';
+                fileInputWrapper.style.display = 'none';
+                fileInput.required = false;
+            } else {
+                // Mode TAMBAH BARU: Tampilkan form upload file
+                promptImagePreview.src = '';
+                imagePreviewWrapper.style.display = 'none';
+                fileInputWrapper.style.display = 'block';
+                fileInput.required = true;
+            }
         }
         modal.style.display = 'flex';
     };
@@ -234,7 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(modalId).style.display = 'none';
     };
 
+    // [MODIFIKASI] Fungsi updateAuthStateUI untuk header dan navigasi bawah
     const updateAuthStateUI = (user) => {
+        // Logika untuk Header
         if (user) {
             authContainerMobile.innerHTML = `<button class="auth-icon-btn logout" id="logout-btn-mobile-icon"><span class="material-icons">logout</span><span class="tooltip">Logout</span></button>`;
             document.getElementById('logout-btn-mobile-icon').addEventListener('click', logoutUser);
@@ -243,6 +272,33 @@ document.addEventListener('DOMContentLoaded', () => {
             authContainerMobile.innerHTML = `<button class="auth-icon-btn" id="login-btn-mobile-icon"><span class="material-icons">login</span><span class="tooltip">Login</span></button>`;
             document.getElementById('login-btn-mobile-icon').addEventListener('click', () => showModal('login-modal'));
             addPromptLinkMobile.style.display = 'none';
+        }
+
+        // Logika untuk Navigasi Bawah
+        if (navAuthContainer) {
+            if (user) {
+                navAuthContainer.innerHTML = `
+                    <a href="#" class="nav-item" id="nav-logout">
+                        <span class="material-icons">logout</span>
+                        <span class="nav-label">Logout</span>
+                    </a>
+                `;
+                document.getElementById('nav-logout').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logoutUser();
+                });
+            } else {
+                navAuthContainer.innerHTML = `
+                    <a href="#" class="nav-item" id="nav-login">
+                        <span class="material-icons">login</span>
+                        <span class="nav-label">Login</span>
+                    </a>
+                `;
+                document.getElementById('nav-login').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showModal('login-modal');
+                });
+            }
         }
     };
 
@@ -255,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value);
     });
     
+    // [MODIFIKASI] Event listener form dengan validasi gambar manual
     promptForm.addEventListener('submit', async (e) => {
         e.preventDefault();
     
@@ -263,8 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const existingImageUrl = document.getElementById('prompt-imageUrl').value;
         const promptId = document.getElementById('prompt-id').value;
     
-        if (!file && !promptId) {
-            alert("Silakan pilih file gambar untuk diunggah.");
+        // Perbaikan validasi: Cek manual jika ini prompt baru dan tidak ada file
+        if (!promptId && !file) {
+            alert("Untuk prompt baru, jangan lupa upload gambar hasilnya ya!");
             return;
         }
     
@@ -319,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const editBtn = target.closest('.edit-btn');
         const deleteBtn = target.closest('.delete-btn');
         const copyBtn = target.closest('.copy-btn');
-        // Listener ini sekarang akan menangkap klik dari overlay dan tag di bawah
         const clickedTag = target.closest('.tag'); 
 
         if (clickedTag) {
@@ -366,6 +423,38 @@ document.addEventListener('DOMContentLoaded', () => {
     searchBtn.addEventListener('click', () => searchOverlay.classList.toggle('active'));
     [categoryFilter, textFilterDesktop, textFilterMobile].forEach(el => el.addEventListener('input', applyFilters));
     addPromptLinkMobile.addEventListener('click', (e) => { e.preventDefault(); showModal('prompt-modal'); });
+    
+    // [BARU] Event listener untuk tombol di navigasi bawah
+    if (navSearch) {
+        navSearch.addEventListener('click', (e) => {
+            e.preventDefault();
+            searchOverlay.classList.toggle('active');
+            window.scrollTo(0, 0);
+        });
+    }
+    if (navAddPrompt) {
+        navAddPrompt.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('prompt-modal');
+        });
+    }
+    if (navTheme) {
+        navTheme.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Fitur ganti tema akan segera hadir!');
+        });
+    }
+
+    // [BARU] Event listener untuk tombol hapus gambar pratinjau
+    if(deleteImageBtn) {
+        deleteImageBtn.addEventListener('click', () => {
+            imagePreviewWrapper.style.display = 'none';
+            fileInputWrapper.style.display = 'block';
+            document.getElementById('prompt-imageUrl').value = '';
+            promptImagePreview.src = '';
+            document.getElementById('prompt-imageFile').required = true;
+        });
+    }
 
     // =========================================================================
     // 10. INITIALIZATION
@@ -378,8 +467,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     fetchAndRenderPrompts();
-
-        // [START] TAMBAHKAN BARIS INI UNTUK FOOTER
     document.getElementById('current-year').textContent = new Date().getFullYear();
-    // [END] TAMBAHKAN BARIS INI
 });

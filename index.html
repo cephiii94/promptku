@@ -39,42 +39,59 @@
         <main class="prompt-grid" id="prompt-grid"><p>Memuat prompt...</p></main>
     </div>
 
-    <div id="prompt-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+<div id="prompt-modal" class="modal">
+    <div class="modal-content">
+        <form id="prompt-form"> <div class="modal-header">
                 <h2 id="modal-title">Tambah Prompt Baru</h2>
-                <button class="close-btn" data-modal="prompt-modal">&times;</button>
+                <div class="modal-header-actions">
+                    <button type="submit" class="auth-button login-btn">Simpan</button>
+                    <button class="close-btn" data-modal="prompt-modal">&times;</button>
+                </div>
             </div>
             <div class="modal-body">
-            <form id="prompt-form">
                 <input type="hidden" id="prompt-id">
                 <input type="text" id="prompt-title" placeholder="Judul" required>
 
-            <div class="form-row">
-                <div class="form-group" style="flex-basis: 100%;"> <label for="prompt-socialUrl">Link Sumber (Facebook, Twitter, dll.)</label>
-                    <input type="url" id="prompt-socialUrl" placeholder="cth: https://www.facebook.com/cecep">
-                </div>
-            </div>
-    <div class="form-row">
-        <div class="form-group">
-            <label for="prompt-category">Kategori</label>                            <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
-                            <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
-                        </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex-basis: 100%;">
+                        <label for="prompt-socialUrl">Link Sumber (Facebook, Twitter, dll.)</label>
+                        <input type="url" id="prompt-socialUrl" placeholder="cth: https://www.facebook.com/cecep">
                     </div>
-                    <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="prompt-imageFile">Upload Gambar Hasil</label>
-                        <input type="file" id="prompt-imageFile" accept="image/*" required>
-                        <input type="hidden" id="prompt-imageUrl">
-                    </div>                    <button type="submit" class="auth-button login-btn">Simpan</button>
-                </form>
+                        <label for="prompt-category">Kategori</label>
+                        <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
+                        <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
+                    </div>
+                </div>
+                <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
+<div class="form-group">
+    <div id="image-upload-container">
+
+        <div id="image-preview-wrapper" style="display: none;">
+            <label>Gambar Saat Ini</label>
+            <div class="image-container-with-delete">
+                <img id="prompt-image-preview" src="" alt="Pratinjau Gambar">
+                <button type="button" id="delete-image-btn" class="delete-image-btn">&times;</button>
             </div>
         </div>
+
+        <div id="file-input-wrapper">
+            <label for="prompt-imageFile">Upload Gambar Hasil</label>
+            <input type="file" id="prompt-imageFile" accept="image/*">
+        </div>
+
     </div>
-    
+    <input type="hidden" id="prompt-imageUrl">
+</div>
+            </div>
+        </form> </div>
+</div>
+
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -100,6 +117,31 @@
         <div class="container">
             <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat oleh <a href="#" target="_blank" rel="noopener noreferrer">Cecep Hardiansyah</a></p>
         </div>
-    </footer>
-    </body>
+</footer>
+
+    <nav class="bottom-nav-mobile">
+        <a href="index.html" class="nav-item active" id="nav-home">
+            <span class="material-icons">home</span>
+            <span class="nav-label">Home</span>
+        </a>
+
+        <a href="#" class="nav-item" id="nav-search">
+            <span class="material-icons">search</span>
+            <span class="nav-label">Cari</span>
+        </a>
+
+        <a href="#" class="nav-item nav-add-fab" id="nav-add-prompt">
+            <span class="material-icons">add</span>
+            </a>
+
+        <a href="#" class="nav-item" id="nav-theme">
+            <span class="material-icons">dark_mode</span>
+            <span class="nav-label">Tema</span>
+        </a>
+
+        <div class="nav-item" id="nav-auth-container">
+            </div>
+    </nav>
+
+</body>
 </html>
