@@ -14,14 +14,18 @@
 
     <header class="sticky-header">
         <div class="header-title"><h1>Galeri Prompt</h1></div>
-        <div class="header-controls">
-            <select id="category-filter" class="filter-select">
-                <option value="all">Semua Kategori</option>
-            </select>
-            <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
-            
-            <button id="search-btn" class="search-icon-btn icon-btn" type="button" style="background-color: var(--primary-blue)">
-                <span class="material-icons">search</span>
+<div class="header-controls">
+    <select id="category-filter" class="filter-select">
+        <option value="all">Semua Kategori</option>
+    </select>
+    <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
+    
+    <button id="reset-filters-btn" class="icon-btn reset-btn" type="button" style="display: none;">
+        <span class="material-icons">close</span>
+        <span class="tooltip">Reset Filter</span>
+    </button>
+    <button id="search-btn" class="search-icon-btn icon-btn" type="button" style="background-color: var(--primary-blue)">
+                        <span class="material-icons">search</span>
                 <span class="tooltip">Cari Prompt</span>
             </button>
             <button id="add-prompt-link-mobile" class="icon-btn" type="button">
@@ -44,13 +48,16 @@
         <form id="prompt-form"> <div class="modal-header">
                 <h2 id="modal-title">Tambah Prompt Baru</h2>
                 <div class="modal-header-actions">
-                    <button type="submit" class="auth-button login-btn">Simpan</button>
-                    <button class="close-btn" data-modal="prompt-modal">&times;</button>
+                <button type="submit" class="auth-button login-btn">
+                    <span class="material-icons">save</span>
+                    Simpan
+                </button>                    
+                <button class="close-btn" data-modal="prompt-modal">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="prompt-id">
-                <input type="text" id="prompt-title" placeholder="Judul" required>
+                <input type="text" id="prompt-title" placeholder="Judul" >
 
                 <div class="form-row">
                     <div class="form-group" style="flex-basis: 100%;">
@@ -61,14 +68,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="prompt-category">Kategori</label>
-                        <input type="text" id="prompt-category" placeholder="cth: Karakter" required>
+                        <input type="text" id="prompt-category" placeholder="cth: Karakter" >
                     </div>
                     <div class="form-group">
                         <label for="prompt-tags">Tags (pisahkan dengan koma)</label>
                         <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
                     </div>
                 </div>
-                <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" required></textarea>
+                <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" ></textarea>
 <div class="form-group">
     <div id="image-upload-container">
 
@@ -115,7 +122,7 @@
     
         <footer class="site-footer">
         <div class="container">
-            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat oleh <a href="#" target="_blank" rel="noopener noreferrer">Cecep Hardiansyah</a></p>
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat Dengan Cinta &hearts;</p>
         </div>
 </footer>
 
