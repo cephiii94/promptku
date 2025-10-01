@@ -670,7 +670,7 @@ body {
 /* [PERBAIKAN] Ukuran pratinjau gambar di modal dan object-fit */
 #prompt-image-preview {
     max-width: 100%;
-    max-height: 250px;
+    max-height: 150px;
     width: 100%;
     object-fit: contain;
     border-radius: var(--border-radius-md);

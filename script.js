@@ -150,12 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const overlayCategoryHtml = prompt.category 
-                ? `<span class="image-overlay-text tag" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
+                ? `<span class="image-overlay-text " data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
                 : ''; 
 
             const adminActions = currentUser ? `
                 <div class="card-actions">
-                    <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">save</span><span class="tooltip">Edit</span></button>
+                    <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                     <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
                 </div>` : '';
 
@@ -433,6 +433,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => hideModal(btn.dataset.modal)));
+
+    // [KODE BARU] Menambahkan event listener untuk menutup modal saat area luar di-klik
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (event) => {
+            // event.target adalah elemen yang diklik.
+            // Kita cek apakah elemen yang diklik sama dengan elemen modal itu sendiri.
+            if (event.target === modal) {
+                hideModal(modal.id); // Jika ya, tutup modalnya.
+            }
+        });
+    });
+    
     searchBtn.addEventListener('click', () => searchOverlay.classList.toggle('active'));
     [categoryFilter, textFilterDesktop, textFilterMobile].forEach(el => el.addEventListener('input', applyFilters));
     if(addPromptLinkMobile) addPromptLinkMobile.addEventListener('click', (e) => { e.preventDefault(); showModal('prompt-modal'); });
