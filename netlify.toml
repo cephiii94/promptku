@@ -1,0 +1,6 @@
+# File ini memberitahu Netlify di mana menemukan server Functions Anda.
+# Simpan file ini di folder utama (root) proyek Anda.
+
+[build]
+  # Folder tempat Anda akan menyimpan file server (Functions)
+  functions = "netlify/functions/"

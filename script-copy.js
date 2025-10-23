@@ -4,17 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. SETUP & CONFIGURATION
     // =========================================================================
 
-    /*
-    [CATATAN KEAMANAN PENTING - FIREBASE]
-    Konfigurasi Firebase Anda (termasuk apiKey) memang didesain untuk
-    diekspos di sisi klien (client-side) seperti ini. Ini adalah hal yang wajar.
-
-    NAMUN, Anda WAJIB mengamankan database Anda dengan
-    FIREBASE SECURITY RULES yang ketat di Firebase Console Anda.
-    Keamanan Anda bergantung pada RULES, bukan pada kerahasiaan kunci ini.
-    */
     const firebaseConfig = {
-        apiKey: "AIzaSyD5dhh4a3835uJGxxvKL27KcTAtu0f7bT4", // Ambil dari file asli Anda
+        apiKey: "AIzaSyD5dhh4a3835uJGxxvKL27KcTAtu0f7bT4",
         authDomain: "all-auth-1509.firebaseapp.com",
         projectId: "all-auth-1509",
         storageBucket: "all-auth-1509.appspot.com",
@@ -22,9 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:23681152443:web:8f86c9b89e14c90692809e",
         measurementId: "G-D3Y0WHY83V"
     };
-
-    // [BARU] Definisikan Cloud Name Anda di sini. Ini boleh publik.
-    const CLOUDINARY_CLOUD_NAME = "dx4pxe7ji"; // Cloud Name Anda
 
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -338,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value);
     });
     
-    // [PERUBAHAN UTAMA - SIGNED UPLOAD]
     promptForm.addEventListener('submit', async (e) => {
         e.preventDefault();
     
@@ -358,38 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
         let imageUrl = existingImageUrl; 
     
-        // HANYA jalankan blok ini jika ada file baru yang diupload
         if (file) {
             try {
-                // ===========================================================
-                // [PERUBAHAN UTAMA] - Implementasi Signed Upload
-                // ===========================================================
-
-                // 1. Minta "tanda tangan" (signature) aman dari server Netlify kita
-                // Endpoint '/.netlify/functions/...' adalah endpoint default Netlify
-                const signatureResponse = await fetch('/.netlify/functions/generate-signature');
-                if (!signatureResponse.ok) {
-                    throw new Error('Gagal mendapatkan signature dari server.');
-                }
-                const { signature, timestamp, api_key } = await signatureResponse.json();
-
-                // 2. Siapkan FormData untuk dikirim ke Cloudinary
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('api_key', api_key); // Gunakan API Key dari server
-                formData.append('timestamp', timestamp); // Gunakan timestamp dari server
-                formData.append('signature', signature); // Gunakan signature dari server
-                formData.append('upload_preset', 'galeri-prompt-uploads'); // Preset harus sama dengan yang di server
-
-                // 3. Tentukan URL Upload Cloudinary
-                const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-                
-                // 4. Kirim file ke Cloudinary
+                formData.append('upload_preset', 'galeri-prompt-uploads');
+                const CLOUD_NAME = 'dx4pxe7ji';
+                const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
                 const response = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
-                // ===========================================================
-                // [AKHIR PERUBAHAN UTAMA]
-                // ===========================================================
-
                 if (!response.ok) throw new Error('Upload gambar ke Cloudinary gagal.');
                 const data = await response.json();
                 imageUrl = data.secure_url;
@@ -402,7 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     
-        // Kode ini berjalan seperti biasa
         const socialUrl = document.getElementById('prompt-socialUrl').value;
         const extractedUser = extractUsernameFromUrl(socialUrl);
 
@@ -413,17 +375,15 @@ document.addEventListener('DOMContentLoaded', () => {
             socialUrl: socialUrl,
             category: document.getElementById('prompt-category').value,
             promptText: document.getElementById('prompt-text').value,
-            imageUrl: imageUrl, // Ini akan berisi URL baru jika ada file, atau URL lama jika tidak
+            imageUrl: imageUrl,
             tags: document.getElementById('prompt-tags').value,
         };
     
         await savePrompt(promptData); 
     
         submitButton.disabled = false;
-        // [Perbaikan kecil] Ganti teks tombol kembali ke icon 'save'
-        submitButton.innerHTML = '<span class="material-icons">save</span>';
+        submitButton.textContent = 'Simpan';
     });
-    // [AKHIR PERUBAHAN]
 
     promptGrid.addEventListener('click', (e) => {
         const target = e.target;
@@ -541,4 +501,3 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderPrompts();
     document.getElementById('current-year').textContent = new Date().getFullYear();
 });
-
