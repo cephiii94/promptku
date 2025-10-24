@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeri Prompt Banana</title>
+    <title>Promptku - Galeri Prompt Banana</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -118,7 +118,53 @@
             </div>
         </div>
     </div>
-    
+
+<div id="view-prompt-modal" class="modal modal-fullview">
+    <button class="close-btn-fullview" data-modal="view-prompt-modal">&times;</button>
+    <div class="modal-content-fullview">
+        
+        <div class="modal-image-side">
+            <img id="view-modal-image" src="" alt="Tampilan penuh prompt">
+        </div>
+        
+        <div class="modal-prompt-side">
+            <h2>Prompt Lengkap</h2>
+            
+            <div class="prompt-author-info">
+                <span id="view-modal-author-text"></span>
+                <a id="view-modal-author-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+            </div>
+
+            <div class="prompt-text-container">
+                <p id="view-modal-prompt-text"></p>
+            </div>
+
+            <button id="view-modal-copy-btn" class="auth-button login-btn">
+                <span class="material-icons">content_copy</span>
+                <span>Salin Prompt</span>
+            </button>
+        </div>
+        </div>
+</div>
+
+<div id="prompt-text-popup" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Prompt Lengkap</h2>
+            <button class="close-btn" data-modal="prompt-text-popup">&times;</button>
+        </div>
+        <div class="modal-body">
+            <textarea id="popup-prompt-textarea" readonly></textarea>
+            
+            <button id="popup-copy-btn" class="auth-button login-btn" style="width: 100%; margin-top: 1rem;">
+                <span class="material-icons">content_copy</span>
+                <span>Salin Prompt</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>

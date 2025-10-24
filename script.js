@@ -147,60 +147,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
+        if (!promptGrid.innerHTML) {
+            promptGrid.innerHTML = '<p>Memuat...</p>'; // Tampilkan pesan memuat awal
+        }
+
         if (!promptsToRender.length) {
-            promptGrid.innerHTML = '<p>Tidak ada prompt yang ditemukan.</p>';
+            // Hanya perbarui jika grid sudah terisi sebelumnya (menghindari kedipan saat memuat)
+            if (promptGrid.innerHTML !== '<p>Memuat...</p>') {
+                 promptGrid.innerHTML = '<p>Tidak ada prompt yang ditemukan.</p>';
+            }
             return;
         }
+
         const allCardsHTML = promptsToRender.map(prompt => {
-            let userDisplayHtml;
-            const userName = prompt.user || 'Anonymous';
             
-            if (prompt.user && prompt.socialUrl) {
-                userDisplayHtml = `<a href="${prompt.socialUrl}" target="_blank" rel="noopener noreferrer" class="card-user">by ${userName}</a>`;
-            } else {
-                userDisplayHtml = `<span class="card-user">by ${userName}</span>`;
-            }
-
-            const overlayCategoryHtml = prompt.category 
-                ? `<span class="image-overlay-text " data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
-                : ''; 
-
+            // [BARU] Tombol Admin (diposisikan absolute di kanan atas)
             const adminActions = currentUser ? `
                 <div class="card-actions">
                     <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                     <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
                 </div>` : '';
 
-            const categoryTag = prompt.category ? `<span class="tag tag-category" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` : '';
-            const otherTags = (prompt.tags && Array.isArray(prompt.tags)) ? prompt.tags.map(tag => `<span class="tag" data-filter-type="tag" data-filter-value="${tag}">${tag}</span>`).join('') : '';
+            // Kategori di kiri atas (tetap sama)
+            const overlayCategoryHtml = prompt.category 
+                ? `<span class="image-overlay-text " data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
+                : ''; 
+            
+            // [REKOMENDASI] Tombol copy baru yang lebih minimalis
+            const copyButtonHtml = `
+                <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText)}">
+                    <span class="material-icons">content_copy</span>
+                    <span class="copy-text">Salin</span>
+                </button>`;
 
+            // [STRUKTUR KARTU BARU]
+            // Kita tidak lagi menggunakan .card-content.
+            // Semua info sekarang ada di dalam .card-image-container atau overlay.
             return `
                 <div class="card">
-                    <div class="card-image-container">
+                    <div class="card-image-container" data-id="${prompt.id}" data-action="view-prompt">
                         <img src="${prompt.imageUrl}" alt="Hasil gambar dari prompt: ${prompt.title}">
-                        ${overlayCategoryHtml}
+                        
+                        ${overlayCategoryHtml} ${adminActions} <div class="card-prompt-overlay">
+                            <p class="card-prompt-text">${prompt.promptText}</p>
+                            ${copyButtonHtml} </div>
                     </div>
-                    <div class="card-content">
-                        <div class="card-header">
-                            <div>
-                                <h3 class="card-title">${prompt.title}</h3>
-                                ${userDisplayHtml}
-                            </div>
-                        </div>
-                        <button class="copy-btn" data-prompt-text="${encodeURIComponent(prompt.promptText)}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
-                            <span class="copy-text">Salin</span>
-                        </button>
-                        <div class="prompt-wrapper">
-                            <textarea readonly class="prompt-textarea">${prompt.promptText}</textarea>
-                        </div>
-                        <div class="card-tags">
-                            ${categoryTag}
-                            ${otherTags}
-                        </div>
-                        ${adminActions}
-                    </div>
-                </div>`;
+                    
+                    </div>`;
         }).join('');
         promptGrid.innerHTML = allCardsHTML;
     };
@@ -290,6 +283,56 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bottomNavMobile) {
             bottomNavMobile.style.display = 'flex';
         }
+    };
+
+    // [BARU & MODIFIKASI] Fungsi khusus untuk menampilkan modal full view (dengan logika mobile)
+    const showViewPromptModal = (data) => {
+        document.getElementById('view-modal-image').src = data.imageUrl;
+        // Tetap isi text-content untuk desktop
+        document.getElementById('view-modal-prompt-text').textContent = data.promptText;
+        
+        // [MODIFIKASI] Mengisi info author
+        const authorText = document.getElementById('view-modal-author-text');
+        const authorLink = document.getElementById('view-modal-author-link');
+        
+        if (data.user && data.socialUrl) {
+            authorText.textContent = 'Prompt by: ';
+            authorLink.href = data.socialUrl;
+            authorLink.textContent = data.user;
+            authorLink.style.display = 'inline';
+        } else if (data.user) {
+            authorText.textContent = 'Prompt by: ' + data.user;
+            authorLink.style.display = 'none';
+            authorLink.href = '#';
+            authorLink.textContent = '';
+        } else {
+            authorText.textContent = ''; 
+            authorLink.style.display = 'none';
+            authorLink.href = '#';
+            authorLink.textContent = '';
+        }
+        
+        // --- Sisa fungsi (Tombol Copy) ---
+        const copyBtn = document.getElementById('view-modal-copy-btn');
+        // Simpan data prompt di tombolnya untuk digunakan nanti
+        copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
+        
+        // Reset status tombol copy
+        copyBtn.classList.remove('copied');
+
+        // [MODIFIKASI] Ubah teks tombol berdasarkan ukuran layar
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            copyBtn.querySelector('span:last-child').textContent = 'Lihat Prompt';
+            copyBtn.querySelector('span.material-icons').textContent = 'text_snippet';
+        } else {
+            copyBtn.querySelector('span:last-child').textContent = 'Salin Prompt';
+            copyBtn.querySelector('span.material-icons').textContent = 'content_copy';
+        }
+        
+        // Tampilkan modal
+        document.getElementById('view-prompt-modal').style.display = 'flex';
+        if (bottomNavMobile) bottomNavMobile.style.display = 'none'; // Sembunyikan nav bawah
     };
 
     const updateAuthStateUI = (user) => {
@@ -429,8 +472,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = e.target;
         const editBtn = target.closest('.edit-btn');
         const deleteBtn = target.closest('.delete-btn');
-        const copyBtn = target.closest('.copy-btn');
-        const clickedTag = target.closest('.tag'); 
+        const copyBtn = target.closest('.copy-btn-overlay'); // <-- [DIUBAH]
+        const clickedTag = target.closest('.image-overlay-text'); // <-- [DIUBAH] Cek tag kategori juga
+        const viewBtn = target.closest('[data-action="view-prompt"]'); // <-- [BARU]
+
+        // [BARU] Logika untuk menampilkan modal full view
+        if (viewBtn && !editBtn && !deleteBtn && !copyBtn && !clickedTag) {
+            const promptId = viewBtn.dataset.id;
+            const promptData = allPrompts.find(p => p.id === promptId);
+            if (promptData) {
+                showViewPromptModal(promptData);
+            }
+            return; // Hentikan eksekusi
+        }
 
         if (clickedTag) {
             const { filterType, filterValue } = clickedTag.dataset;
@@ -456,17 +510,20 @@ document.addEventListener('DOMContentLoaded', () => {
             deletePrompt(deleteBtn.dataset.id);
             return;
         }
+        // [BLOK DIUBAH] - Logika copy-paste untuk tombol baru
         if (copyBtn) {
             const textToCopy = decodeURIComponent(copyBtn.dataset.promptText);
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const textSpan = copyBtn.querySelector('.copy-text');
                 if (!textSpan) return;
-                const originalText = textSpan.textContent;
+                
+                const originalText = textSpan.textContent; // "Salin"
                 copyBtn.classList.add('copied');
-                textSpan.textContent = 'Tersalin!';
+                textSpan.textContent = 'Tersalin!'; // Teks ini akan muncul berkat CSS
+
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
-                    textSpan.textContent = originalText;
+                    textSpan.textContent = originalText; // Kembali ke "Salin" (tersembunyi)
                 }, 2000);
             }).catch(err => console.error('Gagal menyalin: ', err));
         }
@@ -474,12 +531,82 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => hideModal(btn.dataset.modal)));
 
+    // [BARU & MODIFIKASI] Listener untuk modal full view (close-btn & copy-btn)
+    const viewModal = document.getElementById('view-prompt-modal');
+    if (viewModal) { // Cek jika elemen ada
+        const viewModalCopyBtn = document.getElementById('view-modal-copy-btn');
+        const viewModalCloseBtn = viewModal.querySelector('.close-btn-fullview');
+
+        viewModalCloseBtn.addEventListener('click', () => {
+            hideModal('view-prompt-modal');
+        });
+
+        // [MODIFIKASI BESAR] Event listener untuk tombol utama di modal full view
+        viewModalCopyBtn.addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const textToCopy = decodeURIComponent(btn.dataset.promptText);
+            const isMobile = window.innerWidth <= 768;
+
+            if (isMobile) {
+                // --- LOGIKA MOBILE: Buka Pop-up ---
+                
+                // 1. Isi text area di popup baru
+                const popupTextArea = document.getElementById('popup-prompt-textarea');
+                if(popupTextArea) popupTextArea.value = textToCopy;
+                
+                // 2. Tampilkan modal popup
+                showModal('prompt-text-popup'); 
+
+                // 3. Reset tombol copy di *dalam* popup (jika ada)
+                const popupCopyBtn = document.getElementById('popup-copy-btn');
+                if (popupCopyBtn) {
+                    popupCopyBtn.classList.remove('copied');
+                    popupCopyBtn.querySelector('span:last-child').textContent = 'Salin Prompt';
+                }
+
+            } else {
+                // --- LOGIKA DESKTOP: Langsung Salin ---
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const textSpan = btn.querySelector('span:last-child');
+                    const originalText = "Salin Prompt"; // Teks asli desktop
+                    
+                    btn.classList.add('copied');
+                    textSpan.textContent = 'Berhasil Tersalin!';
+                    
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        textSpan.textContent = originalText;
+                    }, 2000);
+                }).catch(err => console.error('Gagal menyalin: ', err));
+            }
+        });
+    }
+
+    // [BARU] Event listener untuk tombol Salin di DALAM pop-up mobile
+    const popupCopyBtn = document.getElementById('popup-copy-btn');
+    if (popupCopyBtn) {
+        popupCopyBtn.addEventListener('click', (e) => {
+            const textToCopy = document.getElementById('popup-prompt-textarea').value;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = e.currentTarget;
+                btn.classList.add('copied');
+                btn.querySelector('span:last-child').textContent = 'Berhasil Tersalin!';
+            }).catch(err => console.error('Gagal menyalin: ', err));
+        });
+    }
+
+
     // [KODE BARU] Menambahkan event listener untuk menutup modal saat area luar di-klik
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (event) => {
             // event.target adalah elemen yang diklik.
             // Kita cek apakah elemen yang diklik sama dengan elemen modal itu sendiri.
             if (event.target === modal) {
+                // Khusus untuk popup prompt, jangan tutup jika area luar diklik
+                // agar tidak sengaja tertutup saat scroll di HP
+                if (modal.id === 'prompt-text-popup' || modal.id === 'prompt-modal') { 
+                    return;
+                }
                 hideModal(modal.id); // Jika ya, tutup modalnya.
             }
         });
@@ -541,4 +668,3 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderPrompts();
     document.getElementById('current-year').textContent = new Date().getFullYear();
 });
-

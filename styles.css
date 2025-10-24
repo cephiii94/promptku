@@ -163,23 +163,24 @@ body {
     display: block;
 }
 
+/* GANTI KODE LAMA ANDA DENGAN INI */
 .image-overlay-text {
     position: absolute;
     top: 0.75rem;
     left: 0.75rem;
-    background-color:transparent;
+    background-color: rgba(0, 0, 0, 0.4); /* Buat sedikit lebih gelap agar kontras */
     color: white;
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 1rem; /* [DIPERBAIKI] Padding ditambah */
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 500;
     backdrop-filter: blur(4px);
     cursor: pointer;
-
-    border: 1px solid var(--light-gray-border);
-    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Border lebih lembut */
     transition: all 0.2s ease;
+    z-index: 6; /* [DITAMBAH] Pastikan di atas tombol admin */
 }
+
 .image-overlay-text:hover {
     background-color: var(--primary-blue);
     color: var(--white);
@@ -706,4 +707,404 @@ body {
 .bottom-nav-mobile .tooltip {
     top: auto;
     bottom: 115%;
+}
+
+/* ==========================================================================
+   12. [BARU] DESAIN KARTU (OVERLAY GAMBAR)
+   ========================================================================== */
+
+/* 1. Modifikasi .card */
+.card {
+    /* HAPUS background putih lama */
+    background: var(--light-gray-bg); /* Fallback selagi gambar memuat */
+    
+    /* Pertahankan ini */
+    position: relative;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    break-inside: avoid;
+    border: none; /* Hapus border lama */
+    transition: transform 0.3s ease;
+}
+
+/* 2. Modifikasi .card-image-container dan <img> */
+.card-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--border-radius-lg); /* Pastikan container juga rounded */
+    line-height: 0; /* Menghilangkan spasi aneh di bawah gambar */
+}
+
+.card-image-container img {
+    width: 100%;
+    height: auto; /* Biarkan tinggi otomatis menyesuaikan lebar */
+    object-fit: cover; /* [PENTING] Mengisi kontainer, bukan 'contain' */
+    display: block;
+    border-radius: var(--border-radius-lg);
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-image-container img {
+    transform: scale(1.05); /* Efek zoom kecil saat hover */
+}
+
+/* 3. HAPUS styling .card-content lama */
+/* Kita tidak perlu menghapusnya, aturan baru akan menimpanya, 
+   tapi jika ingin bersih, Anda bisa hapus:
+   .card-content, .card-header, .prompt-wrapper, .prompt-textarea, 
+   .card-tags, .tag (jika hanya dipakai di kartu), dan .copy-btn 
+*/
+.card-content {
+    display: none; /* Sembunyikan .card-content lama */
+}
+
+
+/* 4. [BARU] Overlay untuk Teks Prompt (sesuai gambar) */
+.card-prompt-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    
+    /* Efek Kaca Transparan */
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    
+    color: var(--white);
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+
+    /* Layout (teks di kiri, tombol di kanan) */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+
+    /* Animasi muncul saat hover pada kartu */
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover .card-prompt-overlay {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* 5. [BARU] Styling Teks Prompt di Overlay */
+.card-prompt-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    flex-grow: 1; /* Ambil sisa ruang */
+
+    /* Batasi teks agar tidak terlalu panjang (opsional) */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Tampilkan maks 4 baris */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 6. [BARU] Tombol Copy di Overlay (Rekomendasi) */
+.copy-btn-overlay {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    border-radius: var(--border-radius-md);
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Mencegah tombol mengecil */
+}
+.copy-btn-overlay .material-icons {
+    font-size: 20px;
+}
+.copy-btn-overlay .copy-text {
+    display: none; /* Sembunyikan teks "Salin" */
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.copy-btn-overlay:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+.copy-btn-overlay.copied {
+    background-color: var(--success-green);
+    border-color: var(--success-green);
+}
+.copy-btn-overlay.copied .material-icons {
+    display: none; /* Sembunyikan ikon saat tersalin */
+}
+.copy-btn-overlay.copied .copy-text {
+    display: inline; /* Tampilkan teks "Tersalin!" */
+    padding: 0 0.25rem;
+}
+
+/* 7. Modifikasi .card-actions (Tombol Admin) */
+.card-actions {
+    /* Hapus styling lama */
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+
+    /* [BARU] Posisikan di kanan atas */
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+    display: flex;
+    gap: 0.5rem;
+    
+    /* [BARU] Sembunyikan by default, muncul saat hover */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover .card-actions {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   13. [BARU] MODAL FULL VIEW (LIGHTBOX)
+   ========================================================================== */
+
+.modal-fullview {
+    z-index: 2000; /* Paling atas */
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem;
+    align-items: center; /* Pusatkan konten */
+}
+
+.close-btn-fullview {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    
+    /* [PERUBAHAN] Dibungkus warna merah */
+    background-color: var(--danger-red);
+    color: var(--white);
+    border: 2px solid var(--white);
+    box-shadow: var(--shadow-md);
+    border-radius: 50%;
+    width: 44px;  /* Ukuran lingkaran */
+    height: 44px; /* Ukuran lingkaran */
+    font-size: 24px; /* Ukuran 'x' */
+    font-weight: bold;
+    line-height: 40px; /* Sesuaikan agar 'x' di tengah */
+    text-align: center;
+    padding: 0;
+    
+    cursor: pointer;
+    z-index: 2001;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.close-btn-fullview:hover {
+    transform: scale(1.1);
+    background-color: #d73737; /* Merah lebih gelap saat hover */
+}
+
+.modal-content-fullview {
+    width: 100%;
+    max-width: 1400px; /* Batas lebar maksimum */
+    height: 90vh; /* Tinggi 90% dari layar */
+    display: flex;
+    background: none; /* Hapus background, kita hanya butuh 2 kolom */
+    padding: 0;
+    box-shadow: none;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.modal-image-side {
+    flex: 3; /* Ambil 3 bagian (misal 60%) */
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+    overflow: hidden;
+    height: 100%;
+}
+.modal-image-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Tampilkan gambar penuh tanpa terpotong */
+}
+
+.modal-prompt-side {
+    flex: 2; /* Ambil 2 bagian (misal 40%) */
+    background: var(--white);
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0;
+}
+.modal-prompt-side h2 {
+    color: var(--primary-blue-dark);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--light-gray-border);
+    padding-bottom: 1rem;
+}
+
+.prompt-text-container {
+    flex-grow: 1; /* Penuhi sisa ruang */
+    background-color: var(--light-gray-bg);
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    overflow-y: auto; /* Bisa scroll jika prompt sangat panjang */
+    margin-bottom: 1.5rem;
+}
+.prompt-text-container p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-dark);
+    white-space: pre-wrap; /* Jaga format baris baru */
+    word-break: break-word;
+}
+
+#view-modal-copy-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+#view-modal-copy-btn.copied {
+    background-color: var(--success-green) !important;
+}
+
+/* [BARU] CSS untuk Info Author di Modal */
+.prompt-author-info {
+    margin-top: -0.75rem; /* Tarik ke atas, lebih dekat ke H2 */
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-medium);
+}
+.prompt-author-info a {
+    color: var(--primary-blue);
+    font-weight: 500;
+    text-decoration: none;
+}
+.prompt-author-info a:hover {
+    text-decoration: underline;
+}
+
+/* Penyesuaian untuk Mobile */
+@media (max-width: 768px) {
+    .modal-content-fullview {
+        flex-direction: column;
+        height: 85vh;
+    }
+    .modal-image-side, .modal-prompt-side {
+        flex: 1; /* Bagi rata */
+        border-radius: 0;
+    }
+    .modal-image-side {
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+    .modal-prompt-side {
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        padding: 1.5rem;
+    }
+    .prompt-text-container p {
+        font-size: 0.9rem;
+    }
+    .close-btn-fullview {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        line-height: 32px; /* Sesuaikan agar 'x' di tengah */
+    }
+}
+
+/* ==========================================================================
+   14. [BARU] CSS UNTUK POP-UP PROMPT MOBILE
+   ========================================================================== */
+
+   /* [PERBAIKAN Z-INDEX] */
+#prompt-text-popup {
+    z-index: 2001; /* Pastikan ini lebih tinggi dari .modal-fullview (2000) */
+}
+/* Styling untuk textarea di dalam pop-up baru */
+#popup-prompt-textarea {
+    width: 100%;
+    height: 250px; /* Beri tinggi yang cukup */
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    resize: none;
+    background: var(--light-gray-bg);
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem;
+}
+
+/* Status "copied" untuk tombol di pop-up baru */
+#popup-copy-btn.copied {
+    background-color: var(--success-green) !important;
+}
+
+
+/* ==========================================================================
+   15. [MODIFIKASI] TAMPILAN FULL VIEW (KHUSUS MOBILE)
+   ========================================================================== */
+
+/* Blok media query ini akan menimpa CSS desktop HANYA di mobile */
+@media (max-width: 768px) {
+    
+    /* 1. Konten modal full-view utama (sudah ada) */
+    .modal-content-fullview {
+        flex-direction: column;
+        height: 85vh;
+    }
+
+    /* 2. Sisi gambar: Paksa ambil semua ruang (bukan 50%) */
+    .modal-image-side {
+        flex: 1; /* Biarkan ini mengambil semua ruang yang tersedia */
+        min-height: 0; /* Trik agar flexbox bekerja benar */
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+
+    /* 3. Sisi prompt: Paksa menyusut ke kontennya (Author + Tombol) */
+    .modal-prompt-side {
+        flex: none; /* [PENTING] Hentikan 50/50 split */
+        height: auto; /* [PENTING] Tinggi sesuai konten */
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        padding: 1.5rem;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1); /* Efek bayangan */
+    }
+
+    /* 4. [PENTING] Sembunyikan elemen yang tidak perlu di tampilan utama */
+    .modal-prompt-side h2 {
+        display: none;
+    }
+    .modal-prompt-side .prompt-text-container {
+        display: none;
+    }
+    
+    /* 5. Pastikan info author tetap di atas tombol */
+    .prompt-author-info {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
 }
