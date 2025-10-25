@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="card-image-container" data-id="${prompt.id}" data-action="view-prompt">
                         <img src="${prompt.imageUrl}" alt="Hasil gambar dari prompt: ${prompt.title}">
                         
-                        ${overlayCategoryHtml} ${adminActions} <div class="card-prompt-overlay">
+                        ${overlayCategoryHtml} ${adminActions} 
+                        <div class="card-prompt-overlay">
+                        <small class="card-overlay-hint">Klik gambar untuk detail</small>
                             <p class="card-prompt-text">${prompt.promptText}</p>
                             ${copyButtonHtml} </div>
                     </div>

@@ -170,7 +170,7 @@ body {
     left: 0.75rem;
     background-color: rgba(0, 0, 0, 0.4); /* Buat sedikit lebih gelap agar kontras */
     color: white;
-    padding: 0.35rem 1rem; /* [DIPERBAIKI] Padding ditambah */
+    padding: 1rem 1rem; /* [DIPERBAIKI] Padding ditambah */
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 500;
@@ -738,6 +738,7 @@ body {
     overflow: hidden;
     border-radius: var(--border-radius-lg); /* Pastikan container juga rounded */
     line-height: 0; /* Menghilangkan spasi aneh di bawah gambar */
+    cursor: zoom-in;
 }
 
 .card-image-container img {
@@ -791,6 +792,9 @@ body {
     transform: translateY(100%);
     opacity: 0;
     transition: all 0.3s ease-in-out;
+
+    flex-direction: column; /* Susun hint dan baris-prompt secara vertikal */
+    gap: 0.5rem; /* Jarak antara hint dan baris-prompt */
 }
 
 .card:hover .card-prompt-overlay {
@@ -876,6 +880,27 @@ body {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+/* [BARU] Styling untuk hint */
+.card-overlay-hint {
+    display: block;
+    width: 100%;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+    text-align: left; /* Rata kiri */
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* [BARU] Styling untuk baris prompt+tombol */
+.prompt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
 }
 
 /* ==========================================================================
