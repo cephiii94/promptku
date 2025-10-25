@@ -6,12 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
     [CATATAN KEAMANAN PENTING - FIREBASE]
-    Konfigurasi Firebase Anda (termasuk apiKey) memang didesain untuk
-    diekspos di sisi klien (client-side) seperti ini. Ini adalah hal yang wajar.
-
-    NAMUN, Anda WAJIB mengamankan database Anda dengan
-    FIREBASE SECURITY RULES yang ketat di Firebase Console Anda.
-    Keamanan Anda bergantung pada RULES, bukan pada kerahasiaan kunci ini.
+    ... (konfigurasi Anda)
     */
     const firebaseConfig = {
         apiKey: "AIzaSyD5dhh4a3835uJGxxvKL27KcTAtu0f7bT4", // Ambil dari file asli Anda
@@ -65,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // [TERBARU] Selector untuk navigasi bawah
     const bottomNavMobile = document.querySelector('.bottom-nav-mobile');
 
+    // [BARU] Selector untuk navigasi modal
+    const modalNavPrev = document.getElementById('modal-nav-prev');
+    const modalNavNext = document.getElementById('modal-nav-next');
+
     // =========================================================================
     // 3. HELPER FUNCTION
     // =========================================================================
@@ -88,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allPrompts = [];
     let currentUser = null;
+    let currentFilteredPrompts = []; // [BARU] Menyimpan daftar yang sedang dilihat
+    let currentViewIndex = 0; // [BARU] Menyimpan indeks prompt yang sedang dibuka
 
     // =========================================================================
     // 5. DATA FETCHING & FILTERING
@@ -139,6 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
             );
         }
+        
+        currentFilteredPrompts = filtered; // [BARU] Simpan daftar yang difilter
         renderPrompts(filtered);
     };
 
@@ -159,7 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const allCardsHTML = promptsToRender.map(prompt => {
+        // [MODIFIKASI] Tambahkan 'index' ke map
+        const allCardsHTML = promptsToRender.map((prompt, index) => {
             
             // [BARU] Tombol Admin (diposisikan absolute di kanan atas)
             const adminActions = currentUser ? `
@@ -181,21 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </button>`;
 
             // [STRUKTUR KARTU BARU]
-            // Kita tidak lagi menggunakan .card-content.
-            // Semua info sekarang ada di dalam .card-image-container atau overlay.
             return `
                 <div class="card">
-                    <div class="card-image-container" data-id="${prompt.id}" data-action="view-prompt">
+                    <div class="card-image-container" data-index="${index}" data-action="view-prompt">
                         <img src="${prompt.imageUrl}" alt="Hasil gambar dari prompt: ${prompt.title}">
                         
-                        ${overlayCategoryHtml} ${adminActions} 
-                        <div class="card-prompt-overlay">
-                        <small class="card-overlay-hint">Klik gambar untuk detail</small>
-                            <p class="card-prompt-text">${prompt.promptText}</p>
-                            ${copyButtonHtml} </div>
+                        ${overlayCategoryHtml} ${adminActions} <div class="card-prompt-overlay">
+                            <small class="card-overlay-hint">Klik gambar untuk detail</small>
+                            <div class="prompt-row">
+                                <p class="card-prompt-text">${prompt.promptText}</p>
+                                ${copyButtonHtml}
+                            </div>
+                        </div>
                     </div>
-                    
-                    </div>`;
+                </div>`;
         }).join('');
         promptGrid.innerHTML = allCardsHTML;
     };
@@ -287,13 +290,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // [BARU & MODIFIKASI] Fungsi khusus untuk menampilkan modal full view (dengan logika mobile)
+    // [MODIFIKASI BESAR] Fungsi ini sekarang juga mengatur tombol Next/Prev
     const showViewPromptModal = (data) => {
+        
+        // [BARU] Set judul modal
+        const modalTitle = document.querySelector('#view-prompt-modal .modal-prompt-side h2');
+        if (modalTitle) {
+            modalTitle.textContent = data.title;
+        }
+
         document.getElementById('view-modal-image').src = data.imageUrl;
-        // Tetap isi text-content untuk desktop
         document.getElementById('view-modal-prompt-text').textContent = data.promptText;
         
-        // [MODIFIKASI] Mengisi info author
+        // Mengisi info author
         const authorText = document.getElementById('view-modal-author-text');
         const authorLink = document.getElementById('view-modal-author-link');
         
@@ -314,15 +323,11 @@ document.addEventListener('DOMContentLoaded', () => {
             authorLink.textContent = '';
         }
         
-        // --- Sisa fungsi (Tombol Copy) ---
+        // Tombol Copy / Lihat Prompt
         const copyBtn = document.getElementById('view-modal-copy-btn');
-        // Simpan data prompt di tombolnya untuk digunakan nanti
         copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
-        
-        // Reset status tombol copy
         copyBtn.classList.remove('copied');
 
-        // [MODIFIKASI] Ubah teks tombol berdasarkan ukuran layar
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
             copyBtn.querySelector('span:last-child').textContent = 'Lihat Prompt';
@@ -331,21 +336,52 @@ document.addEventListener('DOMContentLoaded', () => {
             copyBtn.querySelector('span:last-child').textContent = 'Salin Prompt';
             copyBtn.querySelector('span.material-icons').textContent = 'content_copy';
         }
+
+        // [BARU] Logika untuk tombol navigasi
+        if (currentViewIndex === 0) {
+            modalNavPrev.style.display = 'none'; // Sembunyikan di item pertama
+        } else {
+            modalNavPrev.style.display = 'flex';
+        }
+
+        if (currentViewIndex === currentFilteredPrompts.length - 1) {
+            modalNavNext.style.display = 'none'; // Sembunyikan di item terakhir
+        } else {
+            modalNavNext.style.display = 'flex';
+        }
         
         // Tampilkan modal
         document.getElementById('view-prompt-modal').style.display = 'flex';
         if (bottomNavMobile) bottomNavMobile.style.display = 'none'; // Sembunyikan nav bawah
     };
 
+    // [BARU] Fungsi untuk navigasi modal
+    const navigateToPrompt = (direction) => {
+        // Update indeks
+        currentViewIndex += direction;
+
+        // Pastikan tidak keluar batas
+        if (currentViewIndex < 0) currentViewIndex = 0;
+        if (currentViewIndex >= currentFilteredPrompts.length) {
+             currentViewIndex = currentFilteredPrompts.length - 1;
+        }
+        
+        // Ambil data prompt baru
+        const promptData = currentFilteredPrompts[currentViewIndex];
+        if (promptData) {
+            // Panggil showViewPromptModal untuk me-refresh modal
+            // dengan data baru dan update tombol nav
+            showViewPromptModal(promptData);
+        }
+    };
+
     const updateAuthStateUI = (user) => {
         if (user) {
             // --- KONDISI SAAT USER SUDAH LOGIN ---
-            // Header
             authContainerMobile.innerHTML = `<button class="auth-icon-btn logout" id="logout-btn-mobile-icon"><span class="material-icons">logout</span><span class="tooltip">Logout</span></button>`;
             document.getElementById('logout-btn-mobile-icon').addEventListener('click', logoutUser);
             if(addPromptLinkMobile) addPromptLinkMobile.style.display = 'flex';
             
-            // Navigasi Bawah
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <a href="#" class="nav-item" id="nav-logout">
@@ -357,12 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             // --- KONDISI SAAT USER TIDAK LOGIN ---
-            // Header
             authContainerMobile.innerHTML = `<button class="auth-icon-btn" id="login-btn-mobile-icon"><span class="material-icons">login</span><span class="tooltip">Login</span></button>`;
             document.getElementById('login-btn-mobile-icon').addEventListener('click', () => showModal('login-modal'));
             if(addPromptLinkMobile) addPromptLinkMobile.style.display = 'none';
 
-            // Navigasi Bawah
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <a href="#" class="nav-item" id="nav-login">
@@ -383,7 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value);
     });
     
-    // [PERUBAHAN UTAMA - SIGNED UPLOAD]
     promptForm.addEventListener('submit', async (e) => {
         e.preventDefault();
     
@@ -403,37 +436,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
         let imageUrl = existingImageUrl; 
     
-        // HANYA jalankan blok ini jika ada file baru yang diupload
         if (file) {
             try {
-                // ===========================================================
-                // [PERUBAHAN UTAMA] - Implementasi Signed Upload
-                // ===========================================================
-
-                // 1. Minta "tanda tangan" (signature) aman dari server Netlify kita
-                // Endpoint '/.netlify/functions/...' adalah endpoint default Netlify
                 const signatureResponse = await fetch('/.netlify/functions/generate-signature');
                 if (!signatureResponse.ok) {
                     throw new Error('Gagal mendapatkan signature dari server.');
                 }
                 const { signature, timestamp, api_key } = await signatureResponse.json();
 
-                // 2. Siapkan FormData untuk dikirim ke Cloudinary
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('api_key', api_key); // Gunakan API Key dari server
-                formData.append('timestamp', timestamp); // Gunakan timestamp dari server
-                formData.append('signature', signature); // Gunakan signature dari server
-                formData.append('upload_preset', 'galeri-prompt-uploads'); // Preset harus sama dengan yang di server
+                formData.append('api_key', api_key);
+                formData.append('timestamp', timestamp);
+                formData.append('signature', signature);
+                formData.append('upload_preset', 'galeri-prompt-uploads');
 
-                // 3. Tentukan URL Upload Cloudinary
                 const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
                 
-                // 4. Kirim file ke Cloudinary
                 const response = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
-                // ===========================================================
-                // [AKHIR PERUBAHAN UTAMA]
-                // ===========================================================
 
                 if (!response.ok) throw new Error('Upload gambar ke Cloudinary gagal.');
                 const data = await response.json();
@@ -447,7 +467,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     
-        // Kode ini berjalan seperti biasa
         const socialUrl = document.getElementById('prompt-socialUrl').value;
         const extractedUser = extractUsernameFromUrl(socialUrl);
 
@@ -458,34 +477,35 @@ document.addEventListener('DOMContentLoaded', () => {
             socialUrl: socialUrl,
             category: document.getElementById('prompt-category').value,
             promptText: document.getElementById('prompt-text').value,
-            imageUrl: imageUrl, // Ini akan berisi URL baru jika ada file, atau URL lama jika tidak
+            imageUrl: imageUrl,
             tags: document.getElementById('prompt-tags').value,
         };
     
         await savePrompt(promptData); 
     
         submitButton.disabled = false;
-        // [Perbaikan kecil] Ganti teks tombol kembali ke icon 'save'
         submitButton.innerHTML = '<span class="material-icons">save</span>';
     });
-    // [AKHIR PERUBAHAN]
 
     promptGrid.addEventListener('click', (e) => {
         const target = e.target;
         const editBtn = target.closest('.edit-btn');
         const deleteBtn = target.closest('.delete-btn');
-        const copyBtn = target.closest('.copy-btn-overlay'); // <-- [DIUBAH]
-        const clickedTag = target.closest('.image-overlay-text'); // <-- [DIUBAH] Cek tag kategori juga
-        const viewBtn = target.closest('[data-action="view-prompt"]'); // <-- [BARU]
+        const copyBtn = target.closest('.copy-btn-overlay'); 
+        const clickedTag = target.closest('.image-overlay-text'); 
+        const viewBtn = target.closest('[data-action="view-prompt"]'); 
 
-        // [BARU] Logika untuk menampilkan modal full view
+        // [MODIFIKASI] Gunakan data-index
         if (viewBtn && !editBtn && !deleteBtn && !copyBtn && !clickedTag) {
-            const promptId = viewBtn.dataset.id;
-            const promptData = allPrompts.find(p => p.id === promptId);
-            if (promptData) {
-                showViewPromptModal(promptData);
+            const index = parseInt(viewBtn.dataset.index, 10); // Ambil indeks
+            if (!isNaN(index)) {
+                currentViewIndex = index; // Set indeks global
+                const promptData = currentFilteredPrompts[currentViewIndex]; // Ambil data dari daftar yang difilter
+                if (promptData) {
+                    showViewPromptModal(promptData);
+                }
             }
-            return; // Hentikan eksekusi
+            return;
         }
 
         if (clickedTag) {
@@ -494,10 +514,6 @@ document.addEventListener('DOMContentLoaded', () => {
             textFilterMobile.value = '';
             if (filterType === 'category') {
                 categoryFilter.value = filterValue;
-            } else if (filterType === 'tag') {
-                categoryFilter.value = 'all';
-                textFilterDesktop.value = filterValue;
-                textFilterMobile.value = filterValue;
             }
             applyFilters();
             window.scrollTo(0, 0);
@@ -512,20 +528,19 @@ document.addEventListener('DOMContentLoaded', () => {
             deletePrompt(deleteBtn.dataset.id);
             return;
         }
-        // [BLOK DIUBAH] - Logika copy-paste untuk tombol baru
         if (copyBtn) {
             const textToCopy = decodeURIComponent(copyBtn.dataset.promptText);
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const textSpan = copyBtn.querySelector('.copy-text');
                 if (!textSpan) return;
                 
-                const originalText = textSpan.textContent; // "Salin"
+                const originalText = textSpan.textContent; 
                 copyBtn.classList.add('copied');
-                textSpan.textContent = 'Tersalin!'; // Teks ini akan muncul berkat CSS
+                textSpan.textContent = 'Tersalin!';
 
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
-                    textSpan.textContent = originalText; // Kembali ke "Salin" (tersembunyi)
+                    textSpan.textContent = originalText;
                 }, 2000);
             }).catch(err => console.error('Gagal menyalin: ', err));
         }
@@ -533,9 +548,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => hideModal(btn.dataset.modal)));
 
-    // [BARU & MODIFIKASI] Listener untuk modal full view (close-btn & copy-btn)
+    // Listener untuk modal full view (close-btn & copy-btn)
     const viewModal = document.getElementById('view-prompt-modal');
-    if (viewModal) { // Cek jika elemen ada
+    if (viewModal) { 
         const viewModalCopyBtn = document.getElementById('view-modal-copy-btn');
         const viewModalCloseBtn = viewModal.querySelector('.close-btn-fullview');
 
@@ -543,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideModal('view-prompt-modal');
         });
 
-        // [MODIFIKASI BESAR] Event listener untuk tombol utama di modal full view
+        // [MODIFIKASI] Listener ini sekarang menangani logika mobile/desktop
         viewModalCopyBtn.addEventListener('click', (e) => {
             const btn = e.currentTarget;
             const textToCopy = decodeURIComponent(btn.dataset.promptText);
@@ -551,15 +566,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isMobile) {
                 // --- LOGIKA MOBILE: Buka Pop-up ---
-                
-                // 1. Isi text area di popup baru
                 const popupTextArea = document.getElementById('popup-prompt-textarea');
                 if(popupTextArea) popupTextArea.value = textToCopy;
                 
-                // 2. Tampilkan modal popup
                 showModal('prompt-text-popup'); 
 
-                // 3. Reset tombol copy di *dalam* popup (jika ada)
                 const popupCopyBtn = document.getElementById('popup-copy-btn');
                 if (popupCopyBtn) {
                     popupCopyBtn.classList.remove('copied');
@@ -570,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- LOGIKA DESKTOP: Langsung Salin ---
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     const textSpan = btn.querySelector('span:last-child');
-                    const originalText = "Salin Prompt"; // Teks asli desktop
+                    const originalText = "Salin Prompt";
                     
                     btn.classList.add('copied');
                     textSpan.textContent = 'Berhasil Tersalin!';
@@ -597,19 +608,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // [BARU] Event listeners untuk Navigasi Modal (Next/Prev)
+    if (modalNavPrev) {
+        modalNavPrev.addEventListener('click', () => {
+            navigateToPrompt(-1); // -1 untuk "sebelumnya"
+        });
+    }
 
-    // [KODE BARU] Menambahkan event listener untuk menutup modal saat area luar di-klik
+    if (modalNavNext) {
+        modalNavNext.addEventListener('click', () => {
+            navigateToPrompt(1); // 1 untuk "selanjutnya"
+        });
+    }
+
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (event) => {
-            // event.target adalah elemen yang diklik.
-            // Kita cek apakah elemen yang diklik sama dengan elemen modal itu sendiri.
             if (event.target === modal) {
-                // Khusus untuk popup prompt, jangan tutup jika area luar diklik
-                // agar tidak sengaja tertutup saat scroll di HP
                 if (modal.id === 'prompt-text-popup' || modal.id === 'prompt-modal') { 
                     return;
                 }
-                hideModal(modal.id); // Jika ya, tutup modalnya.
+                hideModal(modal.id);
             }
         });
     });

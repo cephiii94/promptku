@@ -1133,3 +1133,66 @@ body {
         text-align: center;
     }
 }
+
+/* ==========================================================================
+   16. [BARU] TOMBOL NAVIGASI MODAL (NEXT/PREV)
+   ========================================================================== */
+
+/* Pastikan .modal-image-side bisa menampung tombol absolute */
+.modal-image-side {
+    position: relative; /* [PENTING] Pastikan ini ada */
+}
+
+.modal-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2002; /* Di atas gambar, di bawah tombol close (2001) */
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex; /* Menggunakan flex untuk tombol baru */
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-nav-btn#modal-nav-prev {
+    left: 1rem;
+}
+
+.modal-nav-btn#modal-nav-next {
+    right: 1rem;
+}
+
+/* Sembunyikan tombol jika tidak diperlukan (di-handle JS) */
+.modal-nav-btn[style*="display: none"] {
+    display: none !important;
+}
+
+/* Penyesuaian mobile */
+@media (max-width: 768px) {
+    .modal-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+    .modal-nav-btn#modal-nav-prev {
+        left: 0.5rem;
+    }
+    .modal-nav-btn#modal-nav-next {
+        right: 0.5rem;
+    }
+}
