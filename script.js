@@ -354,6 +354,20 @@ document.addEventListener('DOMContentLoaded', () => {
             modalNavNext.style.display = 'flex';
         }
         
+        // === [PERUBAHAN YANG ANDA MINTA ADA DI SINI] ===
+        
+        // [BARU] Logika untuk Tombol Generate Prompt
+        const generateBtn = document.getElementById('view-modal-generate-btn');
+        
+        // [GANTI SAYA] Ganti 'image-generator.html' dengan URL halaman generator Anda
+        const generatorURL = 'image-generator.html'; 
+        
+        const promptText = data.promptText;
+        generateBtn.href = `${generatorURL}?prompt=${encodeURIComponent(promptText)}`;
+
+        // === [AKHIR PERUBAHAN] ===
+
+
         // Tampilkan modal
         document.getElementById('view-prompt-modal').style.display = 'flex';
         if (bottomNavMobile) bottomNavMobile.style.display = 'none'; // Sembunyikan nav bawah

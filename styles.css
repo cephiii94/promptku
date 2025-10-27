@@ -1061,6 +1061,32 @@ body {
     }
 }
 
+/* [BARU] Styling untuk tombol Generate */
+.generate-btn {
+    background-color: var(--success-green); /* Warna hijau */
+    color: white;
+    text-decoration: none; /* Menghilangkan garis bawah <a> */
+}
+.generate-btn:hover {
+    background-color: var(--primary-green); /* Hijau lebih gelap saat hover */
+}
+
+/* [BARU] Wrapper untuk 2 tombol di modal view */
+.modal-button-group {
+    display: flex;
+    gap: 1rem; /* Jarak antar tombol */
+    width: 100%;
+}
+
+/* [MODIFIKASI] Mengatur ulang lebar tombol Salin & Generate */
+#view-modal-copy-btn,
+#view-modal-generate-btn {
+    flex: 1; /* Membuat kedua tombol memiliki lebar yang sama */
+    width: auto; /* Menimpa width: 100% sebelumnya */
+    font-size: 1rem;
+    padding: 0.75rem;
+}
+
 /* ==========================================================================
    14. [BARU] CSS UNTUK POP-UP PROMPT MOBILE
    ========================================================================== */
