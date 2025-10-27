@@ -880,24 +880,27 @@ body {
 .overlay-info {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    flex-grow: 1; /* Ambil sisa ruang */
-    min-width: 0; /* Mencegah teks overflow */
+    gap: 1rem; /* Tambah gap antara judul dan author */
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .overlay-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--white);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Judul panjang akan jadi '...' */
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    display: block; /* Pastikan judul ditampilkan */
 }
 
 .overlay-user {
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.8);
+    display: block; /* Pastikan author ditampilkan */
 }
 
 /* ==========================================================================
