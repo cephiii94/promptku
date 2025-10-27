@@ -710,15 +710,12 @@ body {
 }
 
 /* ==========================================================================
-   12. [BARU] DESAIN KARTU (OVERLAY GAMBAR)
+   12. [BERSIH] DESAIN KARTU (OVERLAY GAMBAR)
    ========================================================================== */
 
 /* 1. Modifikasi .card */
 .card {
-    /* HAPUS background putih lama */
-    background: var(--light-gray-bg); /* Fallback selagi gambar memuat */
-    
-    /* Pertahankan ini */
+    background: var(--light-gray-bg);
     position: relative;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
@@ -727,7 +724,7 @@ body {
     width: 100%;
     margin-bottom: 1.5rem;
     break-inside: avoid;
-    border: none; /* Hapus border lama */
+    border: none;
     transition: transform 0.3s ease;
 }
 
@@ -736,88 +733,59 @@ body {
     position: relative;
     width: 100%;
     overflow: hidden;
-    border-radius: var(--border-radius-lg); /* Pastikan container juga rounded */
-    line-height: 0; /* Menghilangkan spasi aneh di bawah gambar */
-    cursor: zoom-in;
+    border-radius: var(--border-radius-lg);
+    line-height: 0;
+    cursor: zoom-in; /* Petunjuk kursor "zoom" */
 }
 
 .card-image-container img {
     width: 100%;
-    height: auto; /* Biarkan tinggi otomatis menyesuaikan lebar */
-    object-fit: cover; /* [PENTING] Mengisi kontainer, bukan 'contain' */
+    height: auto;
+    object-fit: cover;
     display: block;
     border-radius: var(--border-radius-lg);
     transition: transform 0.3s ease;
 }
 
 .card:hover .card-image-container img {
-    transform: scale(1.05); /* Efek zoom kecil saat hover */
+    transform: scale(1.05);
 }
 
-/* 3. HAPUS styling .card-content lama */
-/* Kita tidak perlu menghapusnya, aturan baru akan menimpanya, 
-   tapi jika ingin bersih, Anda bisa hapus:
-   .card-content, .card-header, .prompt-wrapper, .prompt-textarea, 
-   .card-tags, .tag (jika hanya dipakai di kartu), dan .copy-btn 
-*/
+/* 3. Sembunyikan .card-content lama */
 .card-content {
-    display: none; /* Sembunyikan .card-content lama */
+    display: none;
 }
 
-
-/* 4. [BARU] Overlay untuk Teks Prompt (sesuai gambar) */
-.card-prompt-overlay {
+/* 4. [BARU] Ikon petunjuk 'expand' (solusi mobile) */
+.card-expand-hint {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    
-    /* Efek Kaca Transparan */
-    background: rgba(0, 0, 0, 0.6);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    
-    color: var(--white);
-    border-bottom-left-radius: var(--border-radius-lg);
-    border-bottom-right-radius: var(--border-radius-lg);
-
-    /* Layout (teks di kiri, tombol di kanan) */
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-
-    /* Animasi muncul saat hover pada kartu */
-    transform: translateY(100%);
-    opacity: 0;
-    transition: all 0.3s ease-in-out;
-
-    flex-direction: column; /* Susun hint dan baris-prompt secara vertikal */
-    gap: 0.5rem; /* Jarak antara hint dan baris-prompt */
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    padding: 5px;
+    z-index: 6; 
+    pointer-events: none; /* [PENTING] Agar klik tembus ke gambar */
+    backdrop-filter: blur(2px);
+    transition: all 0.2s ease;
 }
 
-.card:hover .card-prompt-overlay {
-    transform: translateY(0);
-    opacity: 1;
+/* Sembunyikan ikon ini jika tombol admin muncul (saat login & hover) */
+.card:hover .card-actions + .card-expand-hint {
+    display: none;
 }
 
-/* 5. [BARU] Styling Teks Prompt di Overlay */
-.card-prompt-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin: 0;
-    flex-grow: 1; /* Ambil sisa ruang */
-
-    /* Batasi teks agar tidak terlalu panjang (opsional) */
-    display: -webkit-box;
-    -webkit-line-clamp: 4; /* Tampilkan maks 4 baris */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* Sembunyikan juga di desktop saat overlay info muncul */
+@media (min-width: 769px) {
+    .card:hover .card-expand-hint {
+        opacity: 0;
+        visibility: hidden;
+    }
 }
 
-/* 6. [BARU] Tombol Copy di Overlay (Rekomendasi) */
+/* 5. Tombol Copy di Overlay */
 .copy-btn-overlay {
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -835,7 +803,7 @@ body {
     font-size: 20px;
 }
 .copy-btn-overlay .copy-text {
-    display: none; /* Sembunyikan teks "Salin" */
+    display: none;
     font-size: 0.8rem;
     font-weight: 500;
 }
@@ -847,29 +815,24 @@ body {
     border-color: var(--success-green);
 }
 .copy-btn-overlay.copied .material-icons {
-    display: none; /* Sembunyikan ikon saat tersalin */
+    display: none;
 }
 .copy-btn-overlay.copied .copy-text {
-    display: inline; /* Tampilkan teks "Tersalin!" */
+    display: inline;
     padding: 0 0.25rem;
 }
 
-/* 7. Modifikasi .card-actions (Tombol Admin) */
+/* 6. Tombol Admin .card-actions */
 .card-actions {
-    /* Hapus styling lama */
     margin-top: 0;
     border-top: none;
     padding-top: 0;
-
-    /* [BARU] Posisikan di kanan atas */
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
     z-index: 5;
     display: flex;
     gap: 0.5rem;
-    
-    /* [BARU] Sembunyikan by default, muncul saat hover */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
@@ -882,25 +845,59 @@ body {
     transform: translateY(0);
 }
 
-/* [BARU] Styling untuk hint */
-.card-overlay-hint {
-    display: block;
-    width: 100%;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-style: italic;
-    text-align: left; /* Rata kiri */
-    padding-bottom: 0.35rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* [BARU] Styling untuk baris prompt+tombol */
-.prompt-row {
+/* 7. [MODIFIKASI] Overlay untuk Info Hover (Judul & User) */
+.card-prompt-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--white);
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+    
+    /* Layout baru (info di kiri, tombol di kanan) */
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    width: 100%;
+
+    /* Animasi muncul saat hover */
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover .card-prompt-overlay {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* 8. [BARU] Styling untuk info di overlay (INI YANG HILANG) */
+.overlay-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex-grow: 1; /* Ambil sisa ruang */
+    min-width: 0; /* Mencegah teks overflow */
+}
+
+.overlay-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Judul panjang akan jadi '...' */
+}
+
+.overlay-user {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* ==========================================================================

@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allPrompts = [];
     let currentUser = null;
-    let currentFilteredPrompts = []; // [BARU] Menyimpan daftar yang sedang dilihat
-    let currentViewIndex = 0; // [BARU] Menyimpan indeks prompt yang sedang dibuka
+    let currentFilteredPrompts = []; // Menyimpan daftar yang sedang dilihat
+    let currentViewIndex = 0; // Menyimpan indeks prompt yang sedang dibuka
 
     // =========================================================================
     // 5. DATA FETCHING & FILTERING
@@ -141,11 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
         
-        currentFilteredPrompts = filtered; // [BARU] Simpan daftar yang difilter
+        currentFilteredPrompts = filtered; // Simpan daftar yang difilter
         renderPrompts(filtered);
     };
 
-    // =========================================================================
+// =========================================================================
     // 6. RENDERING LOGIC
     // =========================================================================
 
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // [MODIFIKASI] Tambahkan 'index' ke map
         const allCardsHTML = promptsToRender.map((prompt, index) => {
             
-            // [BARU] Tombol Admin (diposisikan absolute di kanan atas)
+            // Tombol Admin (diposisikan absolute di kanan atas)
             const adminActions = currentUser ? `
                 <div class="card-actions">
                     <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `<span class="image-overlay-text " data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
                 : ''; 
             
-            // [REKOMENDASI] Tombol copy baru yang lebih minimalis
+            // Tombol copy baru yang lebih minimalis
             const copyButtonHtml = `
                 <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText)}">
                     <span class="material-icons">content_copy</span>
@@ -187,22 +187,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // [STRUKTUR KARTU BARU]
             return `
                 <div class="card">
-                    <div class="card-image-container" data-index="${index}" data-action="view-prompt">
+                    <div class="card-image-container" data-id="${prompt.id}" data-index="${index}" data-action="view-prompt">
                         <img src="${prompt.imageUrl}" alt="Hasil gambar dari prompt: ${prompt.title}">
                         
-                        ${overlayCategoryHtml} ${adminActions} <div class="card-prompt-overlay">
-                            <small class="card-overlay-hint">Klik gambar untuk detail</small>
-                            <div class="prompt-row">
-                                <p class="card-prompt-text">${prompt.promptText}</p>
-                                ${copyButtonHtml}
+                        <span class="card-expand-hint material-icons">open_in_full</span>
+
+                        ${overlayCategoryHtml}
+                        ${adminActions}
+                        <div class="card-prompt-overlay">
+                            <div class="overlay-info">
+                                <h4 class="overlay-title">${prompt.title}</h4>
+                                <span class="overlay-user">by ${prompt.user || 'Anonymous'}</span>
                             </div>
+                            ${copyButtonHtml}
                         </div>
                     </div>
                 </div>`;
         }).join('');
         promptGrid.innerHTML = allCardsHTML;
     };
-
+    
     // =========================================================================
     // 7. AUTHENTICATION & CRUD OPERATIONS
     // =========================================================================
@@ -290,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // [MODIFIKASI BESAR] Fungsi ini sekarang juga mengatur tombol Next/Prev
+    // [MODIFIKASI] Fungsi ini sekarang juga mengatur tombol Next/Prev
     const showViewPromptModal = (data) => {
         
         // [BARU] Set judul modal
