@@ -1,15 +1,15 @@
 // File: netlify/functions/generate-image.js
-// INI ADALAH KODE UNTUK MEMANGGIL API GEMINI (TEKS)
+// KODE INI UNTUK MEMANGGIL API GEMINI 2.5 FLASH IMAGE (NANO BANANA)
+// DENGAN KONFIGURASI YANG BENAR
 
 exports.handler = async (event) => {
     
-    // 1. Ambil API Key (sekarang seharusnya sudah terbaca setelah restart)
     const API_KEY = process.env.GEMINI_API_KEY;
 
     if (!API_KEY) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Error: GEMINI_API_KEY tidak diatur. Restart server 'netlify dev' Anda." })
+            body: JSON.stringify({ message: "Error: GEMINI_API_KEY tidak diatur. Pastikan file .env ada dan 'netlify dev' sudah di-restart." })
         };
     }
     if (event.httpMethod !== 'POST') {
@@ -25,57 +25,65 @@ exports.handler = async (event) => {
     }
 
     // ===================================================================
-    // KONEKSI KE API GOOGLE GEMINI (TEKS)
+    // KONEKSI KE API GOOGLE GEMINI (IMAGE GENERATION)
     // ===================================================================
-    // Perhatikan: Model ini (gemini-1.5-flash) adalah untuk TEKS.
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${API_KEY}`;
 
     try {
-        // Kami akan meminta Gemini untuk "menyempurnakan prompt", bukan membuat gambar
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
+            // Ini adalah format payload untuk Gemini Image Generation
             body: JSON.stringify({
-                // Ini adalah format payload untuk Gemini API (teks)
                 "contents": [
-                    {
-                        "parts": [
-                            { "text": `Anda adalah asisten AI. Seseorang memberi Anda prompt untuk image generator. Sempurnakan prompt ini agar lebih baik, tapi kembalikan HANYA teks prompt yang sudah disempurnakan. Prompt asli: "${userPrompt}"` }
-                        ]
-                    }
-                ]
+                    { "parts": [{ "text": userPrompt }] }
+                ],
+                // ================== [PERUBAHAN DI SINI] ==================
+                "generationConfig": {
+                    // Kita TIDAK menggunakan 'responseMimeType'.
+                    // Kita menggunakan 'responseModalities' untuk meminta gambar.
+                    "responseModalities": ["IMAGE"] 
+                }
+                // ==========================================================
             })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
             console.error("Gemini API Error:", errorData);
+            // Ini akan menampilkan error dari Google jika masih ada
             throw new Error(errorData.error.message || `API Error: ${response.status}`);
         }
 
         const data = await response.json();
+
+        // Logika ini SUDAH BENAR. Model ini akan mengembalikan 'inlineData'
+        const part = data.candidates[0].content.parts[0];
+        if (!part.inlineData || !part.inlineData.data) {
+            console.error("Format balasan tidak dikenal:", data);
+            
+            // Cek apakah ada 'text' (jika model menolak promptnya)
+            if(part.text) {
+                throw new Error(`API menolak prompt: ${part.text}`);
+            }
+            
+            throw new Error("Format balasan dari API tidak dikenal (tidak ada inlineData).");
+        }
         
-        // Mengambil HASIL TEKS dari balasan Gemini
-        const generatedText = data.candidates[0].content.parts[0].text;
+        const imageBase64 = part.inlineData.data;
+        const imageUrl = `data:image/png;base64,${imageBase64}`;
 
         // ===============================================================
-        // INI ADALAH MASALAH SELANJUTNYA
+        // KIRIM BALASAN SUKSES KE FRONTEND
         // ===============================================================
-        // Frontend Anda (image-generator.html) mengharapkan balasan:
-        // { "imageUrl": "http://..." }
-        //
-        // Tapi API ini mengembalikan TEKS, bukan URL gambar.
-        // Kita akan tetap mengirim balasan yang salah formatnya
-        // untuk membuktikan bahwa API-nya merespons.
         
         return {
             statusCode: 200,
-            // Balasan ini akan GAGAL di frontend, tapi membuktikan API Key Anda benar
             body: JSON.stringify({ 
-                message: "API Gemini (Teks) Berhasil!", 
-                hasilTeks: generatedText 
+                imageUrl: imageUrl
             })
         };
 
