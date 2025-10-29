@@ -1,0 +1,48 @@
+# --- File .gitignore ---
+# File ini memberitahu Git file/folder apa yang harus diabaikan
+
+# 1. Dependensi Node.js (Paling Penting)
+# Folder ini berisi ribuan file yang di-download oleh npm/yarn
+/node_modules
+
+# 2. File Environment (Sangat Penting)
+# JANGAN PERNAH menyimpan API Key atau rahasia di Git.
+# Di sinilah Anda akan menyimpan API Key untuk Google AI nanti.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# 3. Build & Cache Netlify
+# Folder ini dibuat oleh perintah 'netlify dev' untuk menjalankan fungsi lokal
+.netlify
+
+# 4. Folder Build Umum
+# Jika nanti Anda menggunakan build tool seperti Vite atau Create React App
+/dist
+/build
+
+# 5. Log Error
+npm-debug.log*
+yarn-error.log
+yarn-debug.log
+
+# 6. File Sistem Operasi (OS)
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# 7. File Editor Kode (Opsional, tapi bagus)
+# Jika Anda menggunakan VS Code
+.vscode/
+# Jika Anda menggunakan WebStorm/PHPStorm
+.idea/

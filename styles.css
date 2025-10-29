@@ -46,6 +46,7 @@ body {
     color: var(--text-dark);
     line-height: 1.6;
     padding-top: var(--header-height-desktop);
+    padding-bottom: 80px; /* <-- TAMBAHKAN BARIS INI */
 }
 
 /* 2. LAYOUT & CONTAINER
@@ -568,7 +569,7 @@ body {
    ========================================================================== */
 /* GANTI .bottom-nav-mobile LAMA DENGAN INI UNTUK EFEK KACA */
 .bottom-nav-mobile {
-    display: none; 
+    display: flex; 
     position: fixed;
     bottom: 1rem; 
     left: 50%;
@@ -645,18 +646,12 @@ body {
     color: var(--white);
 }
 
-@media (min-width: 769px) {
-    .bottom-nav-mobile {
-        display: none !important;
-    }
-}
+
 
 @media (max-width: 768px) {
     body {
-        padding-bottom: 80px; 
     }
     .bottom-nav-mobile {
-        display: flex;
     }
 }
 
