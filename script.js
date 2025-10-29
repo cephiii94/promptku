@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.dataset.promptText = data.promptText;
         
         // Atur URL statis ke Gemini.
-        generateBtn.href = 'https://gemini.google.com';
+        generateBtn.href = `/image-generator.html?prompt=${encodeURIComponent(data.promptText)}`;
         
         // Reset tampilan tombol (jika sebelumnya disalin)
         generateBtn.classList.remove('copied');

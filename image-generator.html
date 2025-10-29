@@ -63,10 +63,10 @@
         </div>
     </footer>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // 1. Logika untuk mengambil prompt dari URL
+            // 1. Logika untuk mengambil prompt dari URL (TETAP SAMA)
             const getPromptFromURL = () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const prompt = urlParams.get('prompt');
@@ -79,11 +79,12 @@
             // Panggil fungsi saat halaman dimuat
             getPromptFromURL();
 
-            // 2. Logika untuk submit form (Placeholder)
+            // 2. Logika untuk submit form (DIGANTI DENGAN KODE NETLIFY)
             const generatorForm = document.getElementById('generator-form');
             const outputPlaceholder = document.getElementById('image-output-placeholder');
 
-            generatorForm.addEventListener('submit', (e) => {
+            // [PERUBAHAN] Tambahkan 'async' di sini
+            generatorForm.addEventListener('submit', async (e) => {
                 e.preventDefault(); // Mencegah form submit
                 
                 const promptText = document.getElementById('prompt-input').value;
@@ -100,31 +101,55 @@
                 `;
 
                 // ===============================================
-                // === [PERHATIAN] TEMPATKAN LOGIKA API ANDA DI SINI ===
+                // === [BARU] Logika Fetch ke Netlify Function ===
                 // ===============================================
                 
-                // Ini hanya simulasi. Ganti bagian ini dengan 
-                // panggilan API (fetch) ke layanan image generator Anda.
-                
-                console.log("Memulai generate dengan prompt:", promptText);
+                try {
+                    // 1. Panggil Netlify Function Anda
+                    // Pastikan '/.netlify/functions/generate-image' sudah benar
+                    const response = await fetch('/.netlify/functions/generate-image', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        // 2. Kirim prompt sebagai JSON
+                        body: JSON.stringify({ prompt: promptText }),
+                    });
 
-                // Simulasi API call butuh 3 detik
-                setTimeout(() => {
-                    // Ganti URL ini dengan URL gambar hasil dari API Anda
-                    const hasilGambarUrl = 'https://picsum.photos/512/512?random=' + Math.random(); 
+                    if (!response.ok) {
+                        // Tangkap error jika server Netlify gagal (misal: error 500)
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || `Server error: ${response.status}`);
+                    }
 
-                    // Tampilkan gambar
+                    // 3. Ambil data (URL gambar) dari balasan
+                    const data = await response.json();
+
+                    // Pastikan balasan dari Netlify Function Anda adalah { "imageUrl": "..." }
+                    if (!data.imageUrl) {
+                         // Tangkap jika format balasan tidak sesuai
+                         throw new Error("Format balasan dari server tidak valid.");
+                    }
+                    
+                    // 4. Tampilkan gambar
                     outputPlaceholder.innerHTML = `
-                        <img src="${hasilGambarUrl}" alt="Generated Image" style="max-width: 100%; height: auto; border-radius: 8px;">
+                        <img src="${data.imageUrl}" alt="Generated Image" style="max-width: 100%; height: auto; border-radius: 8px;">
                     `;
 
-                }, 3000); // Hapus timeout ini saat menggunakan API sungguhan
+                } catch (error) {
+                    // 5. Tampilkan pesan error jika terjadi masalah
+                    console.error("Gagal men-generate gambar:", error);
+                    outputPlaceholder.innerHTML = `
+                        <span class="material-icons" style="color: #EF4444;">error_outline</span>
+                        <p>Maaf, terjadi kesalahan: ${error.message}</p>
+                    `;
+                }
             });
 
-            // 3. Logika footer (tahun)
+            // 3. Logika footer (tahun) (TETAP SAMA)
             document.getElementById('current-year').textContent = new Date().getFullYear();
         });
     </script>
-
+    
 </body>
 </html>
