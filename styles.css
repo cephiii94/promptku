@@ -1071,6 +1071,10 @@ body {
     background-color: var(--primary-green); /* Hijau lebih gelap saat hover */
 }
 
+#view-modal-generate-btn.copied {
+    background-color: var(--primary-green); /* Hijau lebih gelap */
+}
+
 /* [BARU] Wrapper untuk 2 tombol di modal view */
 .modal-button-group {
     display: flex;
@@ -1220,5 +1224,97 @@ body {
     }
     .modal-nav-btn#modal-nav-next {
         right: 0.5rem;
+    }
+}
+
+/* ==========================================================================
+   17. [BARU] HALAMAN IMAGE GENERATOR
+   ========================================================================== */
+
+/* Kontainer utama untuk form generator */
+.generator-container {
+    background: var(--white);
+    padding: 1.5rem 2rem 2rem 2rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 800px; /* Batasi lebar agar fokus */
+    margin: 2rem auto; /* Pusatkan di dalam .container */
+}
+
+/* Penyesuaian label di halaman generator */
+.generator-container .form-group label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-blue-dark);
+}
+
+/* Styling untuk textarea prompt */
+.generator-container textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Kontainer untuk output/hasil gambar */
+.output-container {
+    margin-top: 2rem;
+    border-top: 1px solid var(--light-gray-border);
+    padding-top: 2rem;
+}
+
+.output-container h2 {
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
+
+/* Placeholder sebelum gambar di-load */
+#image-output-placeholder {
+    width: 100%;
+    min-height: 300px;
+    max-width: 512px; /* Batas maks lebar output */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--light-gray-bg);
+    border: 2px dashed var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-medium);
+    transition: all 0.3s ease;
+}
+
+/* Styling untuk gambar hasil jadi */
+#image-output-placeholder img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-md);
+}
+
+/* Animasi putar untuk loading (digunakan oleh JS) */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.spin {
+    animation: spin 1.5s linear infinite;
+}
+
+/* Penyesuaian di mobile */
+@media (max-width: 768px) {
+    .generator-container {
+        padding: 1rem 1.5rem 1.5rem 1.5rem;
+        margin-top: 1.5rem;
     }
 }

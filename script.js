@@ -354,18 +354,21 @@ document.addEventListener('DOMContentLoaded', () => {
             modalNavNext.style.display = 'flex';
         }
         
-        // === [PERUBAHAN YANG ANDA MINTA ADA DI SINI] ===
+        // === [PERUBAHAN ADA DI SINI] ===
         
         // [BARU] Logika untuk Tombol Generate Prompt
         const generateBtn = document.getElementById('view-modal-generate-btn');
         
-        // [GANTI SAYA] Ganti 'image-generator.html' dengan URL halaman generator Anda
-        const generatorURL = 'image-generator.html'; 
+        // [PERUBAHAN] Halaman Gemini tidak bisa diisi otomatis.
+        // Sebagai gantinya, kita simpan prompt di 'dataset' untuk disalin.
+        generateBtn.dataset.promptText = data.promptText;
         
-        const promptText = data.promptText;
-        generateBtn.href = `${generatorURL}?prompt=${encodeURIComponent(promptText)}`;
-
-        // === [AKHIR PERUBAHAN] ===
+        // Atur URL statis ke Gemini.
+        generateBtn.href = 'https://gemini.google.com';
+        
+        // Reset tampilan tombol (jika sebelumnya disalin)
+        generateBtn.classList.remove('copied');
+        generateBtn.querySelector('span:last-child').textContent = 'Generate Prompt';
 
 
         // Tampilkan modal
@@ -610,6 +613,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2000);
                 }).catch(err => console.error('Gagal menyalin: ', err));
             }
+        });
+    }
+
+    // === [PERUBAHAN ADA DI SINI] ===
+    
+    // [BARU] Event listener untuk tombol Generate Prompt
+    const viewModalGenerateBtn = document.getElementById('view-modal-generate-btn');
+    if (viewModalGenerateBtn) {
+        viewModalGenerateBtn.addEventListener('click', (e) => {
+            // Kita TIDAK menghentikan link (preventDefault), agar tab baru tetap terbuka
+            
+            const btn = e.currentTarget;
+            const textToCopy = btn.dataset.promptText; // Ambil dari dataset
+
+            if (textToCopy) {
+                // 1. Salin ke clipboard
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    
+                    // 2. Beri feedback visual
+                    const textSpan = btn.querySelector('span:last-child');
+                    const originalText = "Generate Prompt";
+                    
+                    btn.classList.add('copied'); // Tambah kelas 'copied'
+                    textSpan.textContent = 'Prompt Disalin!';
+                    
+                    // 3. Kembalikan teks tombol setelah 2.5 detik
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        textSpan.textContent = originalText;
+                    }, 2500);
+
+                }).catch(err => {
+                    console.error('Gagal menyalin: ', err);
+                });
+            }
+            // 4. Link <a> akan otomatis membuka tab baru karena kita tidak membatalkannya
         });
     }
 

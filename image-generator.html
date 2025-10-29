@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generator - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+</head>
+<body>
+
+    <header class="sticky-header">
+        <a href="index.html" class="icon-btn" style="background-color: var(--primary-blue); border: none; padding: 0.5rem;">
+            <span class="material-icons">arrow_back</span>
+            <span class="tooltip">Kembali ke Galeri</span>
+        </a>
+        
+        <div class="header-title">
+            <h1>Image Generator</h1>
+        </div>
+        
+        <div style="width: 44px; height: 44px;"></div>
+    </header>
+
+    <div class="container">
+        <main class="generator-container">
+            
+            <form id="generator-form">
+                <div class="form-group">
+                    <label for="prompt-input">Prompt Anda:</label>
+                    <textarea id="prompt-input" rows="8" placeholder="Tulis prompt Anda di sini atau dapatkan dari galeri..."></textarea>
+                </div>
+
+                <button type="submit" class="auth-button generate-btn" style="width: 100%;">
+                    <span class="material-icons">auto_awesome</span>
+                    <span>Generate Image</span>
+                </button>
+            </form>
+
+            <div class="output-container">
+                <h2>Hasil Gambar</h2>
+                
+                <div id="image-output-placeholder">
+                    <span class="material-icons" style="font-size: 48px;">image</span>
+                    <p>Hasil gambar akan muncul di sini</p>
+                </div>
+                
+                </div>
+
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat Dengan Cinta &hearts;</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Logika untuk mengambil prompt dari URL
+            const getPromptFromURL = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const prompt = urlParams.get('prompt');
+                if (prompt) {
+                    // Masukkan prompt ke textarea
+                    document.getElementById('prompt-input').value = decodeURIComponent(prompt);
+                }
+            };
+            
+            // Panggil fungsi saat halaman dimuat
+            getPromptFromURL();
+
+            // 2. Logika untuk submit form (Placeholder)
+            const generatorForm = document.getElementById('generator-form');
+            const outputPlaceholder = document.getElementById('image-output-placeholder');
+
+            generatorForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Mencegah form submit
+                
+                const promptText = document.getElementById('prompt-input').value;
+
+                if (!promptText.trim()) {
+                    alert("Mohon masukkan prompt terlebih dahulu.");
+                    return;
+                }
+
+                // Tampilkan status loading
+                outputPlaceholder.innerHTML = `
+                    <span class="material-icons spin">hourglass_top</span>
+                    <p>Sedang men-generate... mohon tunggu...</p>
+                `;
+
+                // ===============================================
+                // === [PERHATIAN] TEMPATKAN LOGIKA API ANDA DI SINI ===
+                // ===============================================
+                
+                // Ini hanya simulasi. Ganti bagian ini dengan 
+                // panggilan API (fetch) ke layanan image generator Anda.
+                
+                console.log("Memulai generate dengan prompt:", promptText);
+
+                // Simulasi API call butuh 3 detik
+                setTimeout(() => {
+                    // Ganti URL ini dengan URL gambar hasil dari API Anda
+                    const hasilGambarUrl = 'https://picsum.photos/512/512?random=' + Math.random(); 
+
+                    // Tampilkan gambar
+                    outputPlaceholder.innerHTML = `
+                        <img src="${hasilGambarUrl}" alt="Generated Image" style="max-width: 100%; height: auto; border-radius: 8px;">
+                    `;
+
+                }, 3000); // Hapus timeout ini saat menggunakan API sungguhan
+            });
+
+            // 3. Logika footer (tahun)
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        });
+    </script>
+
+</body>
+</html>
