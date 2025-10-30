@@ -232,6 +232,47 @@ body {
     padding-top: 0.5rem;
 }
 
+/* Style untuk Tags di Overlay Kartu */
+.card-tags-overlay {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+.tag-overlay {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.tag-overlay:hover {
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+/* Style untuk Tombol Like di Modal */
+.like-btn {
+    flex: 0 1 auto; /* Jangan membesar, sesuaikan dengan konten */
+    background-color: #F3F4F6;
+    color: var(--text-medium);
+    padding: 0.75rem 1rem;
+}
+.like-btn .material-icons {
+    color: var(--danger-red);
+    transition: transform 0.2s ease;
+}
+.like-btn.liked {
+    background-color: #FEE2E2; /* Latar belakang merah muda */
+    color: var(--danger-red);
+    font-weight: 600;
+}
+.like-btn:hover .material-icons {
+    transform: scale(1.2);
+}
+
 .tag {
     font-size: 0.75rem;
     font-weight: 500;
@@ -1232,4 +1273,60 @@ body {
 /* Kelas ini digunakan oleh JavaScript di SEMUA halaman */
 .hidden {
     display: none !important;
+}
+
+/* ==========================================================================
+   18. [BARU] KUSTOMISASI SWEETALERT
+   ========================================================================== */
+
+   .swal2-container {
+    z-index: 2002; /* Harus lebih tinggi dari #prompt-text-popup (2001) */
+}
+
+.swal2-popup {
+    border-radius: var(--border-radius-lg) !important;
+}
+
+.swal2-title {
+    color: var(--text-dark) !important;
+}
+
+.swal2-html-container {
+    color: var(--text-medium) !important;
+}
+
+/* Tombol Konfirmasi (Biru) */
+.swal2-confirm {
+    background-color: var(--primary-blue) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+.swal2-confirm:hover {
+    background-color: var(--primary-blue-dark) !important;
+}
+
+/* Tombol Batal (Abu-abu) */
+.swal2-cancel {
+    background-color: var(--light-gray-border) !important;
+    color: var(--text-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+.swal2-cancel:hover {
+    background-color: #d1d5db !important;
+}
+
+/* Warna Ikon */
+.swal2-icon.swal2-success .swal2-icon-content {
+    color: var(--success-green) !important;
+}
+.swal2-icon.swal2-error {
+    border-color: var(--danger-red) !important;
+    color: var(--danger-red) !important;
+}
+.swal2-icon.swal2-warning {
+    border-color: #FBBF24 !important; /* Kuning */
+    color: #FBBF24 !important;
+}
+.swal2-icon.swal2-info {
+    border-color: var(--primary-blue-light) !important;
+    color: var(--primary-blue-light) !important;
 }
