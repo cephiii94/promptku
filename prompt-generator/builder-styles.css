@@ -1,0 +1,226 @@
+/* ==========================================================================
+   18. HALAMAN PROMPT BUILDER
+   ========================================================================== */
+/* ==========================================================================
+   [BARU] DEFINISI GENERATOR CONTAINER
+   ========================================================================== */
+.generator-container {
+    background: var(--white);
+    padding: 1.5rem 2rem 2rem 2rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    
+    /* [PENTING] Ini adalah kode yang hilang untuk membuatnya ke tengah */
+    max-width: 800px; 
+    margin: 0 auto; /* Ganti margin-top: 0 dengan ini */
+}
+
+/* Penyesuaian mobile */
+@media (max-width: 768px) {
+    .generator-container {
+        padding: 1rem 1.5rem 1.5rem 1.5rem;
+    }
+}
+
+/* Header di dalam box putih */
+.builder-header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+.builder-header h2 {
+    color: var(--primary-blue-dark);
+    font-size: 1.75rem;
+}
+.builder-header p {
+    font-size: 1rem;
+    color: var(--text-medium);
+    margin-top: 0.25rem;
+}
+
+.guide-button-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Tombol "Cara Menggunakan?" */
+.btn-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primary-blue);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+}
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Teks helper di bawah input */
+.helper-text {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    margin-top: 0.25rem;
+}
+
+/* [PENTING] Menambahkan style untuk Input & Select di dalam .generator-container */
+.generator-container input[type="text"],
+.generator-container input[type="url"],
+.generator-container select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    font-family: inherit;
+    font-size: 0.9rem;
+    background-color: var(--white);
+}
+
+.generator-container select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Wrapper untuk field karakter dinamis */
+.character-field-wrapper {
+    position: relative;
+    border: 1px solid var(--light-gray-border);
+    padding: 0.75rem;
+    border-radius: var(--border-radius-md);
+    background-color: var(--light-gray-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Tombol Hapus (X) di field karakter */
+.remove-char-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: var(--text-medium);
+    font-weight: 700;
+    font-size: 1.25rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 0.25rem;
+}
+.remove-char-btn:hover {
+    color: var(--danger-red);
+}
+
+/* Wrapper untuk Textarea Hasil (agar tombol salin bisa 'absolute') */
+.textarea-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Tombol salin di dalam textarea hasil */
+.textarea-wrapper .copy-btn-overlay {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+    opacity: 0.8;
+    visibility: visible;
+}
+.textarea-wrapper:hover .copy-btn-overlay {
+    opacity: 1;
+}
+
+/* [BARU] Skeleton Loader untuk Hasil Prompt */
+@keyframes pulse {
+    50% { opacity: .5; }
+}
+
+#resultLoader {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100px; /* Samakan dengan textarea */
+    padding: 0.75rem;
+    background-color: var(--light-gray-bg);
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+}
+#resultLoader .pulse-wrapper {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+}
+.skeleton-line {
+    height: 1rem;
+    background-color: #D1D5DB; /* light-gray-border tapi lebih gelap sedikit */
+    border-radius: 0.25rem;
+}
+
+/* [BARU] Kotak Info di dalam Modal */
+.modal-notice-box {
+    padding: 0.75rem;
+    background-color: var(--soft-blue-bg);
+    border: 1px solid var(--primary-blue-light);
+    border-radius: var(--border-radius-md);
+    margin-top: 1.5rem;
+}
+.modal-notice-box strong {
+    color: var(--primary-blue-dark);
+    font-weight: 600;
+}
+.modal-notice-box p {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+.modal-notice-box a {
+    color: var(--primary-blue);
+    font-weight: 500;
+}
+.modal-notice-box a:hover {
+    text-decoration: underline;
+}
+
+/* [FIX] Pastikan spinner dari image-generator.html (hourglass) terlihat */
+.auth-button .spin {
+    display: inline-block !important; /* Timpa 'hidden' */
+}
+
+/* [OVERRIDE] Style Textarea khusus untuk halaman builder */
+.generator-container textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray-border);
+    border-radius: var(--border-radius-md);
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    resize: vertical;
+    /* [PENTING] Hapus min-height 150px dari Sec. 17 */
+    min-height: auto; 
+}
+
+/* Atur tinggi spesifik untuk setiap textarea di halaman builder
+*/
+
+/* Poin 1 (Prompt Inti) */
+.generator-container textarea#corePrompt {
+    min-height: 100px;
+}
+
+/* Poin 2, 3, 4, 6, dan 7 */
+.generator-container .character-field,
+.generator-container #actionDetails,
+.generator-container #atmosphereDetails,
+.generator-container #quality,
+.generator-container #negative {
+    min-height: 60px; /* Atur tinggi yang serasi (lebih pendek) */
+}

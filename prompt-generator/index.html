@@ -3,412 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Prompt Builder</title>
-    <!-- Memuat Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
-    <!-- Memuat Font Inter --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>AI Prompt Builder - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Menggunakan Font Inter sebagai default */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Kustomisasi warna soft blue (sesuai preferensi Tuan Cecep) */
-        .btn-primary {
-            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
-        }
-        .btn-secondary {
-            @apply bg-blue-100 text-blue-700 hover:bg-blue-200;
-        }
-        .btn-link {
-            @apply text-blue-600 hover:text-blue-800 text-sm font-medium;
-        }
-        .input-focus {
-            @apply focus:ring-blue-500 focus:border-blue-500;
-        }
-        .bg-custom {
-            @apply bg-blue-50;
-        }
-        
-        /* Tambahkan style untuk tombol yang nonaktif (saat loading) */
-        .btn-primary:disabled {
-            @apply bg-blue-400 cursor-not-allowed;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="builder-styles.css">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32x32.png">
 </head>
-<body class="bg-custom min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 md:p-10">
-        <header class="text-center mb-4"> <!-- Margin bottom dikurangi -->
-            <h1 class="text-3xl font-bold text-gray-900">AI Prompt Builder</h1>
-            <p class="text-md text-gray-600 mt-2">Bantu Gemini Banana memahami keinginan Anda dengan prompt terstruktur.</p>
-        </header>
-        
-        <!-- TOMBOL PANDUAN (BARU) -->
-        <div class="text-center mb-8">
-            <button id="openModalButton" class="btn-link">
-                Cara Menggunakan (?)
-            </button>
+    <header class="sticky-header">
+        <a href="../index.html" class="icon-btn">
+            <span class="material-icons">arrow_back</span>
+            <span class="tooltip">Kembali ke Galeri</span>
+        </a>
+        <div class="header-title">
+            <h1>AI Prompt Builder</h1>
         </div>
+        <div style="width: 44px; height: 44px;"></div> 
+    </header>
 
-
-        <!-- Bagian Form Input --><div class="space-y-6">
+    <div class="container">
+        <main class="generator-container">
             
-            <!-- 1. Prompt Inti --><div>
-                <label for="corePrompt" class="block text-sm font-medium text-gray-700 mb-1">
-                    1. Prompt Inti (Subjek Utama)
-                </label>
-                <textarea id="corePrompt" rows="3" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm input-focus" placeholder="Misal: 'Seorang wanita', 'Dua anak laki-laki', 'Sebuah kastil di atas bukit'"></textarea>
-                <p class="text-xs text-gray-500 mt-1">Jelaskan subjek utama atau perintah pengeditan utama.</p>
-            </div>
-
-            <!-- 2. Detail Karakter (Dinamis dengan URL Referensi) --><div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    2. Detail Karakter (Opsional)
-                </label>
-                <p class="text-xs text-gray-500 mb-2">Gunakan 'Link Gambar Referensi Wajah' untuk membantu AI mengenali wajah tertentu (dari URL yang dapat diakses publik).</p>
-                <!-- Kontainer untuk field karakter dinamis --><div id="characterContainer" class="space-y-3">
-                    <!-- Field karakter akan ditambahkan di sini oleh JS --></div>
-                <!-- Tombol Tambah Karakter --><button id="addCharacterButton" class="mt-3 px-4 py-2 text-sm font-medium rounded-lg btn-secondary transition duration-150 ease-in-out">
-                    Tambah Karakter (+)
+            <header class="builder-header">
+                <h2>Bantu AI Memahami Anda</h2>
+                <p>Bantu Gemini Banana memahami keinginan Anda dengan prompt terstruktur.</p>
+            </header>
+            
+            <div class="guide-button-container">
+                <button id="openModalButton" class="btn-link">
+                    Cara Menggunakan (?)
                 </button>
             </div>
 
-            <!-- 3. Aksi & Interaksi --><div>
-                <label for="actionDetails" class="block text-sm font-medium text-gray-700 mb-1">
-                    3. Aksi & Interaksi (Opsional)
-                </label>
-                <input type="text" id="actionDetails" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm input-focus" placeholder="Misal: sedang berlari, tertawa bersama teman, membaca buku di bawah pohon">
-            </div>
 
-            <!-- 4. Suasana & Latar --><div>
-                <label for="atmosphereDetails" class="block text-sm font-medium text-gray-700 mb-1">
-                    4. Suasana & Latar (Opsional)
-                </label>
-                <input type="text" id="atmosphereDetails" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm input-focus" placeholder="Misal: di kafe yang ramai, malam hari, hujan, pencahayaan neon, berkabut">
-            </div>
+            <form id="prompt-form">
+                <div class="form-group">
+                    <label for="corePrompt">1. Prompt Inti (Subjek Utama)</label>
+                    <textarea id="corePrompt" rows="3" placeholder="Misal: 'Seorang wanita', 'Dua anak laki-laki', 'Sebuah kastil di atas bukit'"></textarea>
+                    <p class="helper-text">Jelaskan subjek utama atau perintah pengeditan utama.</p>
+                </div>
 
-            <!-- 5. Gaya & Medium --><div>
-                <label for="styleMedium" class="block text-sm font-medium text-gray-700 mb-1">
-                    5. Gaya & Medium
-                </label>
-                <select id="styleMedium" class="w-full p-3 bg-white border border-gray-300 rounded-lg shadow-sm input-focus">
-                    <option value="">-- Pilih Gaya (Opsional) --</option>
-                    <option value="photorealistic">Fotorealistis (Nyata)</option>
-                    <option value="digital art">Seni Digital (Digital Art)</option>
-                    <option value="watercolor painting">Lukisan Cat Air</option>
-                    <option value="oil painting">Lukisan Cat Minyak</option>
-                    <option value="anime style">Gaya Anime / Manga</option>
-                    <option value="3D render">3D Render (Seperti Pixar)</option>
-                    <option value="pixel art">Pixel Art</option>
-                    <option value="line art">Line Art (Sketsa Garis)</option>
-                    <option value="in the style of Van Gogh">Gaya Van Gogh</option>
-                    <option value="in the style of Picasso">Gaya Picasso</option>
-                </select>
-            </div>
-            
-            <!-- 6. Kualitas & Resolusi --><div>
-                <label for="quality" class="block text-sm font-medium text-gray-700 mb-1">
-                    6. Kualitas & Resolusi
-                </label>
-                <input type="text" id="quality" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm input-focus" placeholder="Misal: '4k', 'sangat detail', 'tajam', 'kualitas tinggi'">
-                <p class="text-xs text-gray-500 mt-1">Seringkali 'highly detailed' atau '4k' sudah cukup.</p>
-            </div>
+                <div class="form-group">
+                    <label>2. Detail Karakter (Opsional)</label>
+                    <p class="helper-text" style="margin-bottom: 0.75rem;">Gunakan 'Link Gambar Referensi Wajah' untuk membantu AI mengenali wajah tertentu.</p>
+                    <div id="characterContainer">
+                        </div>
+                    <button type="button" id="addCharacterButton" class="auth-button reset-btn" style="padding: 0.5rem 1rem; margin-top: 0.75rem; width: auto;">
+                        <span class="material-icons" style="font-size: 18px;">add</span>
+                        <span>Tambah Karakter</span>
+                    </button>
+                </div>
 
-            <!-- 7. Prompt Negatif --><div>
-                <label for="negative" class="block text-sm font-medium text-gray-700 mb-1">
-                    7. Prompt Negatif (Hindari Ini)
-                </label>
-                <input type="text" id="negative" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm input-focus" placeholder="Misal: 'buram', 'teks', 'watermark', 'kualitas rendah', 'tangan jelek'">
-            </div>
+                <div class="form-group">
+                    <label for="actionDetails">3. Aksi & Interaksi (Opsional)</label>
+                    <textarea id="actionDetails" rows="2" placeholder="Misal: sedang berlari, tertawa bersama teman, membaca buku di bawah pohon"></textarea>
+                </div>
 
-            <!-- Tombol Generate --><div class="text-center pt-4">
-                <button id="generateButton" class="w-full md:w-auto px-12 py-3 font-semibold rounded-lg shadow-md btn-primary transition duration-150 ease-in-out flex items-center justify-center space-x-2">
-                    <!-- Spinner (hidden by default) --><svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                <div class="form-group">
+                    <label for="atmosphereDetails">4. Suasana & Latar (Opsional)</label>
+                    <textarea id="atmosphereDetails" rows="2" placeholder="Misal: di kafe yang ramai, malam hari, hujan, pencahayaan neon, berkabut"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="styleMedium">5. Gaya & Medium</label>
+                    <select id="styleMedium">
+                        <option value="">-- Pilih Gaya (Opsional) --</option>
+                        <option value="photorealistic">Fotorealistis (Nyata)</option>
+                        <option value="digital art">Seni Digital (Digital Art)</option>
+                        <option value="watercolor painting">Lukisan Cat Air</option>
+                        <option value="oil painting">Lukisan Cat Minyak</option>
+                        <option value="anime style">Gaya Anime / Manga</option>
+                        <option value="3D render">3D Render (Seperti Pixar)</option>
+                        <option value="pixel art">Pixel Art</option>
+                        <option value="line art">Line Art (Sketsa Garis)</option>
+                        <option value="in the style of Van Gogh">Gaya Van Gogh</option>
+                        <option value="in the style of Picasso">Gaya Picasso</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quality">6. Kualitas & Resolusi</label>
+                    <textarea id="quality" rows="2" placeholder="Misal: '4k', 'sangat detail', 'tajam', 'kualitas tinggi'"></textarea>
+                    <p class="helper-text">Seringkali 'highly detailed' atau '4k' sudah cukup.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="negative">7. Prompt Negatif (Hindari Ini)</label>
+                    <textarea id="negative" rows="2" placeholder="Misal: 'buram', 'Teks', 'watermark', 'kualitas rendah', 'tangan jelek'"></textarea>
+                </div>
+
+                <button type="submit" id="generateButton" class="auth-button generate-btn" style="width: 100%; margin-top: 1rem;">
+                    <span id="loadingSpinner" class="material-icons spin hidden" style="margin-right: 0.5rem;">hourglass_top</span>
                     <span id="buttonText">Buat Prompt Cerdas (AI)</span>
                 </button>
-            </div>
+            </form>
 
-            <!-- Hasil Jadi Prompt --><div class="pt-4">
-                <label for="finalPrompt" class="block text-sm font-medium text-gray-900 mb-2">
-                    Hasil Prompt (Siap Digunakan):
-                </label>
-                <!-- KONTENER RELATIF BARU UNTUK LOADING --><div class="relative w-full h-36"> 
-                    <!-- Loader Skeleton (hidden by default) --><div id="resultLoader" class="absolute inset-0 w-full h-full p-3 bg-gray-100 border border-gray-300 rounded-lg shadow-inner hidden">
-                        <div class="animate-pulse space-y-3">
-                            <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                            <div class="h-4 bg-gray-300 rounded w-full"></div>
-                            <div class="h-4 bg-gray-300 rounded w-5/6"></div>
-                            <div class="h-4 bg-gray-300 rounded w-1/2"></div>
+            <div class="form-group" style="margin-top: 2rem; border-top: 1px solid var(--light-gray-border); padding-top: 2rem;">
+                <label for="finalPrompt">Hasil Prompt (Siap Digunakan):</label>
+                
+                <div class="textarea-wrapper"> 
+                    
+                    <div id="resultLoader" class="hidden">
+                        <div class="pulse-wrapper">
+                            <div class="skeleton-line" style="width: 75%;"></div>
+                            <div class="skeleton-line" style="width: 100%;"></div>
+                            <div class="skeleton-line" style="width: 83.33%;"></div>
                         </div>
                     </div>
             
-                    <!-- Textarea Asli (sekarang di dalam kontener) --><textarea id="finalPrompt" rows="5" class="w-full h-full p-3 bg-gray-100 border border-gray-300 rounded-lg shadow-inner readonly" readonly placeholder="Hasil prompt akan muncul di sini..."></textarea>
+                    <textarea id="finalPrompt" rows="5" readonly placeholder="Hasil prompt akan muncul di sini..."></textarea>
                     
-                    <!-- Tombol Salin (sekarang di dalam kontener) --><button id="copyButton" class="absolute top-3 right-3 px-3 py-1 bg-gray-300 text-gray-800 text-xs font-medium rounded-md hover:bg-gray-400">
-                        Salin
+                    <button id="copyButton" class="copy-btn-overlay hidden">
+                        <span class="material-icons">content_copy</span>
+                        <span class="copy-text">Tersalin!</span>
                     </button>
-                    <span id="copyMessage" class="absolute top-3 right-3 px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-md hidden">
-                        Tersalin!
-                    </span>
                 </div>
             </div>
 
-        </div>
+        </main>
     </div>
 
-    <!-- MODAL PANDUAN (BARU) -->
-    <div id="howToModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <!-- PERUBAHAN DI SINI: Ditambahkan max-h-[90vh] dan overflow-y-auto -->
-        <div class="bg-white w-full max-w-lg rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto">
-            <!-- Tombol Tutup Modal -->
-            <button id="closeModalButton" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">
-                &times;
-            </button>
+    <div id="howToModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cara Menggunakan</h2>
+                <button id="closeModalButton" class="close-btn">&times;</button>
+            </div>
             
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">Cara Menggunakan Prompt Builder</h3>
-            
-            <div class="space-y-4 text-sm text-gray-700">
+            <div class="modal-body" style="padding-top: 1rem;">
                 <p>Tool ini membantu Anda membuat prompt teks yang deskriptif untuk AI Gambar (Gemini Banana) dari input yang sederhana.</p>
                 
-                <div>
-                    <strong class="font-semibold text-gray-800">Alur Penggunaan Dasar:</strong>
-                    <ol class="list-decimal list-inside mt-2 space-y-1">
-                        <li><strong>Prompt Inti:</strong> Isi dengan subjek utama adegan (misal: "Dua orang di taman").</li>
+                <div style="margin-top: 1rem;">
+                    <strong style="font-weight: 600; color: var(--text-dark);">Alur Penggunaan Dasar:</strong>
+                    <ol style="list-style: decimal; padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                        <li><strong>Prompt Inti:</strong> Isi dengan subjek utama adegan.</li>
                         <li><strong>Detail Karakter:</strong> Klik "Tambah Karakter (+)" untuk setiap karakter utama.</li>
                         <li><strong>Aksi & Suasana:</strong> Jelaskan apa yang terjadi dan bagaimana suasananya.</li>
-                        <li><strong>Gaya & Kualitas:</strong> Pilih gaya (misal: "Fotorealistis") dan kualitas (misal: "4k").</li>
-                        <li>Klik <strong>"Buat Prompt Cerdas (AI)"</strong>. AI akan mengubah input Anda menjadi prompt bahasa Inggris yang sinematik.</li>
+                        <li><strong>Gaya & Kualitas:</strong> Pilih gaya (misal: "Fotorealistis") dan kualitas.</li>
+                        <li>Klik <strong>"Buat Prompt Cerdas (AI)"</strong>.</li>
                     </ol>
                 </div>
 
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <strong class="font-semibold text-blue-800">PENTING: Cara Menggunakan Referensi Wajah</strong>
-                    <p class="mt-2">Agar AI bisa menghasilkan wajah yang mirip (misal: wajah Vanno atau Varren), ikuti langkah ini:</p>
-                    <ol class="list-decimal list-inside mt-2 space-y-1">
-                        <li><strong>Upload Gambar:</strong> Buka <a href="https://imgur.com/upload" target="_blank" class="text-blue-600 hover:underline">Imgur.com</a> (atau host gambar lain). Upload foto referensi wajah Anda.</li>
-                        <li><strong>Salin Link:</strong> Setelah ter-upload, klik kanan pada gambar dan pilih <strong>"Copy Image Address"</strong> (Salin Alamat Gambar). Link harus berakhir dengan .jpg, .png, dll.</li>
-                        <li><strong>Deskripsikan Karakter:</strong> Di *tool* ini, isi *textarea* "Detail Karakter" (misal: "Vanno, anak laki-laki, tertawa").</li>
-                        <li><strong>Tempel Link:</strong> Tempel/Paste link dari Imgur tadi ke kotak <strong>"Link Gambar Referensi Wajah"</strong> yang ada di bawahnya.</li>
+                <div class="modal-notice-box">
+                    <strong>PENTING: Cara Menggunakan Referensi Wajah</strong>
+                    <p>Agar AI bisa menghasilkan wajah yang mirip (misal: Vanno atau Varren):</p>
+                    <ol style="list-style: decimal; padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                        <li><strong>Upload Gambar:</strong> Buka <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>. Upload foto referensi wajah Anda.</li>
+                        <li><strong>Salin Link:</strong> Klik kanan gambar dan pilih <strong>"Copy Image Address"</strong> (Link harus berakhir .jpg, .png, dll).</li>
+                        <li><strong>Deskripsikan Karakter:</strong> Isi *textarea* "Detail Karakter" (misal: "Vanno, anak laki-laki, tertawa").</li>
+                        <li><strong>Tempel Link:</strong> Tempel link dari Imgur ke kotak <strong>"Link Gambar Referensi Wajah"</strong>.</li>
                     </ol>
-                    <p class="mt-3 text-xs italic">AI pembuat prompt akan secara otomatis menginstruksikan AI gambar untuk menggunakan link tersebut sebagai referensi visual untuk karakter yang Anda deskripsikan.</p>
                 </div>
 
             </div>
         </div>
     </div>
-    <!-- AKHIR MODAL -->
 
-
-    <script>
-        // --- Konstanta untuk Modal (BARU) ---
-        const openModalButton = document.getElementById('openModalButton');
-        const closeModalButton = document.getElementById('closeModalButton');
-        const howToModal = document.getElementById('howToModal');
-        
-        // --- Konstanta Lainnya (Sudah Ada) ---
-        const generateButton = document.getElementById('generateButton');
-        const copyButton = document.getElementById('copyButton');
-        const copyMessage = document.getElementById('copyMessage');
-        const corePromptEl = document.getElementById('corePrompt');
-        const styleMediumEl = document.getElementById('styleMedium');
-        const addCharacterButton = document.getElementById('addCharacterButton');
-        const characterContainer = document.getElementById('characterContainer');
-        const actionDetailsEl = document.getElementById('actionDetails'); 
-        const atmosphereDetailsEl = document.getElementById('atmosphereDetails');
-        const qualityEl = document.getElementById('quality');
-        const negativeEl = document.getElementById('negative');
-        const finalPromptEl = document.getElementById('finalPrompt');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const buttonText = document.getElementById('buttonText');
-        const resultLoaderEl = document.getElementById('resultLoader');
-
-        // --- Event Listener untuk Modal (BARU) ---
-        openModalButton.addEventListener('click', () => {
-            howToModal.classList.remove('hidden');
-        });
-
-        closeModalButton.addEventListener('click', () => {
-            howToModal.classList.add('hidden');
-        });
-
-        // Tutup modal jika klik di luar area konten (di backdrop)
-        howToModal.addEventListener('click', (event) => {
-            if (event.target === howToModal) {
-                howToModal.classList.add('hidden');
-            }
-        });
-        // ----------------------------------------
-
-
-        // --- FUNGSI BARU: Menambah Field Karakter + Link Referensi ---
-        let characterCounter = 0; // Untuk ID unik
-        function addNewCharacterField() {
-            characterCounter++;
-            const charId = `character-${characterCounter}`;
-
-            const fieldWrapper = document.createElement('div');
-            fieldWrapper.className = 'relative border border-gray-200 p-3 rounded-lg bg-gray-50'; // Styling untuk setiap karakter
-
-            // Textarea untuk deskripsi karakter
-            const detailTextarea = document.createElement('textarea');
-            detailTextarea.id = `${charId}-detail`;
-            detailTextarea.className = 'w-full p-2 pr-10 border border-gray-300 rounded-lg shadow-sm input-focus character-field text-sm'; 
-            detailTextarea.placeholder = `Detail Karakter #${characterCounter} (misal: pria, jaket kulit, rambut hitam)`;
-            detailTextarea.rows = 2;
-
-            // Input untuk URL referensi
-            const refLinkInput = document.createElement('input');
-            refLinkInput.type = 'url'; // Menggunakan tipe 'url' untuk validasi dasar
-            refLinkInput.id = `${charId}-ref-link`;
-            refLinkInput.className = 'w-full mt-2 p-2 border border-gray-300 rounded-lg shadow-sm input-focus character-ref-link text-sm'; // Class baru
-            refLinkInput.placeholder = 'Link Gambar Referensi Wajah (Opsional)';
-
-            // Tombol hapus (X)
-            const removeButton = document.createElement('button');
-            removeButton.className = 'absolute top-2 right-2 text-gray-500 hover:text-red-500 font-bold text-lg';
-            removeButton.innerHTML = '&times;'; 
-            removeButton.addEventListener('click', () => {
-                fieldWrapper.remove();
-            });
-
-            fieldWrapper.appendChild(detailTextarea);
-            fieldWrapper.appendChild(refLinkInput); // Tambahkan input link
-            fieldWrapper.appendChild(removeButton);
-            characterContainer.appendChild(fieldWrapper);
-        }
-
-        addCharacterButton.addEventListener('click', addNewCharacterField);
-        // Tambahkan satu field karakter secara default saat halaman dimuat
-        addNewCharacterField(); 
-
-        // === PERUBAHAN BESAR: FUNGSI UNTUK MEMANGGIL NETLIFY FUNCTION ===
-        generateButton.addEventListener('click', async () => {
-            const core = corePromptEl.value.trim();
-            const style = styleMediumEl.value;
-
-            const characterFields = document.querySelectorAll('.character-field');
-            const characterRefLinks = document.querySelectorAll('.character-ref-link');
-            const characterDetailsList = [];
-            
-            characterFields.forEach((field, index) => {
-                const detail = field.value.trim();
-                const refLink = characterRefLinks[index] ? characterRefLinks[index].value.trim() : '';
-
-                if (detail) {
-                    let characterDescription = `Karakter ${index + 1}: ${detail}`;
-                    if (refLink) {
-                        characterDescription += ` (referensi wajah: ${refLink})`; 
-                    }
-                    characterDetailsList.push(characterDescription);
-                }
-            });
-            const characterDetails = characterDetailsList.join('\n');
-            
-            const actionDetails = actionDetailsEl.value.trim();
-            const atmosphereDetails = atmosphereDetailsEl.value.trim();
-            const quality = qualityEl.value.trim();
-            const negative = negativeEl.value.trim();
-
-            if (!core) {
-                finalPromptEl.value = "Harap isi 'Prompt Inti' terlebih dahulu.";
-                return;
-            }
-
-            // Tampilkan status loading
-            generateButton.disabled = true;
-            loadingSpinner.classList.remove('hidden');
-            buttonText.textContent = 'Memproses AI...';
-            finalPromptEl.classList.add('hidden');
-            copyButton.classList.add('hidden');
-            copyMessage.classList.add('hidden'); 
-            resultLoaderEl.classList.remove('hidden');
-
-            // 1. Definisikan endpoint Netlify Function kita
-            // Ini adalah "backend" yang akan kita panggil
-            const functionEndpoint = '/.netlify/functions/generate-prompt';
-
-            // 2. Siapkan payload untuk dikirim ke backend kita
-            const payload = {
-                core,
-                characterDetails,
-                actionDetails,
-                atmosphereDetails,
-                style,
-                quality,
-                negative
-            };
-
-            // 3. Panggil Netlify Function (bukan Google API langsung)
-            try {
-                const response = await fetch(functionEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    // Jika backend kita mengirim error (misal 500), tangkap di sini
-                    const errorResult = await response.json();
-                    throw new Error(errorResult.error || `Server error (${response.status})`);
-                }
-
-                // Jika berhasil, backend akan mengirim balik { text: "..." }
-                const result = await response.json();
-                
-                if (result.text) {
-                    finalPromptEl.value = result.text.trim();
-                } else {
-                    console.error('Respons server tidak valid:', result);
-                    finalPromptEl.value = 'Maaf, server tidak memberikan respons yang valid. Coba lagi.';
-                }
-
-            } catch (error) {
-                console.error('Error memanggil Netlify Function:', error);
-                finalPromptEl.value = `Gagal terhubung ke server: ${error.message}. Coba lagi nanti.`;
-            } finally {
-                // Sembunyikan status loading
-                generateButton.disabled = false;
-                loadingSpinner.classList.add('hidden');
-                buttonText.textContent = 'Buat Prompt Cerdas (AI)';
-                
-                // Tampilkan hasil, sembunyikan loader skeleton
-                resultLoaderEl.classList.add('hidden');
-                finalPromptEl.classList.remove('hidden');
-                copyButton.classList.remove('hidden');
-            }
-        });
-
-        // Fungsi untuk menyalin prompt - Logika ini tetap sama
-        copyButton.addEventListener('click', () => {
-            if (finalPromptEl.classList.contains('hidden') || !finalPromptEl.value || finalPromptEl.value.startsWith("Harap isi")) {
-                return;
-            }
-
-            finalPromptEl.select();
-            finalPromptEl.setSelectionRange(0, 99999); 
-            
-            try {
-                document.execCommand('copy');
-                copyMessage.classList.remove('hidden');
-                copyButton.classList.add('hidden');
-                
-                setTimeout(() => {
-                    copyMessage.classList.add('hidden');
-                    copyButton.classList.remove('hidden');
-                }, 1500);
-
-            } catch (err) {
-                console.error('Gagal menyalin teks: ', err);
-            }
-            
-            window.getSelection().removeAllRanges();
-        });
-    </script>
-
+<script src="script.js" defer></script>
 </body>
 </html>
-
