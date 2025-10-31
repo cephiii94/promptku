@@ -1121,6 +1121,7 @@ body {
     display: flex;
     gap: 1rem; /* Jarak antar tombol */
     width: 100%;
+    position: relative; /* <-- TAMBAHKAN BARIS INI */
 }
 
 /* [MODIFIKASI] Mengatur ulang lebar tombol Salin & Generate */
@@ -1331,4 +1332,73 @@ body {
 .swal2-icon.swal2-info {
     border-color: var(--primary-blue-light) !important;
     color: var(--primary-blue-light) !important;
+}
+
+/* ==========================================================================
+   19. [BARU] IKON BANTUAN (TANDA TANYA) DI MODAL
+   ========================================================================== */
+
+/* 1. Styling Ikon '?' (help_outline) */
+.help-tooltip-icon {
+    position: absolute;
+    top: -42px; /* (tinggi ikon 28px + 14px jarak) */
+    right: 0;   /* Pojok kanan, sejajar dgn tombol Generate */
+    z-index: 2000;
+    background-color: #e5e7eb; /* var(--light-gray-border) */
+    color: #4B5563; /* var(--text-medium) */
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.help-tooltip-icon .material-icons {
+    font-size: 20px;
+}
+
+/* 2. Styling Tooltip Content (yang tersembunyi) */
+.help-tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 120%; /* Muncul di atas ikon */
+    right: 0;
+    width: 280px;
+    background-color: var(--text-dark);
+    color: var(--white);
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    text-align: left;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.help-tooltip-content strong {
+    color: var(--success-green);
+}
+
+/* 3. Tampilkan tooltip saat ikon di-hover */
+.help-tooltip-icon:hover .help-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 4. Sedikit efek hover pada ikon */
+.help-tooltip-icon:hover {
+    background-color: #d1d5db;
+    transform: scale(1.1);
+}
+
+/* 5. [Responsive] Sesuaikan lebar tooltip di mobile */
+@media (max-width: 768px) {
+    .help-tooltip-content {
+        width: 250px;
+    }
 }

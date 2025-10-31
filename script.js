@@ -682,8 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // ==========================================================
-        // [PERUBAHAN DI SINI] Bagian 2: Menambah Event Listener baru untuk Tombol Generate
+// ==========================================================
+        // [PERBAIKAN UNTUK MASALAH POP-UP MOBILE]
         // ==========================================================
         const viewModalGenerateBtn = document.getElementById('view-modal-generate-btn');
         if (viewModalGenerateBtn) {
@@ -691,27 +691,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = e.currentTarget;
                 const textToCopy = decodeURIComponent(btn.dataset.promptText);
 
-                // 1. Salin prompt ke clipboard
+                // 1. [DIUBAH] Buka Gemini di tab baru (Lakukan ini DULU)
+                // Ini harus dipanggil secara sinkron di dalam event listener
+                // agar tidak diblokir oleh pop-up blocker di mobile.
+                window.open('https://gemini.google.com/app', '_blank');
+
+                // 2. [DIUBAH] Salin prompt ke clipboard
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     
-                    // 2. Beri Umpan Balik (Feedback) ke pengguna
+                    // 3. Beri Umpan Balik (Feedback) ke pengguna
                     const textSpan = btn.querySelector('span:last-child');
                     const originalText = "Generate";
-                    btn.classList.add('copied'); // Pakai style .copied (hijau)
-                    textSpan.textContent = 'Prompt Tersalin!';
-
-                    // 3. Buka Gemini di tab baru
-                    window.open('https://gemini.google.com/app', '_blank');
+                    
+                    // Cek jika textSpan ada sebelum mengubah
+                    if (textSpan) {
+                        btn.classList.add('copied'); // Pakai style .copied (hijau)
+                        textSpan.textContent = 'Prompt Tersalin!';
+                    }
 
                     // 4. Kembalikan tombol ke normal setelah 2.5 detik
                     setTimeout(() => {
                         btn.classList.remove('copied');
-                        textSpan.textContent = originalText;
+                        if (textSpan) {
+                            textSpan.textContent = originalText;
+                        }
                     }, 2500);
 
                 }).catch(err => {
+                    // Jika GAGAL menyalin, beri tahu pengguna
                     console.error('Gagal menyalin: ', err);
-                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal menyalin prompt ke clipboard.' });
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal menyalin prompt ke clipboard. Silakan salin manual.' });
                 });
             });
         }
