@@ -441,9 +441,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentViewIndex === currentFilteredPrompts.length - 1) modalNavNext.style.display = 'none';
         else modalNavNext.style.display = 'flex';
         
+        // ==========================================================
+        // [PERUBAHAN DI SINI] Bagian 1: Mengubah href menjadi dataset
+        // ==========================================================
         const generateBtn = document.getElementById('view-modal-generate-btn');
-        const geminiUrl = `https://gemini.google.com/app?prompt=${encodeURIComponent(data.promptText)}`;
-        generateBtn.href = geminiUrl;
+        // Baris `geminiUrl` dan `generateBtn.href` dihapus
+        // Kita simpan data prompt di tombolnya
+        generateBtn.dataset.promptText = encodeURIComponent(data.promptText);
+        // ==========================================================
         
         const likeBtn = document.getElementById('view-modal-like-btn');
         const likeCountSpan = document.getElementById('view-modal-like-count');
@@ -676,6 +681,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 }).catch(err => console.error('Gagal menyalin: ', err));
             }
         });
+
+        // ==========================================================
+        // [PERUBAHAN DI SINI] Bagian 2: Menambah Event Listener baru untuk Tombol Generate
+        // ==========================================================
+        const viewModalGenerateBtn = document.getElementById('view-modal-generate-btn');
+        if (viewModalGenerateBtn) {
+            viewModalGenerateBtn.addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                const textToCopy = decodeURIComponent(btn.dataset.promptText);
+
+                // 1. Salin prompt ke clipboard
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    
+                    // 2. Beri Umpan Balik (Feedback) ke pengguna
+                    const textSpan = btn.querySelector('span:last-child');
+                    const originalText = "Generate";
+                    btn.classList.add('copied'); // Pakai style .copied (hijau)
+                    textSpan.textContent = 'Prompt Tersalin!';
+
+                    // 3. Buka Gemini di tab baru
+                    window.open('https://gemini.google.com/app', '_blank');
+
+                    // 4. Kembalikan tombol ke normal setelah 2.5 detik
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        textSpan.textContent = originalText;
+                    }, 2500);
+
+                }).catch(err => {
+                    console.error('Gagal menyalin: ', err);
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal menyalin prompt ke clipboard.' });
+                });
+            });
+        }
+        // ==========================================================
+        // AKHIR DARI KODE BARU
+        // ==========================================================
         
         const viewModalLikeBtn = document.getElementById('view-modal-like-btn');
         if (viewModalLikeBtn) {
