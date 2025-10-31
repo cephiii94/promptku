@@ -441,14 +441,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentViewIndex === currentFilteredPrompts.length - 1) modalNavNext.style.display = 'none';
         else modalNavNext.style.display = 'flex';
         
-        // ==========================================================
-        // [PERUBAHAN DI SINI] Bagian 1: Mengubah href menjadi dataset
-        // ==========================================================
         const generateBtn = document.getElementById('view-modal-generate-btn');
-        // Baris `geminiUrl` dan `generateBtn.href` dihapus
         // Kita simpan data prompt di tombolnya
         generateBtn.dataset.promptText = encodeURIComponent(data.promptText);
-        // ==========================================================
         
         const likeBtn = document.getElementById('view-modal-like-btn');
         const likeCountSpan = document.getElementById('view-modal-like-count');
@@ -682,50 +677,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-// ==========================================================
-        // [PERBAIKAN UNTUK MASALAH POP-UP MOBILE]
+        // ==========================================================
+        // [PERBAIKAN - LOGIKA BERBEDA UNTUK MOBILE vs DESKTOP]
         // ==========================================================
         const viewModalGenerateBtn = document.getElementById('view-modal-generate-btn');
         if (viewModalGenerateBtn) {
             viewModalGenerateBtn.addEventListener('click', (e) => {
                 const btn = e.currentTarget;
                 const textToCopy = decodeURIComponent(btn.dataset.promptText);
+                const isMobile = window.innerWidth <= 768; // Deteksi mobile
 
-                // 1. [DIUBAH] Buka Gemini di tab baru (Lakukan ini DULU)
-                // Ini harus dipanggil secara sinkron di dalam event listener
-                // agar tidak diblokir oleh pop-up blocker di mobile.
-                window.open('https://gemini.google.com/app', '_blank');
+                if (isMobile) {
+                    // ============
+                    // LOGIKA MOBILE: Langsung buka tab baru.
+                    // ============
+                    // Pengguna harus menyalin manual (sesuai tooltip baru).
+                    window.open('https://gemini.google.com/app', '_blank');
 
-                // 2. [DIUBAH] Salin prompt ke clipboard
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    
-                    // 3. Beri Umpan Balik (Feedback) ke pengguna
-                    const textSpan = btn.querySelector('span:last-child');
-                    const originalText = "Generate";
-                    
-                    // Cek jika textSpan ada sebelum mengubah
-                    if (textSpan) {
-                        btn.classList.add('copied'); // Pakai style .copied (hijau)
-                        textSpan.textContent = 'Prompt Tersalin!';
-                    }
-
-                    // 4. Kembalikan tombol ke normal setelah 2.5 detik
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
+                } else {
+                    // ============
+                    // LOGIKA DESKTOP: Salin otomatis lalu buka tab.
+                    // ============
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        
+                        const textSpan = btn.querySelector('span:last-child');
+                        const originalText = "Generate";
+                        
                         if (textSpan) {
-                            textSpan.textContent = originalText;
+                            btn.classList.add('copied');
+                            textSpan.textContent = 'Prompt Tersalin!';
                         }
-                    }, 2500);
 
-                }).catch(err => {
-                    // Jika GAGAL menyalin, beri tahu pengguna
-                    console.error('Gagal menyalin: ', err);
-                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal menyalin prompt ke clipboard. Silakan salin manual.' });
-                });
+                        // Buka tab baru
+                        window.open('https://gemini.google.com/app', '_blank');
+
+                        // Kembalikan tombol ke normal
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            if (textSpan) {
+                                textSpan.textContent = originalText;
+                            }
+                        }, 2500);
+
+                    }).catch(err => {
+                        console.error('Gagal menyalin: ', err);
+                        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal menyalin prompt ke clipboard.' });
+                    });
+                }
             });
         }
         // ==========================================================
-        // AKHIR DARI KODE BARU
+        // AKHIR DARI PERBAIKAN
         // ==========================================================
         
         const viewModalLikeBtn = document.getElementById('view-modal-like-btn');

@@ -1204,6 +1204,37 @@ body {
         margin-bottom: 1rem;
         text-align: center;
     }
+    /*6. Perkecil grup tombol modal di mobile */
+    .modal-button-group {
+        gap: 0.5rem; /* Kurangi jarak antar tombol (dari 1rem) */
+    }
+
+    /* 7. Target semua tombol di grup itu */
+    .modal-button-group .auth-button {
+        font-size: 0.8rem; /* Kecilkan font (dari 1rem) */
+        padding: 0.6rem;   /* Kecilkan padding (dari 0.75rem) */
+    }
+
+    /* 8. Target spesifik tombol Like (karena padding-nya beda) */
+    .modal-button-group .like-btn {
+        padding: 0.6rem 0.75rem; /* Buat padding Kiri/Kanan sedikit lebih besar */
+        flex: 0 1 auto; /* Pastikan dia tidak ikut membesar */
+    }
+
+    /* 9. Kecilkan juga ikon di dalamnya */
+    .modal-button-group .auth-button .material-icons {
+        font-size: 1rem; /* Turunkan dari default (24px) ke 16px */
+    }
+
+    /* 10. Posisikan ulang ikon Bantuan (?) */
+    .help-tooltip-icon {
+        top: -38px; /* Sesuaikan posisi top-nya karena tombol lebih kecil */
+        width: 24px;
+        height: 24px;
+    }
+    .help-tooltip-icon .material-icons {
+        font-size: 18px;
+    }
 }
 
 /* ==========================================================================
@@ -1347,7 +1378,7 @@ body {
     background-color: #e5e7eb; /* var(--light-gray-border) */
     color: #4B5563; /* var(--text-medium) */
     border-radius: 50%;
-    width: 28px;
+    width: 320px;
     height: 28px;
     display: flex;
     align-items: center;
@@ -1399,6 +1430,6 @@ body {
 /* 5. [Responsive] Sesuaikan lebar tooltip di mobile */
 @media (max-width: 768px) {
     .help-tooltip-content {
-        width: 250px;
+        width: 280px;
     }
 }
