@@ -823,6 +823,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================================
+    // [BARU] Menangani Tombol Escape (Esc) untuk Menutup Modal
+    // =========================================================================
+    document.addEventListener('keydown', (event) => {
+        // Cek apakah tombol yang ditekan adalah 'Escape'
+        if (event.key === 'Escape' || event.key === 'Esc') {
+            
+            // Ambil semua modal yang sedang terbuka (yang memiliki style 'display: flex')
+            const viewModal = document.getElementById('view-prompt-modal');
+            const loginModal = document.getElementById('login-modal');
+            const popupModal = document.getElementById('prompt-text-popup');
+
+            // 1. Prioritaskan menutup modal view utama (sesuai permintaan Anda)
+            if (viewModal && viewModal.style.display === 'flex') {
+                hideModal('view-prompt-modal');
+                return; // Hentikan eksekusi
+            }
+            
+            // 2. Tutup juga modal popup prompt di mobile
+            if (popupModal && popupModal.style.display === 'flex') {
+                hideModal('prompt-text-popup');
+                return; // Hentikan eksekusi
+            }
+
+            // 3. Tutup juga modal login
+            if (loginModal && loginModal.style.display === 'flex') {
+                hideModal('login-modal');
+                return; // Hentikan eksekusi
+            }
+
+            // Kita sengaja tidak menutup 'prompt-modal' (modal edit/tambah)
+            // agar pengguna tidak sengaja kehilangan data form saat menekan Esc.
+        }
+    });
+
+
+    // =========================================================================
     // 10. INITIALIZATION
     // =========================================================================
 

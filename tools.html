@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koleksi Tools - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <style>
+        .tools-container {
+            padding-top: 2rem;
+            max-width: 900px; /* Batasi lebar agar fokus */
+            margin: 0 auto;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .tool-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem 2rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--light-gray-border);
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        .tool-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .tool-card-header .material-icons {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+        }
+        .tool-card-header h2 {
+            font-size: 1.25rem;
+            color: var(--primary-blue-dark);
+        }
+        .tool-card p {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+        .tool-card-badge {
+            position: absolute;
+            top: 0;
+            right: -40px;
+            background-color: var(--primary-green);
+            color: white;
+            padding: 4px 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="sticky-header">
+        <div class="header-title">
+            <h1>Promptku - Koleksi Tools</h1>
+        </div>
+        
+        </header>
+
+    <div class="container">
+        <main class="tools-container">
+            <div class="tools-grid">
+
+                <a href="/prompt-generator/index.html" class="tool-card">
+                    <div class="tool-card-header">
+                        <span class="material-icons">auto_awesome</span>
+                        <h2>Prompt Generator</h2>
+                    </div>
+                    <p>Buat dan kustomisasi prompt kompleks dengan antarmuka visual yang mudah digunakan.</p>
+                </a>
+
+                <a href="#" class="tool-card" onclick="return false;" style="cursor: not-allowed; opacity: 0.7;">
+                    <span class="tool-card-badge">Segera</span>
+                    <div class="tool-card-header">
+                        <span class="material-icons">image_search</span>
+                        <h2>Analisis Foto (Image to Prompt)</h2>
+                    </div>
+                    <p>Upload sebuah gambar untuk mendapatkan analisis mendalam dan ide prompt yang relevan.</p>
+                </a>
+
+                </div>
+        </main>
+    </div>
+
+    <div id="prompt-modal" class="modal">...</div>
+    <div id="login-modal" class="modal">...</div>
+    <div id="view-prompt-modal" class="modal modal-fullview">...</div>
+    <div id="prompt-text-popup" class="modal">...</div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="script.js"></script> 
+    
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | Dibuat Dengan Cinta &hearts;</p>
+        </div>
+    </footer>
+
+    <nav class="bottom-nav-mobile">
+        <a href="index.html" class="nav-item" id="nav-home">
+            <span class="material-icons">home</span>
+            <span class="nav-label">Home</span>
+        </a>
+
+        <a href="#" class="nav-item" id="nav-search">
+            <span class="material-icons">search</span>
+            <span class="nav-label">Cari</span>
+        </a>
+
+        <a href="#" class="nav-item nav-add-fab" id="nav-add-prompt">
+            <span class="material-icons">add</span>
+        </a>
+
+        <a href="tools.html" class="nav-item active" id="nav-generator">
+            <span class="material-icons">auto_awesome</span>
+            <span class="nav-label">Generator</span>
+        </a>
+
+        <div class="nav-item" id="nav-auth-container">
+            </div>
+    </nav>
+
+</body>
+</html>
