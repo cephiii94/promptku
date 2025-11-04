@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App Ramah</title>
+    <!-- Impor Google Font (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Variabel Warna Soft Blue --- */
+        :root {
+            --bg-primary: #f0f8ff; /* AliceBlue */
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #e3f2fd; /* Biru sangat muda */
+            --bg-accent: #bbdefb; /* Biru muda */
+            --bg-button: #90caf9; /* Biru tombol */
+            --bg-button-hover: #64b5f6;
+            --text-primary: #1e3a5a;
+            --text-secondary: #4a658a;
+            --border-color: #d1e5f8;
+            --chat-bubble-user: #e3f2fd;
+            --chat-bubble-bot: #ffffff;
+            --shadow-light: 0 4px 10px rgba(0, 82, 160, 0.05);
+            --shadow-medium: 0 6px 15px rgba(0, 82, 160, 0.1);
+        }
+
+        /* --- Reset & Global --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Struktur Utama App --- */
+        #app-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* --- Halaman Lobby --- */
+        #lobby-page {
+            display: flex;
+        }
+
+        /* Sidebar Lobby */
+        .lobby-sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .lobby-sidebar h1 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .lobby-sidebar-nav a {
+            display: block;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .lobby-sidebar-nav a:hover {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+        }
+
+        .lobby-sidebar-nav a.active {
+            background-color: var(--bg-button);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Konten Utama Lobby */
+        .lobby-main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .lobby-header {
+            margin-bottom: 24px;
+        }
+
+        .lobby-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .character-card {
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .character-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: var(--bg-accent);
+        }
+
+        .character-card-info {
+            padding: 16px;
+        }
+
+        .character-card-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .character-card-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            /* Batasi 2 baris */
+            height: 2.4em; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* --- Halaman Chat --- */
+        #chat-page {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            gap: 8px; /* Memberi jarak antara panel kiri dan wrapper tengah/kanan */
+        }
+
+        /* Panel Kiri (Info Karakter) */
+        .chat-left-panel {
+            width: 300px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+            
+            /* Sembunyikan scrollbar tapi tetap bisa scroll */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        
+        /* Sembunyikan scrollbar untuk Webkit */
+        .chat-left-panel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chat-left-panel .back-button {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .chat-left-panel .back-button:hover {
+            background-color: var(--bg-button);
+        }
+
+        .chat-char-profile img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            background-color: var(--bg-accent);
+            margin-bottom: 16px;
+        }
+
+        .chat-char-profile h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .chat-char-profile p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .chat-char-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chat-char-tags span {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Wrapper baru untuk panel tengah dan kanan */
+        .chat-main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            overflow: hidden; /* Penting agar tidak aneh */
+        }
+
+        /* Panel Tengah (Obrolan) */
+        .chat-center-panel {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-primary);
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .chat-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+        
+        .chat-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chat-transcript {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.5;
+            box-shadow: var(--shadow-light);
+        }
+
+        .chat-bubble.bot {
+            background-color: var(--chat-bubble-bot);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .chat-bubble.user {
+            background-color: var(--chat-bubble-user);
+            border: 1px solid var(--border-color);
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .chat-notice {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin: 16px auto;
+            background-color: var(--bg-accent);
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        .chat-input-area {
+            padding: 16px 24px;
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 16px;
+        }
+
+        #chat-input {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--bg-button);
+            box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.3);
+        }
+
+        #send-button {
+            background-color: var(--bg-button);
+            color: var(--text-primary);
+            border: none;
+            padding: 0 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #send-button:hover {
+            background-color: var(--bg-button-hover);
+        }
+
+        /* Panel Kanan (Persona) */
+        .chat-right-panel {
+            width: 300px;
+            background-color: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .persona-box {
+            text-align: center;
+            padding: 24px;
+            background-color: var(--bg-primary);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+        }
+        
+        .persona-box h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .persona-box p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .persona-box button {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .persona-box button:hover {
+            background-color: var(--bg-button);
+        }
+
+        /* --- Media Queries (Responsif) --- */
+        @media (max-width: 1024px) {
+            .chat-left-panel, .chat-right-panel {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #app-container {
+                flex-direction: column;
+            }
+
+            .lobby-sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px;
+            }
+            
+            .lobby-sidebar h1 {
+                margin-bottom: 0;
+            }
+
+            .lobby-sidebar-nav {
+                display: flex;
+                gap: 8px;
+            }
+
+            .lobby-sidebar-nav a {
+                margin-bottom: 0;
+                padding: 8px 12px;
+            }
+            
+            .lobby-main {
+                padding: 24px;
+            }
+
+            .character-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 16px;
+            }
+            
+            .character-card img {
+                height: 140px;
+            }
+            
+            #chat-page {
+                gap: 0; /* Hapus gap di mobile */
+            }
+
+            /* Sembunyikan panel di mode mobile chat */
+            .chat-left-panel {
+                display: none;
+            }
+            
+            .chat-main-wrapper {
+                width: 100%;
+            }
+            
+            .chat-right-panel {
+                display: none;
+            }
+            
+            /* Tampilkan header chat yang ringkas */
+            .chat-header {
+                padding: 12px 16px;
+            }
+
+            .chat-input-area {
+                padding: 12px 16px;
+            }
+            
+            #chat-input {
+                padding: 12px 16px;
+            }
+            
+            #send-button {
+                padding: 0 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+
+        <!-- ===== HALAMAN LOBBY ===== -->
+        <div id="lobby-page" class="page">
+            
+            <!-- Sidebar Lobby -->
+            <aside class="lobby-sidebar">
+                <h1>ChatApp</h1>
+                <nav class="lobby-sidebar-nav">
+                    <a href="#" class="active">Home</a>
+                    <a href="#">Buat Bot</a>
+                    <a href="#">Komunitas</a>
+                    <a href="#">Pengaturan</a>
+                </nav>
+            </aside>
+
+            <!-- Konten Utama Lobby -->
+            <main class="lobby-main">
+                <header class="lobby-header">
+                    <h2>Temukan Karakter</h2>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Mulai percakapan dengan salah satu persona AI kami.</p>
+                </header>
+
+                <section class="character-grid">
+                    <!-- Kartu Karakter (Klik ini akan memicu JS) -->
+                    <div class="character-card" data-char='{"id": 1, "name": "Profesor Hoot", "desc": "Seekor burung hantu bijak yang tahu segalanya tentang sejarah dan sains.", "img": "https://placehold.co/300x300/a0c4ff/1e3a5a?text=Hoot", "tags": ["Edukasi", "Sejarah", "Sains"]}'>
+                        <img src="https://placehold.co/300x300/a0c4ff/1e3a5a?text=Hoot" alt="Profesor Hoot" onerror="this.src='https://placehold.co/300x300/a0c4ff/1e3a5a?text=Img+Error'">
+                        <div class="character-card-info">
+                            <h3>Profesor Hoot</h3>
+                            <p>Seekor burung hantu bijak yang tahu segalanya...</p>
+                        </div>
+                    </div>
+
+                    <div class="character-card" data-char='{"id": 2, "name": "Koki Bella", "desc": "Seorang koki ramah yang siap berbagi resep masakan Italia terbaiknya.", "img": "https://placehold.co/300x300/f8bbd0/880e4f?text=Bella", "tags": ["Masak", "Italia", "Ramah"]}'>
+                        <img src="https://placehold.co/300x300/f8bbd0/880e4f?text=Bella" alt="Koki Bella" onerror="this.src='https://placehold.co/300x300/f8bbd0/880e4f?text=Img+Error'">
+                        <div class="character-card-info">
+                            <h3>Koki Bella</h3>
+                            <p>Seorang koki ramah yang siap berbagi resep...</p>
+                        </div>
+                    </div>
+
+                    <div class="character-card" data-char='{"id": 3, "name": "Sparky si Robot", "desc": "Robot penjelajah dari masa depan, penuh semangat dan cerita petualangan.", "img": "https://placehold.co/300x300/d1c4e9/311b92?text=Sparky", "tags": ["Sci-Fi", "Petualangan", "Robot"]}'>
+                        <img src="https://placehold.co/300x300/d1c4e9/311b92?text=Sparky" alt="Sparky si Robot" onerror="this.src='https://placehold.co/300x300/d1c4e9/311b92?text=Img+Error'">
+                        <div class="character-card-info">
+                            <h3>Sparky si Robot</h3>
+                            <p>Robot penjelajah dari masa depan, penuh semangat...</p>
+                        </div>
+                    </div>
+
+                    <div class="character-card" data-char='{"id": 4, "name": "Kapten Alex", "desc": "Penjelajah galaksi yang pemberani, mencari kru baru untuk misi antariksa.", "img": "https://placehold.co/300x300/c8e6c9/1b5e20?text=Alex", "tags": ["Antariksa", "Sci-Fi", "Kapten"]}'>
+                        <img src="https://placehold.co/300x300/c8e6c9/1b5e20?text=Alex" alt="Kapten Alex" onerror="this.src='https://placehold.co/300x300/c8e6c9/1b5e20?text=Img+Error'">
+                        <div class="character-card-info">
+                            <h3>Kapten Alex</h3>
+                            <p>Penjelajah galaksi yang pemberani, mencari kru...</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ===== HALAMAN CHAT ===== -->
+        <div id="chat-page" class="page" style="display: none;">
+            
+            <!-- Panel Kiri -->
+            <aside class="chat-left-panel">
+                <button class="back-button" id="back-to-lobby">← Kembali ke Lobby</button>
+                <div class="chat-char-profile">
+                    <img id="chat-char-img" src="" alt="Character Profile" onerror="this.src='https://placehold.co/300x250/eeeeee/aaaaaa?text=Image+Missing'">
+                    <h2 id="chat-char-name">Nama Karakter</h2>
+                    <p id="chat-char-desc">Deskripsi karakter...</p>
+                    <div class="chat-char-tags" id="chat-char-tags">
+                        <!-- Tags akan diisi oleh JS -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Wrapper Baru untuk Panel Tengah dan Kanan -->
+            <div class="chat-main-wrapper">
+
+                <!-- Panel Tengah -->
+                <main class="chat-center-panel">
+                    <!-- Header Chat (untuk mobile) -->
+                    <header class="chat-header">
+                        <img id="chat-header-img" src="" alt="Avatar" onerror="this.src='https://placehold.co/40x40/eeeeee/aaaaaa?text=...'">
+                        <h3 id="chat-header-name">Nama Karakter</h3>
+                    </header>
+                    
+                    <!-- Transkrip Obrolan -->
+                    <div class="chat-transcript" id="chat-transcript">
+                        <!-- Pesan akan ditambahkan oleh JS -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="chat-input-area">
+                        <textarea id="chat-input" placeholder="Ketik pesanmu..." rows="1"></textarea>
+                        <button id="send-button">Kirim</button>
+                    </div>
+                </main>
+
+                <!-- Panel Kanan -->
+                <aside class="chat-right-panel">
+                    <div class="persona-box">
+                        <h3>Persona Anda</h3>
+                        <p>No persona yet... try to create one.</p>
+                        <button>Buat Persona</button>
+                    </div>
+                </aside>
+                
+            </div> <!-- Penutup .chat-main-wrapper -->
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Referensi Elemen Halaman
+            const lobbyPage = document.getElementById('lobby-page');
+            const chatPage = document.getElementById('chat-page');
+            const backButton = document.getElementById('back-to-lobby');
+            const characterCards = document.querySelectorAll('.character-card');
+            
+            // --- Variabel Global ---
+            let currentCharacter = null;
+            
+            // --- Elemen Halaman Chat (akan diambil nanti) ---
+            // Kita akan mengambil referensi ini di dalam fungsi
+            // untuk memastikan mereka tidak 'null'
+            let chatTranscript, chatInput, sendButton;
+
+            // --- Navigasi ---
+
+            // Fungsi untuk menampilkan halaman chat
+            function showChatPage(charData) {
+                currentCharacter = charData;
+                
+                // --- Ambil Elemen Halaman Chat DI SINI ---
+                // Ini memperbaiki error 'null'
+                const chatCharImg = document.getElementById('chat-char-img');
+                const chatCharName = document.getElementById('chat-char-name');
+                const chatCharDesc = document.getElementById('chat-char-desc');
+                const chatCharTags = document.getElementById('chat-char-tags');
+                const chatHeaderImg = document.getElementById('chat-header-img');
+                const chatHeaderName = document.getElementById('chat-header-name');
+                
+                // Ambil referensi elemen chat jika belum ada
+                if (!chatTranscript) {
+                    chatTranscript = document.getElementById('chat-transcript');
+                    chatInput = document.getElementById('chat-input');
+                    sendButton = document.getElementById('send-button');
+
+                    // Pasang listener HANYA SEKALI saat halaman chat dimuat
+                    sendButton.addEventListener('click', handleSendMessage);
+                    chatInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault(); // Mencegah baris baru
+                            handleSendMessage();
+                        }
+                    });
+                }
+                
+                // 1. Isi data karakter di panel kiri
+                chatCharImg.src = charData.img;
+                chatCharName.textContent = charData.name;
+                chatCharDesc.textContent = charData.desc;
+
+                // 2. Isi data di header chat (untuk mobile)
+                chatHeaderImg.src = charData.img;
+                chatHeaderName.textContent = charData.name;
+
+                // 3. Buat tags
+                chatCharTags.innerHTML = ''; // Kosongkan tags sebelumnya
+                charData.tags.forEach(tag => {
+                    const tagEl = document.createElement('span');
+                    tagEl.textContent = tag;
+                    chatCharTags.appendChild(tagEl);
+                });
+
+                // 4. Bersihkan transkrip & tambahkan sapaan
+                chatTranscript.innerHTML = `
+                    <div class="chat-notice">Semua karakter adalah fiksi.</div>
+                    <div class="chat-bubble bot">
+                        Halo! Saya ${charData.name}. Senang bertemu dengan Anda! Ada yang bisa saya bantu?
+                    </div>
+                `;
+
+                // 5. Tampilkan halaman
+                lobbyPage.style.display = 'none';
+                chatPage.style.display = 'flex'; // Gunakan flex agar panel terlihat
+                
+                chatInput.focus();
+            }
+
+            // Fungsi untuk kembali ke lobby
+            function showLobby() {
+                lobbyPage.style.display = 'flex';
+                chatPage.style.display = 'none';
+                currentCharacter = null;
+                // Tidak perlu menghapus listener, mereka akan tetap ada
+                // dan berfungsi saat halaman chat dibuka lagi
+            }
+
+            // --- Event Listeners Awal ---
+
+            // Klik kartu karakter di lobby
+            characterCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const charData = JSON.parse(card.dataset.char);
+                    showChatPage(charData);
+                });
+            });
+
+            // Klik tombol kembali
+            backButton.addEventListener('click', showLobby);
+
+            // --- Logika Chat (Simulasi) ---
+            
+            function handleSendMessage() {
+                // Pastikan elemen sudah terdefinisi
+                if (!chatInput || !chatTranscript) return;
+
+                const messageText = chatInput.value.trim();
+                if (messageText === '') return;
+
+                // 1. Tampilkan pesan pengguna
+                addMessageToTranscript(messageText, 'user');
+
+                // 2. Kosongkan input
+                chatInput.value = '';
+                
+                // 3. Simulasikan balasan bot
+                simulateBotResponse();
+            }
+
+            function addMessageToTranscript(text, sender) {
+                // Pastikan elemen sudah terdefinisi
+                if (!chatTranscript) return;
+                
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', sender);
+                // Sanitasi teks sederhana untuk keamanan (opsional tapi bagus)
+                bubble.textContent = text;
+                chatTranscript.appendChild(bubble);
+                
+                // Auto-scroll ke bawah
+                chatTranscript.scrollTop = chatTranscript.scrollHeight;
+            }
+
+            function simulateBotResponse() {
+                // Tambahkan indikator mengetik (opsional)
+                
+                setTimeout(() => {
+                    // Balasan palsu
+                    const responses = [
+                        "Itu menarik! Bisakah Anda ceritakan lebih banyak?",
+                        "Maaf, saya ini hanya simulasi. Saya belum bisa memproses itu.",
+                        "Saya mengerti.",
+                        `Terima kasih sudah berbagi. Omong-omong, sebagai ${currentCharacter.name}, saya sangat suka ${currentCharacter.tags[0]}.`,
+                        "Hmm, coba tanyakan hal lain."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    addMessageToTranscript(randomResponse, 'bot');
+
+                }, 1200); // Tunda 1.2 detik
+            }
+
+        });
+    </script>
+</body>
+</html>
+
