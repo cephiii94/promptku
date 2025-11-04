@@ -1,25 +1,36 @@
-document.addEventListener('DOMContentLoaded', () => {
+// [PERUBAHAN] Bungkus event listener dalam 'async'
+document.addEventListener('DOMContentLoaded', async () => {
 
     // =========================================================================
     // 1. SETUP & CONFIGURATION
     // =========================================================================
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5dhh4a3835uJGxxvKL27KcTAtu0f7bT4", // Ambil dari file asli Anda
-        authDomain: "all-auth-1509.firebaseapp.com",
-        projectId: "all-auth-1509",
-        storageBucket: "all-auth-1509.appspot.com",
-        messagingSenderId: "23681152443",
-        appId: "1:23681152443:web:8f86c9b89e14c90692809e",
-        measurementId: "G-D3Y0WHY83V"
-    };
+    // [PERUBAHAN] Ambil konfigurasi Firebase dari Netlify Function
+    let firebaseConfig;
+    try {
+        const response = await fetch('/.netlify/functions/get-firebase-config');
+        if (!response.ok) {
+            throw new Error('Gagal mengambil konfigurasi Firebase.');
+        }
+        firebaseConfig = await response.json();
+    } catch (error) {
+        console.error(error);
+        // Tampilkan pesan error ke pengguna jika config gagal dimuat
+        document.body.innerHTML = `<p style="color: red; text-align: center; padding-top: 50px;">
+            Gagal memuat konfigurasi aplikasi. Silakan coba lagi nanti.
+        </p>`;
+        return; // Hentikan eksekusi skrip jika config gagal
+    }
 
-    const CLOUDINARY_CLOUD_NAME = "dx4pxe7ji";
+    // CLOUDINARY_CLOUD_NAME tidak rahasia, jadi tidak apa-apa di sini.
+    // Yang rahasia (API Key & Secret) sudah Anda amankan di fungsi 'generate-signature'.
+    const CLOUDINARY_CLOUD_NAME = "dx4pxe7ji"; 
 
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     const auth = firebase.auth();
+    // ... sisa kode Anda (lanjut ke const db = ...)
     const db = firebase.firestore();
     const FieldValue = firebase.firestore.FieldValue;
 
