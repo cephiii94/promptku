@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Server untuk Cloudinary Signed Uploads",
   "dependencies": {
-    "cloudinary": "^1.41.3"
+    "cloudinary": "^1.41.3",
+    "firebase-admin": "^13.6.0"
   }
 }
