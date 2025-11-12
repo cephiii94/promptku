@@ -189,13 +189,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Untuk saat ini, kita akan cek kepemilikan saja.
             
             let adminActions = '';
-            if (currentUser && (prompt.creatorId === currentUser.uid)) {
+            // ================================================================
+            // ▼▼▼ PERUBAHAN FUNGSI ADMIN ADA DI SINI ▼▼▼
+            // ================================================================
+            // Tampilkan tombol jika user login DAN (dia adalah pemilik ATAU dia adalah admin)
+            if (currentUser && (prompt.creatorId === currentUser.uid || currentUser.isAdmin === true)) {
                 adminActions = `
                 <div class="card-actions">
                     <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                     <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
                 </div>`;
             }
+            // ================================================================
+            // ▲▲▲ AKHIR DARI PERUBAHAN FUNGSI ADMIN ▲▲▲
+            // ================================================================
             // Jika Anda punya custom claim 'admin', logic-nya akan seperti ini:
             // if (currentUser && (prompt.creatorId === currentUser.uid || currentUser.isAdmin === true)) { ... }
             // Karena kita tidak punya 'currentUser.isAdmin' di frontend, kita pakai logic 'creatorId' saja.
@@ -977,13 +984,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 10. INITIALIZATION
     // =========================================================================
 
+    // ================================================================
+    // ▼▼▼ PERUBAHAN FUNGSI ADMIN ADA DI SINI ▼▼▼
+    // ================================================================
     // Listener utama status autentikasi
-    auth.onAuthStateChanged(user => {
-        currentUser = user;     // Update state global
-        updateAuthStateUI(user); // Update UI (tombol login/logout)
+    auth.onAuthStateChanged(async (user) => { // 1. Jadikan async
+        if (user) {
+            // 2. Ambil token, 'true' memaksa refresh untuk mendapatkan claim terbaru
+            const tokenResult = await user.getIdTokenResult(true); 
+            
+            // 3. Simpan user
+            currentUser = user;
+            
+            // 4. (PENTING) Simpan status admin di objek currentUser
+            currentUser.isAdmin = tokenResult.claims.admin === true;
+            
+            if (currentUser.isAdmin) {
+                console.log("Login sebagai ADMIN terdeteksi!"); // Pesan opsional untuk debug
+            }
+
+        } else {
+            // User logout
+            currentUser = null;
+        }
+        
+        // 5. Panggil updateAuthStateUI yang akan memicu render ulang
+        updateAuthStateUI(user);
         // 'applyFilters()' sudah dipanggil di dalam 'updateAuthStateUI'
         // untuk me-render ulang kartu dengan tombol admin yang sesuai.
     });
+    // ================================================================
+    // ▲▲▲ AKHIR DARI PERUBAHAN FUNGSI ADMIN ▲▲▲
+    // ================================================================
+
 
     // Mulai ambil data saat halaman dimuat
     fetchAndRenderPrompts();
