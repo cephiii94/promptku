@@ -1,4 +1,4 @@
-        // --- Konstanta Modal ---
+// --- Konstanta Modal ---
         const openModalButton = document.getElementById('openModalButton');
         const closeModalButton = document.getElementById('closeModalButton');
         const howToModal = document.getElementById('howToModal');
@@ -166,10 +166,16 @@
             
             try {
                 document.execCommand('copy');
+                
+                // [PERUBAHAN] Update teks di dalam tombol
+                const copyBtnTextEl = document.getElementById('copyButtonText');
+                if (copyBtnTextEl) copyBtnTextEl.textContent = 'Tersalin!';
                 copyButton.classList.add('copied'); // Gunakan kelas 'copied' dari styles.css
                 
                 setTimeout(() => {
                     copyButton.classList.remove('copied');
+                    // [PERUBAHAN] Kembalikan teks ke semula
+                    if (copyBtnTextEl) copyBtnTextEl.textContent = 'Salin';
                 }, 1500);
 
             } catch (err) {

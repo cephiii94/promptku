@@ -100,30 +100,33 @@
                 </div>
 
                 <button type="submit" id="generateButton" class="auth-button generate-btn" style="width: 100%; margin-top: 1rem;">
-                    <span id="loadingSpinner" class="material-icons spin hidden" style="margin-right: 0.5rem;">hourglass_top</span>
+                    <span id="loadingSpinner" class="material-icons spin hidden" style="margin-right: 0.5rem;">autorenew</span>
                     <span id="buttonText">Buat Prompt Cerdas (AI)</span>
                 </button>
             </form>
-
             <div class="form-group" style="margin-top: 2rem; border-top: 1px solid var(--light-gray-border); padding-top: 2rem;">
-                <label for="finalPrompt">Hasil Prompt (Siap Digunakan):</label>
                 
+                <div class="form-label-wrapper">
+                    <label for="finalPrompt">Hasil Prompt (Siap Digunakan):</label>
+                    
+                    <button type="button" id="copyButton" class="auth-button reset-btn hidden" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                        <span class="material-icons" style="font-size: 16px;">content_copy</span>
+                        <span id="copyButtonText">Salin</span>
+                    </button>
+                </div>
+
                 <div class="textarea-wrapper"> 
                     
                     <div id="resultLoader" class="hidden">
-                        <div class="pulse-wrapper">
-                            <div class="skeleton-line" style="width: 75%;"></div>
-                            <div class="skeleton-line" style="width: 100%;"></div>
-                            <div class="skeleton-line" style="width: 83.33%;"></div>
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
                         </div>
                     </div>
             
                     <textarea id="finalPrompt" rows="5" readonly placeholder="Hasil prompt akan muncul di sini..."></textarea>
                     
-                    <button id="copyButton" class="copy-btn-overlay hidden">
-                        <span class="material-icons">content_copy</span>
-                        <span class="copy-text">Tersalin!</span>
-                    </button>
                 </div>
             </div>
 
