@@ -65,14 +65,14 @@ body {
     column-gap: 1.5rem;
     column-count: 1; /* Default untuk layar terkecil */
 }
-@media (min-width: 500px) {
+@media (min-width: 400px) {
     .prompt-grid { column-count: 2; }
 }
 @media (min-width: 768px) {
-    .prompt-grid { column-count: 3; }
+    .prompt-grid { column-count: 4; }
 }
 @media (min-width: 1024px) {
-    .prompt-grid { column-count: 4; }
+    .prompt-grid { column-count: 5; }
 }
 
 
