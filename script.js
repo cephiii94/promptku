@@ -734,7 +734,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (filterType === 'category') {
                     handleCategoryClick(filterValue);
                 } else if (filterType === 'tag') {
-                    if(textFilterDesktop) textFilterDesktop.value = filterValue;
+                    if(textFilterDesktop) {
+                        textFilterDesktop.value = filterValue;
+                        toggleClearButton(); // [TAMBAHAN] Tampilkan tombol X langsung
+                    }
                     if(handleCategoryClick) handleCategoryClick('all'); 
                 }
                 window.scrollTo(0, 0); 
@@ -890,6 +893,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(textFilterMobile) textFilterMobile.value = '';
             if(sortByFilter) sortByFilter.value = 'title_asc';
             applyFilters();
+        });
+    }
+
+    // =========================================================================
+    // LOGIKA TOMBOL X (CLEAR SEARCH)
+    // =========================================================================
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+
+    // 1. Fungsi untuk Cek Kapan Tombol X Muncul
+    const toggleClearButton = () => {
+        if (!clearSearchBtn || !textFilterDesktop) return;
+        
+        if (textFilterDesktop.value.trim().length > 0) {
+            clearSearchBtn.classList.remove('hidden'); // Tampilkan jika ada teks
+        } else {
+            clearSearchBtn.classList.add('hidden');    // Sembunyikan jika kosong
+        }
+    };
+
+    // 2. Event saat mengetik (munculkan/sembunyikan X)
+    if (textFilterDesktop) {
+        textFilterDesktop.addEventListener('input', toggleClearButton);
+    }
+
+    // 3. Event saat tombol X diklik (Hapus teks & Refresh hasil)
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            if (textFilterDesktop) textFilterDesktop.value = ''; // Kosongkan input
+            toggleClearButton(); // Sembunyikan tombol X lagi
+            applyFilters();      // Refresh grid prompt (kembali ke semua)
+        });
+    }
+
+    // [TAMBAHAN] Trigger toggleClearButton saat tag diklik
+    // Ini memastikan tombol X muncul langsung tanpa harus ketik
+    if (textFilterDesktop) {
+        const originalListener = textFilterDesktop.addEventListener.bind(textFilterDesktop);
+        // Setelah input berisi value dari tag, panggil toggleClearButton
+        Object.defineProperty(textFilterDesktop, '__updateSearchFromTag', {
+            value: function() {
+                toggleClearButton();
+            }
         });
     }
 

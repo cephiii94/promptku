@@ -1552,12 +1552,33 @@ body {
     font-size: 20px;
 }
 
+/* Style untuk tombol X di pencarian */
+.clear-btn {
+    color: var(--text-medium);
+    cursor: pointer;
+    padding-right: 16px; /* Jarak dari kanan */
+    font-size: 20px;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.clear-btn:hover {
+    color: var(--danger-red); /* Merah saat di-hover agar jelas */
+}
+
+/* Pastikan input tidak menabrak tombol X */
+header.pinterest-style input#filter-input {
+    padding-right: 4px; /* Kurangi padding kanan input */
+}
+
 /* Override input lama */
 header.pinterest-style input#filter-input {
-    width: 100%;
+    width: auto;      /* Biarkan lebar menyesuaikan */
+    flex-grow: 1;     /* Ambil sisa ruang yang ada, tapi sisakan untuk tombol X */
+    min-width: 0;     /* Mencegah input meluap di layar kecil */
     background: transparent;
     border: none;
-    padding: 14px 16px;
+    padding: 14px 0 14px 16px; /* Padding kanan 0 agar dekat dengan tombol X */
     font-size: 16px;
     color: var(--text-dark);
     outline: none;
