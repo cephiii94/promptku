@@ -1433,3 +1433,255 @@ body {
         width: 280px;
     }
 }
+
+/* ==========================================================================
+   PINTEREST STYLE HEADER (DESKTOP) - SOFT BLUE THEME
+   ========================================================================== */
+
+.pinterest-style {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background-color: var(--white);
+    height: 80px;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Shadow sangat halus */
+}
+
+/* --- 1. KIRI: LOGO & NAV --- */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0; /* Jangan mengecil */
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+.logo-link:hover {
+    background-color: var(--soft-blue-bg);
+}
+.header-logo {
+    width: 32px;
+    height: 32px;
+}
+
+.desktop-nav-link {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 24px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+.desktop-nav-link.active {
+    background-color: var(--text-dark); /* Hitam Pinterest */
+    color: var(--white);
+}
+.desktop-nav-link:not(.active):hover {
+    background-color: var(--soft-blue-bg);
+}
+
+/* --- 2. TENGAH: SEARCH BAR --- */
+.header-center {
+    flex-grow: 1; /* Mengambil sisa ruang */
+    max-width: 800px; /* Jangan terlalu lebar di layar ultrawide */
+}
+
+.search-bar-wrapper {
+    position: relative;
+    width: 100%;
+    background-color: #e9e9e9; /* Abu-abu muda khas search bar */
+    border-radius: 999px; /* Pill shape */
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar-wrapper:focus-within {
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); /* Outline soft blue */
+}
+
+.search-bar-wrapper .search-icon {
+    padding-left: 16px;
+    color: var(--text-medium);
+    font-size: 20px;
+}
+
+/* Override input lama */
+header.pinterest-style input#filter-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 14px 16px;
+    font-size: 16px;
+    color: var(--text-dark);
+    outline: none;
+    border-radius: 999px;
+}
+
+/* --- 3. KANAN: USER ACTIONS --- */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pinterest-btn {
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 15px;
+    transition: filter 0.2s;
+}
+.btn-primary {
+    background-color: var(--primary-blue); /* Soft Blue Button */
+    color: white;
+}
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+/* Wrapper User Profile */
+.user-profile-wrapper {
+    position: relative; /* Untuk dropdown positioning */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Foto Profil */
+.profile-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: var(--light-gray-bg);
+    transition: transform 0.2s;
+}
+.profile-icon-container:hover {
+    transform: scale(1.05);
+    background-color: var(--soft-blue-bg);
+}
+#header-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Panah Dropdown */
+.icon-btn-pinterest {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-medium);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.icon-btn-pinterest:hover {
+    background-color: var(--light-gray-bg);
+    color: var(--text-dark);
+}
+
+/* DROPDOWN MENU STYLE */
+.dropdown-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 280px;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    padding: 16px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    z-index: 2000;
+    border: 1px solid var(--light-gray-border);
+    transform-origin: top right;
+    animation: popIn 0.2s ease-out;
+}
+.dropdown-menu.show {
+    display: flex;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.dropdown-header {
+    padding-bottom: 8px;
+}
+.dropdown-label {
+    font-size: 12px;
+    color: var(--text-medium);
+    margin-bottom: 4px;
+}
+.dropdown-header h4 {
+    font-size: 16px;
+    color: var(--text-dark);
+    margin: 0;
+}
+.dropdown-header p#dropdown-email {
+    font-size: 14px;
+    color: var(--text-medium);
+    margin: 0;
+}
+.dropdown-menu hr {
+    border: none;
+    border-top: 1px solid var(--light-gray-border);
+    margin: 8px 0;
+}
+
+.dropdown-item {
+    padding: 10px 12px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+}
+.dropdown-item:hover {
+    background-color: var(--soft-blue-bg); /* Hover Soft Blue */
+    color: var(--primary-blue-dark);
+}
+.dropdown-item .material-icons {
+    font-size: 20px;
+}
+.dropdown-item.text-danger:hover {
+    background-color: #FEE2E2;
+    color: var(--danger-red);
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (max-width: 768px) {
+    .pinterest-style .header-left .desktop-nav-link,
+    .pinterest-style .header-center {
+        display: none; /* Sembunyikan menu text & search panjang di mobile */
+    }
+    /* Anda bisa menambahkan tombol search icon lagi di sini untuk mobile jika diperlukan,
+       atau biarkan navigasi mobile bawah yang menangani */
+}

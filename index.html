@@ -18,40 +18,64 @@
 </head>
 <body>
 
-    <header class="sticky-header">
-        <div class="header-title"><h1>Promptku - Galeri Prompt</h1></div>
-<div class="header-controls">
-    <select id="category-filter" class="filter-select">
-        <option value="all">Semua Kategori</option>
-    </select>
-    
-    <select id="sort-by-filter" class="filter-select">
-        <option value="title_asc">Judul (A-Z)</option>
-        <option value="title_desc">Judul (Z-A)</option>
-        <option value="popular">Paling Populer</option>
-    </select>
-    
-    <input type="text" id="filter-input" class="filter-input" placeholder="Cari berdasarkan judul...">
-    
-    <button id="reset-filters-btn" class="icon-btn reset-btn" type="button" style="display: none;">
-        <span class="material-icons">close</span>
-        <span class="tooltip">Reset Filter</span>
-    </button>
-    <button id="search-btn" class="search-icon-btn icon-btn" type="button" style="background-color: var(--primary-blue)">
-                        <span class="material-icons">search</span>
-                <span class="tooltip">Cari Prompt</span>
-            </button>
-            <button id="add-prompt-link-mobile" class="icon-btn" type="button">
-                <span class="material-icons">add</span>
-                <span class="tooltip">Tambah Prompt</span>
-            </button>
-            <div id="auth-container-mobile"></div>
+<header class="sticky-header pinterest-style">
+        
+        <div class="header-left">
+            <a href="index.html" class="logo-link">
+                <img src="img/favicon-32x32.png" alt="Promptku Logo" class="header-logo">
+            </a>
+            <a href="index.html" class="desktop-nav-link active">Beranda</a>
+            <a href="tools.html" class="desktop-nav-link">Buat</a>
         </div>
+
+        <div class="header-center">
+            <div class="search-bar-wrapper">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="filter-input" placeholder="Cari inspirasi prompt...">
+            </div>
+        </div>
+
+        <div class="header-right">
+            
+            <div id="auth-buttons-desktop" class="auth-buttons-desktop">
+                <button id="login-btn-desktop" class="pinterest-btn btn-primary">Log Masuk</button>
+            </div>
+
+            <div id="user-profile-desktop" class="user-profile-wrapper" style="display: none;">
+                
+                <div class="profile-icon-container tooltip-container">
+                    <img id="header-avatar" src="https://placehold.co/100x100/e3f2fd/1e3a5a?text=U" alt="User">
+                    <span class="tooltip">Profil Anda</span>
+                </div>
+
+                <button id="profile-dropdown-trigger" class="icon-btn-pinterest">
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </button>
+
+                <div id="profile-dropdown-menu" class="dropdown-menu">
+                    <div class="dropdown-header">
+                        <p class="dropdown-label">Sedang login sebagai:</p>
+                        <h4 id="dropdown-username">Nama User</h4>
+                        <p id="dropdown-email">user@email.com</p>
+                    </div>
+                    <hr>
+                    <a href="#" class="dropdown-item">
+                        <span class="material-icons">settings</span> Pengaturan
+                    </a>
+                    <a href="#" id="logout-btn-desktop" class="dropdown-item text-danger">
+                        <span class="material-icons">logout</span> Keluar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
         <div id="search-form-overlay" class="search-form-overlay">
-            <input type="text" id="filter-input-mobile" class="filter-input" placeholder="Cari berdasarkan judul...">
+            <input type="text" id="filter-input-mobile" class="filter-input" placeholder="Cari...">
         </div>
     </header>
 
+    
     <div class="container">
         <main class="prompt-grid" id="prompt-grid"><p>Memuat prompt...</p></main>
     </div>
