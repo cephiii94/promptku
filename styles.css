@@ -66,7 +66,7 @@ body {
     column-count: 1; /* Default untuk layar terkecil */
 }
 @media (min-width: 400px) {
-    .prompt-grid { column-count: 2; }
+    .prompt-grid { column-count: 2; } /*edit kolom*/
 }
 @media (min-width: 768px) {
     .prompt-grid { column-count: 4; }
@@ -400,12 +400,46 @@ body {
     gap: 1rem;
 }
 
-.modal-body input, .modal-body textarea {
-    
+/* Cari bagian .modal-body input... dan ganti dengan blok ini */
+
+/* 1. Style Gabungan untuk Input, Textarea, dan Select (Dropdown) */
+.modal-body input:not([type="file"]), 
+.modal-body textarea, 
+.modal-body select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--light-gray-border);
-    border-radius: var(--border-radius-md);
+    border-radius: var(--border-radius-md); /* Membuat sudut melengkung (rounded) */
+    font-family: var(--font-family-sans);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: var(--white);
+    transition: all 0.2s ease;
+}
+
+/* 2. Khusus untuk Dropdown (Select): Hilangkan panah bawaan & beri panah kustom */
+.modal-body select {
+    appearance: none;        /* Hapus style default browser */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Ikon Panah Kustom (SVG Abu-abu) */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem; /* Beri jarak di kanan agar teks tidak menabrak panah */
+    cursor: pointer;
+}
+
+/* 3. Efek Fokus (Saat diklik menyala biru) */
+.modal-body input:focus, 
+.modal-body textarea:focus, 
+.modal-body select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .form-row {
@@ -1684,4 +1718,120 @@ header.pinterest-style input#filter-input {
     }
     /* Anda bisa menambahkan tombol search icon lagi di sini untuk mobile jika diperlukan,
        atau biarkan navigasi mobile bawah yang menangani */
+}
+
+/* ==========================================================================
+   20. [BARU] HOME CATEGORY CHIPS (LIST KATEGORI HORIZONTAL)
+   ========================================================================== */
+
+.category-scroll-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto; /* Bisa discroll menyamping */
+    padding: 4px 4px 16px 4px; /* Padding bawah agar bayangan tidak terpotong */
+    margin-bottom: 16px;
+    
+    /* Sembunyikan Scrollbar agar rapi */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE/Edge */
+}
+
+.category-scroll-container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.category-chip {
+    flex: 0 0 auto; /* Jangan mengecil */
+    padding: 10px 20px;
+    background-color: var(--white);
+    border: 1px solid transparent; /* Border transparan default */
+    border-radius: 24px; /* Bentuk Pill/Lonjong */
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Bayangan halus */
+    white-space: nowrap;
+}
+
+.category-chip:hover {
+    background-color: var(--soft-blue-bg); /* Hover Biru Muda */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.category-chip.active {
+    background-color: var(--text-dark); /* Hitam Pinterest saat aktif */
+    color: var(--white);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* ==========================================================================
+   21. [UPDATE] PERCANTIK DROPDOWN MENU
+   ========================================================================== */
+
+/* Override style dropdown sebelumnya agar lebih cantik */
+.dropdown-menu {
+    border: none; /* Hapus border kasar */
+    border-radius: 24px; /* Lebih bulat */
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.05); /* Shadow deep */
+    padding: 20px;
+    width: 300px;
+    top: 65px;
+}
+
+.dropdown-header {
+    text-align: center;
+    background-color: var(--soft-blue-bg);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+}
+
+.dropdown-header .dropdown-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary-blue);
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+.dropdown-header h4 {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    color: var(--text-medium);
+}
+
+.dropdown-item:hover {
+    background-color: #F3F4F6;
+    color: var(--text-dark);
+    transform: translateX(5px); /* Efek geser sedikit saat hover */
+}
+
+.dropdown-item .material-icons {
+    color: var(--primary-blue); /* Ikon biru */
+    margin-right: 12px;
+}
+
+/* Khusus tombol Logout */
+.dropdown-item.text-danger {
+    color: var(--danger-red);
+    margin-top: 8px;
+    border-top: 1px solid var(--light-gray-border);
+    border-radius: 0 0 12px 12px; /* Radius bawah saja */
+}
+.dropdown-item.text-danger:hover {
+    background-color: #FEF2F2;
+    transform: none;
+}
+.dropdown-item.text-danger .material-icons {
+    color: var(--danger-red);
 }
