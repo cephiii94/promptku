@@ -1856,3 +1856,102 @@ header.pinterest-style input#filter-input {
 .dropdown-item.text-danger .material-icons {
     color: var(--danger-red);
 }
+
+/* ==========================================================================
+   PAGINATION STYLES (SOFT BLUE THEME)
+   ========================================================================== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--primary-blue-light);
+    background-color: var(--white);
+    color: var(--primary-blue);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: var(--soft-blue-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.1);
+}
+
+.page-btn.active {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+    pointer-events: none; /* Halaman aktif tidak bisa diklik */
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--light-gray-bg);
+    border-color: var(--light-gray-border);
+    color: var(--text-medium);
+}
+
+/* Style untuk ikon panah di tombol */
+.page-btn .material-icons {
+    font-size: 1.2rem;
+}
+
+/* ==========================================================================
+   LOADING ANIMATION STYLES
+   ========================================================================== */
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    width: 100%;
+    grid-column: 1 / -1; /* Agar loader memenuhi lebar grid */
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--soft-blue-bg);    /* Warna jalur (track) yang lebih muda */
+    border-top: 5px solid var(--primary-blue); /* Warna indikator utama */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+    font-weight: 500;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Animasi Putar */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animasi Denyut Teks */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

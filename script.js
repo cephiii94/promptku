@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         "Filter",
         "Effect",
         "Anime",
- 
         "Lainnya"
     ];
 
@@ -47,9 +46,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sortByFilter = document.getElementById('sort-by-filter');
     const textFilterDesktop = document.getElementById('filter-input');
     const textFilterMobile = document.getElementById('filter-input-mobile');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
     
     // Container untuk Chip Kategori di Home
     const homeCategoryList = document.getElementById('home-category-list');
+
+    // Container Pagination
+    const paginationContainer = document.getElementById('pagination-container');
 
     const addPromptLinkMobile = document.getElementById('add-prompt-link-mobile');
     const authContainerMobile = document.getElementById('auth-container-mobile');
@@ -113,6 +116,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentFilteredPrompts = [];
     let currentViewIndex = 0;
     let activeCategory = 'all'; 
+
+    // State Pagination
+    let currentPage = 1;
+    const itemsPerPage = 12; // Jumlah kartu per halaman
 
 
     // =========================================================================
@@ -205,6 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const sortBy = sortByFilter ? sortByFilter.value : 'title_asc';
         
+        // Logika tombol Reset Filter
         if (resetFiltersBtn) {
             if (category !== 'all' || searchTerm !== '' || sortBy !== 'title_asc') {
                 resetFiltersBtn.style.display = 'inline-flex';
@@ -215,9 +223,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let filtered = allPrompts;
 
+        // Filter Kategori
         if (category !== 'all') {
             filtered = filtered.filter(p => p.category === category);
         }
+        // Filter Pencarian
         if (searchTerm) {
             filtered = filtered.filter(p =>
                 (p.title && p.title.toLowerCase().includes(searchTerm)) ||
@@ -225,6 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
         }
         
+        // Sorting
         switch(sortBy) {
             case 'title_asc':
                 filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
@@ -238,12 +249,128 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         currentFilteredPrompts = filtered;
-        renderPrompts(filtered);
+        
+        // [PENTING] Reset ke halaman 1 setiap kali filter berubah
+        currentPage = 1;
+        
+        // [PENTING] Panggil fungsi pagination untuk render, BUKAN renderPrompts langsung
+        updatePageDisplay();
     };
 
 
     // =========================================================================
-    // 6. RENDERING LOGIC
+    // 6. PAGINATION LOGIC
+    // =========================================================================
+
+    const updatePageDisplay = () => {
+        if (!paginationContainer) return; // Guard clause jika container belum ada di HTML
+
+        // 1. Hitung total halaman
+        const totalItems = currentFilteredPrompts.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        // Jika tidak ada data
+        if (totalItems === 0) {
+            paginationContainer.innerHTML = '';
+            renderPrompts([]); // Render grid kosong
+            return;
+        }
+
+        // 2. Ambil potongan data (slice) untuk halaman saat ini
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const promptsToShow = currentFilteredPrompts.slice(start, end);
+
+        // 3. Render kartu prompt (Hanya yang di slice)
+        renderPrompts(promptsToShow);
+
+        // 4. Generate HTML Tombol Pagination
+        let paginationHTML = '';
+
+        // Tombol Prev
+        paginationHTML += `
+            <button class="page-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''}>
+                <span class="material-icons">chevron_left</span>
+            </button>
+        `;
+
+        // Logika "Smart Ellipsis" (...) untuk halaman banyak
+        const maxVisibleButtons = 5; // Jumlah tombol angka maksimal yg muncul
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+
+        if (endPage - startPage + 1 < maxVisibleButtons) {
+            startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+        }
+
+        // Tombol Halaman Pertama + Titik-titik
+        if (startPage > 1) {
+            paginationHTML += `<button class="page-btn num-btn" data-page="1">1</button>`;
+            if (startPage > 2) paginationHTML += `<span style="padding:0 5px; color:#aaa;">...</span>`;
+        }
+
+        // Tombol Angka Tengah
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <button class="page-btn num-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                    ${i}
+                </button>
+            `;
+        }
+
+        // Tombol Halaman Terakhir + Titik-titik
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) paginationHTML += `<span style="padding:0 5px; color:#aaa;">...</span>`;
+            paginationHTML += `<button class="page-btn num-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+
+        // Tombol Next
+        paginationHTML += `
+            <button class="page-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''}>
+                <span class="material-icons">chevron_right</span>
+            </button>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+
+        // 5. Tambahkan Event Listener ke Tombol Baru
+        // Tombol Angka
+        paginationContainer.querySelectorAll('.num-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPage = parseInt(btn.dataset.page);
+                updatePageDisplay();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Tombol Prev
+        const prevBtn = paginationContainer.querySelector('.prev-btn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePageDisplay();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Tombol Next
+        const nextBtn = paginationContainer.querySelector('.next-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updatePageDisplay();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+    };
+
+
+    // =========================================================================
+    // 7. RENDERING LOGIC
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
@@ -256,6 +383,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const allCardsHTML = promptsToRender.map((prompt, index) => {
             
+            // [PENTING] Hitung Index Absolut untuk Modal Navigasi
+            // Agar saat klik gambar di Hal 2, modal tahu dia urutan ke berapa dari TOTAL hasil filter
+            const absoluteIndex = ((currentPage - 1) * itemsPerPage) + index;
+
             let adminActions = '';
             if (currentUser && (prompt.creatorId === currentUser.uid || currentUser.isAdmin === true)) {
                 adminActions = `
@@ -285,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             return `
                 <div class="card">
-                    <div class="card-image-container" data-id="${prompt.id}" data-index="${index}" data-action="view-prompt">
+                    <div class="card-image-container" data-id="${prompt.id}" data-index="${absoluteIndex}" data-action="view-prompt">
                         <img src="${displayImage}" alt="Hasil gambar: ${prompt.title}" loading="lazy">
                         <span class="card-expand-hint material-icons">open_in_full</span>
                         ${overlayCategoryHtml}
@@ -306,13 +437,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
 
     // =========================================================================
-    // 7. AUTH & CRUD (DENGAN NOTIFIKASI BARU)
+    // 8. AUTH & CRUD (DENGAN NOTIFIKASI BARU)
     // =========================================================================
 
     const loginUser = (email, password) => auth.signInWithEmailAndPassword(email, password)
         .then(() => {
             hideModal('login-modal');
-            // [BARU] Notifikasi sukses login
             Swal.fire({
                 icon: 'success',
                 title: 'Login Berhasil!',
@@ -323,14 +453,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .catch(error => Swal.fire({ icon: 'error', title: 'Login Gagal', text: error.message }));
 
-    // [BARU] Fungsi Logout dengan Konfirmasi & Notifikasi
     const logoutUser = () => {
         Swal.fire({
             title: 'Konfirmasi Logout',
             text: "Apakah Anda yakin ingin keluar?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#EF4444', // Merah
+            confirmButtonColor: '#EF4444', 
             cancelButtonColor: '#4B5563',
             confirmButtonText: 'Ya, Keluar',
             cancelButtonText: 'Batal'
@@ -434,10 +563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Update view modal jika terbuka
                 const viewModal = document.getElementById('view-prompt-modal');
                 if(viewModal && viewModal.style.display === 'flex') {
+                    // Gunakan currentViewIndex yang sekarang mengacu ke index absolut
                     const currentPromptId = currentFilteredPrompts[currentViewIndex].id;
                     if(currentPromptId === promptId) showViewPromptModal(promptData);
                 }
-                applyFilters();
+                applyFilters(); // Ini akan memanggil updatePageDisplay()
             }
         } catch (error) {
             console.error("Like error:", error);
@@ -446,7 +576,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // =========================================================================
-    // 8. MODAL HANDLERS
+    // 9. MODAL HANDLERS
     // =========================================================================
 
     const showModal = (modalId, data = null) => {
@@ -526,6 +656,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             copyBtn.querySelector('span:last-child').textContent = isMobile ? 'Lihat Prompt' : 'Salin Prompt';
         }
 
+        // Navigasi Modal: Cek berdasarkan index di currentFilteredPrompts
         if(modalNavPrev) modalNavPrev.style.display = (currentViewIndex === 0) ? 'none' : 'flex';
         if(modalNavNext) modalNavNext.style.display = (currentViewIndex === currentFilteredPrompts.length - 1) ? 'none' : 'flex';
         
@@ -557,11 +688,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentViewIndex += direction;
         if (currentViewIndex < 0) currentViewIndex = 0;
         if (currentViewIndex >= currentFilteredPrompts.length) currentViewIndex = currentFilteredPrompts.length - 1;
+        
         const promptData = currentFilteredPrompts[currentViewIndex];
         if (promptData) showViewPromptModal(promptData);
     };
 
-    // [UPDATE] UI Update Function - Tampilkan Badge Admin & Fix Mobile Nav
     const updateAuthStateUI = (user) => {
         if (user) {
             if(authButtonsDesktop) authButtonsDesktop.style.display = 'none';
@@ -629,7 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // =========================================================================
-    // 9. EVENT LISTENERS
+    // 10. EVENT LISTENERS
     // =========================================================================
 
     if(loginForm) {
@@ -695,7 +826,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 title: document.getElementById('prompt-title').value,
                 user: extractUsernameFromUrl(socialUrl),
                 socialUrl: socialUrl,
-                category: document.getElementById('prompt-category').value, // Ambil dari select
+                category: document.getElementById('prompt-category').value, 
                 promptText: document.getElementById('prompt-text').value,
                 imageUrl: imageUrl,
                 tags: document.getElementById('prompt-tags').value,
@@ -737,7 +868,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else if (filterType === 'tag') {
                     if(textFilterDesktop) {
                         textFilterDesktop.value = filterValue;
-                        toggleClearButton(); // [TAMBAHAN] Tampilkan tombol X langsung
+                        toggleClearButton(); 
                     }
                     if(handleCategoryClick) handleCategoryClick('all'); 
                 }
@@ -901,38 +1032,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================================
     // LOGIKA TOMBOL X (CLEAR SEARCH)
     // =========================================================================
-    const clearSearchBtn = document.getElementById('clear-search-btn');
 
-    // 1. Fungsi untuk Cek Kapan Tombol X Muncul
     const toggleClearButton = () => {
         if (!clearSearchBtn || !textFilterDesktop) return;
         
         if (textFilterDesktop.value.trim().length > 0) {
-            clearSearchBtn.classList.remove('hidden'); // Tampilkan jika ada teks
+            clearSearchBtn.classList.remove('hidden'); 
         } else {
-            clearSearchBtn.classList.add('hidden');    // Sembunyikan jika kosong
+            clearSearchBtn.classList.add('hidden');    
         }
     };
 
-    // 2. Event saat mengetik (munculkan/sembunyikan X)
     if (textFilterDesktop) {
         textFilterDesktop.addEventListener('input', toggleClearButton);
     }
 
-    // 3. Event saat tombol X diklik (Hapus teks & Refresh hasil)
     if (clearSearchBtn) {
         clearSearchBtn.addEventListener('click', () => {
-            if (textFilterDesktop) textFilterDesktop.value = ''; // Kosongkan input
-            toggleClearButton(); // Sembunyikan tombol X lagi
-            applyFilters();      // Refresh grid prompt (kembali ke semua)
+            if (textFilterDesktop) textFilterDesktop.value = ''; 
+            toggleClearButton(); 
+            applyFilters();     
         });
     }
 
-    // [TAMBAHAN] Trigger toggleClearButton saat tag diklik
-    // Ini memastikan tombol X muncul langsung tanpa harus ketik
     if (textFilterDesktop) {
         const originalListener = textFilterDesktop.addEventListener.bind(textFilterDesktop);
-        // Setelah input berisi value dari tag, panggil toggleClearButton
         Object.defineProperty(textFilterDesktop, '__updateSearchFromTag', {
             value: function() {
                 toggleClearButton();
@@ -955,7 +1079,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loginBtnDesktop) loginBtnDesktop.addEventListener('click', () => showModal('login-modal'));
     if (logoutBtnDesktop) logoutBtnDesktop.addEventListener('click', (e) => {
         e.preventDefault();
-        // Menggunakan fungsi logoutUser baru yang ada konfirmasinya
         logoutUser();
         if(profileDropdown) profileDropdown.classList.remove('show');
     });
@@ -974,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // =========================================================================
-    // 10. INIT
+    // 11. INIT
     // =========================================================================
 
     auth.onAuthStateChanged(async (user) => { 
