@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const navSearch = document.getElementById('nav-search');
     const navAddPrompt = document.getElementById('nav-add-prompt');
+    const navAddPromptMobile = document.getElementById('nav-add-prompt-mobile');
     const navAuthContainer = document.getElementById('nav-auth-container');
     const navTheme = document.getElementById('nav-theme');
     
@@ -874,6 +875,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (navSearch) navSearch.addEventListener('click', (e) => { e.preventDefault(); if(searchOverlay) searchOverlay.classList.toggle('active'); window.scrollTo(0, 0); });
     if (navAddPrompt) navAddPrompt.addEventListener('click', (e) => { e.preventDefault(); showModal('prompt-modal'); });
+    if (navAddPromptMobile) navAddPromptMobile.addEventListener('click', (e) => { e.preventDefault(); showModal('prompt-modal'); });
     if (navTheme) navTheme.addEventListener('click', (e) => { e.preventDefault(); Swal.fire({ icon: 'info', title: 'Segera Hadir!', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 }); });
 
     if(deleteImageBtn) {
