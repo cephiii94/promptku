@@ -103,7 +103,7 @@
                 <button class="close-btn" data-modal="prompt-modal">&times;</button>
                 </div>
             </div>
-            <div class="modal-body">
+                <div class="modal-body">
                 <input type="hidden" id="prompt-id">
                 <input type="text" id="prompt-title" placeholder="Judul" >
 
@@ -125,26 +125,39 @@
                         <input type="text" id="prompt-tags" placeholder="cth: anime, fantasi">
                     </div>
                 </div>
-                <textarea id="prompt-text" rows="4" placeholder="Isi Prompt" ></textarea>
-<div class="form-group">
-    <div id="image-upload-container">
 
-        <div id="image-preview-wrapper" style="display: none;">
-            <label>Gambar Saat Ini</label>
-            <div class="image-container-with-delete">
-                <img id="prompt-image-preview" src="" alt="Pratinjau Gambar">
-                <button type="button" id="delete-image-btn" class="delete-image-btn">&times;</button>
+                <div class="form-row" style="margin-top: 1rem; padding: 1rem; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;">
+                    <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="prompt-isPremium" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="prompt-isPremium" style="margin: 0; cursor: pointer; color: #b45309; font-weight: 700;">PROMPT PREMIUM?</label>
+                    </div>
+                    <div class="form-group" id="mayar-link-container" style="display: none; flex: 1;">
+                        <label for="prompt-mayarLink" style="color: #b45309;">Link Checkout Mayar (Produk Digital)</label>
+                        <input type="url" id="prompt-mayarLink" placeholder="https://mayar.id/pl/xxxx">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="prompt-text">Isi Prompt (Untuk Premium, isi sample/teaser saja)</label>
+                    <textarea id="prompt-text" rows="4" placeholder="Masukkan prompt lengkap..."></textarea>
+                </div>
+
+            <div id="image-preview-wrapper" style="display: none;">
+                <label>Gambar Saat Ini</label>
+                <div class="image-container-with-delete">
+                    <img id="prompt-image-preview" src="" alt="Pratinjau Gambar">
+                    <button type="button" id="delete-image-btn" class="delete-image-btn">&times;</button>
+                </div>
             </div>
-        </div>
 
-        <div id="file-input-wrapper">
-            <label for="prompt-imageFile">Upload Gambar Hasil</label>
-            <input type="file" id="prompt-imageFile" accept="image/*">
-        </div>
+            <div id="file-input-wrapper">
+                <label for="prompt-imageFile">Upload Gambar Hasil</label>
+                <input type="file" id="prompt-imageFile" accept="image/*">
+            </div>
 
+        </div>
+        <input type="hidden" id="prompt-imageUrl">
     </div>
-    <input type="hidden" id="prompt-imageUrl">
-</div>
             </div>
         </form> </div>
 </div>
@@ -239,6 +252,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://js.mayar.id/mayar.min.js"></script>
     <script src="script.js"></script> 
     
         <footer class="site-footer">

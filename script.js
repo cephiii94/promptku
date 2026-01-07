@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // [PENTING] Reset ke halaman 1 setiap kali filter berubah
         currentPage = 1;
         
-        // [PENTING] Panggil fungsi pagination untuk render, BUKAN renderPrompts langsung
+        // [PENTING] Panggil fungsi pagination untuk render
         updatePageDisplay();
     };
 
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================================
 
     const updatePageDisplay = () => {
-        if (!paginationContainer) return; // Guard clause jika container belum ada di HTML
+        if (!paginationContainer) return;
 
         // 1. Hitung total halaman
         const totalItems = currentFilteredPrompts.length;
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Jika tidak ada data
         if (totalItems === 0) {
             paginationContainer.innerHTML = '';
-            renderPrompts([]); // Render grid kosong
+            renderPrompts([]); 
             return;
         }
 
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const end = start + itemsPerPage;
         const promptsToShow = currentFilteredPrompts.slice(start, end);
 
-        // 3. Render kartu prompt (Hanya yang di slice)
+        // 3. Render kartu prompt
         renderPrompts(promptsToShow);
 
         // 4. Generate HTML Tombol Pagination
@@ -294,8 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </button>
         `;
 
-        // Logika "Smart Ellipsis" (...) untuk halaman banyak
-        const maxVisibleButtons = 5; // Jumlah tombol angka maksimal yg muncul
+        const maxVisibleButtons = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
         let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
 
@@ -303,13 +302,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             startPage = Math.max(1, endPage - maxVisibleButtons + 1);
         }
 
-        // Tombol Halaman Pertama + Titik-titik
         if (startPage > 1) {
             paginationHTML += `<button class="page-btn num-btn" data-page="1">1</button>`;
             if (startPage > 2) paginationHTML += `<span style="padding:0 5px; color:#aaa;">...</span>`;
         }
 
-        // Tombol Angka Tengah
         for (let i = startPage; i <= endPage; i++) {
             paginationHTML += `
                 <button class="page-btn num-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
@@ -318,7 +315,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }
 
-        // Tombol Halaman Terakhir + Titik-titik
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) paginationHTML += `<span style="padding:0 5px; color:#aaa;">...</span>`;
             paginationHTML += `<button class="page-btn num-btn" data-page="${totalPages}">${totalPages}</button>`;
@@ -333,8 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         paginationContainer.innerHTML = paginationHTML;
 
-        // 5. Tambahkan Event Listener ke Tombol Baru
-        // Tombol Angka
+        // 5. Event Listener Pagination
         paginationContainer.querySelectorAll('.num-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentPage = parseInt(btn.dataset.page);
@@ -343,7 +338,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        // Tombol Prev
         const prevBtn = paginationContainer.querySelector('.prev-btn');
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
@@ -355,7 +349,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Tombol Next
         const nextBtn = paginationContainer.querySelector('.next-btn');
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
@@ -370,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // =========================================================================
-    // 7. RENDERING LOGIC
+    // 7. RENDERING LOGIC (DENGAN UPDATE PREMIUM)
     // =========================================================================
 
     const renderPrompts = (promptsToRender) => {
@@ -383,8 +376,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const allCardsHTML = promptsToRender.map((prompt, index) => {
             
-            // [PENTING] Hitung Index Absolut untuk Modal Navigasi
-            // Agar saat klik gambar di Hal 2, modal tahu dia urutan ke berapa dari TOTAL hasil filter
             const absoluteIndex = ((currentPage - 1) * itemsPerPage) + index;
 
             let adminActions = '';
@@ -400,11 +391,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<span class="image-overlay-text" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
                 : ''; 
             
-            const copyButtonHtml = `
+            // [UPDATE PREMIUM] Logika Tombol di Overlay (Copy vs Beli)
+            let actionButtonHtml = '';
+
+            if (prompt.isPremium) {
+                // Tampilan Tombol BELI (Untuk Premium)
+                actionButtonHtml = `
+                <a href="${prompt.mayarLink}" target="_blank" class="copy-btn-overlay premium-btn" style="text-decoration: none; background: #F59E0B; border-color: #D97706;">
+                    <span class="material-icons">shopping_cart</span>
+                    <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
+                </a>`;
+            } else {
+                // Tampilan Tombol COPY (Untuk Gratis)
+                actionButtonHtml = `
                 <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText || '')}">
                     <span class="material-icons">content_copy</span>
                     <span class="copy-text">Salin</span>
                 </button>`;
+            }
+
+            // [UPDATE PREMIUM] Badge Premium (Opsional)
+            const premiumBadge = prompt.isPremium 
+                ? `<span style="position: absolute; top: 10px; right: 10px; background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; z-index: 5;">PREMIUM</span>`
+                : '';
+
 
             const tagsHtml = (prompt.tags && Array.isArray(prompt.tags) && prompt.tags.length > 0)
                 ? `<div class="card-tags-overlay">
@@ -420,6 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <img src="${displayImage}" alt="Hasil gambar: ${prompt.title}" loading="lazy">
                         <span class="card-expand-hint material-icons">open_in_full</span>
                         ${overlayCategoryHtml}
+                        ${premiumBadge}
                         ${adminActions}
                         <div class="card-prompt-overlay">
                             <div class="overlay-info">
@@ -427,7 +438,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span class="overlay-user">by ${prompt.user || 'Anonymous'}</span>
                                 ${tagsHtml}
                             </div>
-                            ${copyButtonHtml}
+                            ${actionButtonHtml}
                         </div>
                     </div>
                 </div>`;
@@ -437,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
 
     // =========================================================================
-    // 8. AUTH & CRUD (DENGAN NOTIFIKASI BARU)
+    // 8. AUTH & CRUD (DENGAN UPDATE SAVE PREMIUM)
     // =========================================================================
 
     const loginUser = (email, password) => auth.signInWithEmailAndPassword(email, password)
@@ -563,11 +574,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Update view modal jika terbuka
                 const viewModal = document.getElementById('view-prompt-modal');
                 if(viewModal && viewModal.style.display === 'flex') {
-                    // Gunakan currentViewIndex yang sekarang mengacu ke index absolut
                     const currentPromptId = currentFilteredPrompts[currentViewIndex].id;
                     if(currentPromptId === promptId) showViewPromptModal(promptData);
                 }
-                applyFilters(); // Ini akan memanggil updatePageDisplay()
+                applyFilters(); 
             }
         } catch (error) {
             console.error("Like error:", error);
@@ -576,7 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // =========================================================================
-    // 9. MODAL HANDLERS
+    // 9. MODAL HANDLERS (DENGAN LOGIKA PREMIUM)
     // =========================================================================
 
     const showModal = (modalId, data = null) => {
@@ -597,7 +607,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('prompt-text').value = data?.promptText || '';
             document.getElementById('prompt-imageUrl').value = data?.imageUrl || '';
             document.getElementById('prompt-tags').value = (data?.tags && Array.isArray(data.tags)) ? data.tags.join(', ') : '';
+
+            // [UPDATE PREMIUM] Populate data form premium
+            const isPrem = data?.isPremium || false;
+            const premCheckbox = document.getElementById('prompt-isPremium');
+            const mayarInput = document.getElementById('prompt-mayarLink');
+            const mayarContainer = document.getElementById('mayar-link-container');
+            const promptTextInput = document.getElementById('prompt-text');
+
+            if(premCheckbox) premCheckbox.checked = isPrem;
+            if(mayarInput) mayarInput.value = data?.mayarLink || '';
             
+            // Toggle container input Mayar sesuai status
+            if (mayarContainer) {
+                if (isPrem) {
+                    mayarContainer.style.display = 'block';
+                    if(mayarInput) mayarInput.required = true;
+                    if(promptTextInput) promptTextInput.placeholder = "Tulis deskripsi singkat / teaser di sini. JANGAN TULIS PROMPT ASLI!";
+                } else {
+                    mayarContainer.style.display = 'none';
+                    if(mayarInput) mayarInput.required = false;
+                    if(promptTextInput) promptTextInput.placeholder = "Isi Prompt";
+                }
+            }
+
+            // Image handling
             const fileInput = document.getElementById('prompt-imageFile');
             if (data && data.imageUrl) {
                 promptImagePreview.src = data.imageUrl;
@@ -628,10 +662,77 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(modalImg) modalImg.src = data.imageUrl;
 
         const modalPromptText = document.getElementById('view-modal-prompt-text');
-        if(modalPromptText) modalPromptText.textContent = data.promptText;
-        
         const authorText = document.getElementById('view-modal-author-text');
         const authorLink = document.getElementById('view-modal-author-link');
+        
+        // Elemen Tombol
+        const copyBtn = document.getElementById('view-modal-copy-btn');
+        const generateBtn = document.getElementById('view-modal-generate-btn');
+
+        // [UPDATE PREMIUM] Logika Modal Fullview
+        if (data.isPremium) {
+            // --- JIKA PREMIUM ---
+            if(modalPromptText) {
+                modalPromptText.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #D97706; background: #FFFBEB; border-radius: 8px;">
+                    <span class="material-icons" style="font-size: 48px; margin-bottom: 1rem;">lock</span><br>
+                    <strong>Prompt Ini Terkunci (Premium)</strong><br>
+                    <p style="margin-top: 10px; color: #4B5563;">${data.promptText || "Dapatkan akses penuh ke prompt berkualitas tinggi ini dengan membelinya."}</p>
+                </div>`;
+            }
+
+            // Sembunyikan tombol Generate
+            if(generateBtn) generateBtn.style.display = 'none';
+
+            // Ubah tombol Copy jadi Tombol Beli
+            if(copyBtn) {
+                // Kita modifikasi tombol yang ada agar tidak merusak struktur
+                copyBtn.classList.remove('login-btn'); 
+                copyBtn.style.backgroundColor = '#F59E0B';
+                copyBtn.style.color = '#fff';
+                
+                // Ubah konten tombol
+                copyBtn.innerHTML = `
+                    <span class="material-icons">shopping_cart</span>
+                    <span>Beli Sekarang</span>`;
+                
+                // Hapus logic copy lama (sementara kita override onclick)
+                copyBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(data.mayarLink, '_blank');
+                };
+                // Hapus dataset copy agar tidak tertrigger event listener global
+                delete copyBtn.dataset.promptText;
+            }
+
+        } else {
+            // --- JIKA GRATIS (Standard) ---
+            if(modalPromptText) modalPromptText.textContent = data.promptText;
+            
+            // Munculkan tombol Generate
+            if(generateBtn) {
+                generateBtn.style.display = 'flex'; // Atau inline-flex
+                generateBtn.dataset.promptText = encodeURIComponent(data.promptText);
+            }
+
+            // Kembalikan tombol Copy ke kondisi awal
+            if(copyBtn) {
+                copyBtn.classList.add('login-btn');
+                copyBtn.style.backgroundColor = ''; // Reset ke CSS class
+                copyBtn.style.color = '';
+                
+                copyBtn.innerHTML = `
+                    <span class="material-icons">content_copy</span>
+                    <span>Salin Prompt</span>`;
+                
+                // Set data agar event listener global berfungsi
+                copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
+                
+                // Reset onclick (biarkan event listener global yang menangani)
+                copyBtn.onclick = null;
+            }
+        }
         
         if(authorText && authorLink) {
             if (data.user && data.socialUrl) {
@@ -647,22 +748,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 authorLink.style.display = 'none';
             }
         }
-        
-        const copyBtn = document.getElementById('view-modal-copy-btn');
-        if(copyBtn) {
-            copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
-            copyBtn.classList.remove('copied');
-            const isMobile = window.innerWidth <= 768;
-            copyBtn.querySelector('span:last-child').textContent = isMobile ? 'Lihat Prompt' : 'Salin Prompt';
-        }
 
-        // Navigasi Modal: Cek berdasarkan index di currentFilteredPrompts
+        // Navigasi Modal
         if(modalNavPrev) modalNavPrev.style.display = (currentViewIndex === 0) ? 'none' : 'flex';
         if(modalNavNext) modalNavNext.style.display = (currentViewIndex === currentFilteredPrompts.length - 1) ? 'none' : 'flex';
         
-        const generateBtn = document.getElementById('view-modal-generate-btn');
-        if(generateBtn) generateBtn.dataset.promptText = encodeURIComponent(data.promptText);
-        
+        // Like Button
         const likeBtn = document.getElementById('view-modal-like-btn');
         const likeCountSpan = document.getElementById('view-modal-like-count');
         
@@ -763,6 +854,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 10. EVENT LISTENERS
     // =========================================================================
 
+    // [UPDATE PREMIUM] Event Listener untuk Checkbox Premium
+    const premiumCheckbox = document.getElementById('prompt-isPremium');
+    const mayarLinkContainer = document.getElementById('mayar-link-container');
+    const promptTextInput = document.getElementById('prompt-text');
+
+    if (premiumCheckbox) {
+        premiumCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                if(mayarLinkContainer) mayarLinkContainer.style.display = 'block';
+                if(document.getElementById('prompt-mayarLink')) document.getElementById('prompt-mayarLink').required = true;
+                if(promptTextInput) promptTextInput.placeholder = "Tulis deskripsi singkat / teaser di sini. JANGAN TULIS PROMPT ASLI!";
+            } else {
+                if(mayarLinkContainer) mayarLinkContainer.style.display = 'none';
+                if(document.getElementById('prompt-mayarLink')) document.getElementById('prompt-mayarLink').required = false;
+                if(promptTextInput) promptTextInput.placeholder = "Isi Prompt";
+            }
+        });
+    }
+
     if(loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -821,6 +931,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         
             const socialUrl = document.getElementById('prompt-socialUrl').value;
+            
+            // [UPDATE PREMIUM] Ambil value Premium & Link Mayar
+            const isPremium = document.getElementById('prompt-isPremium') ? document.getElementById('prompt-isPremium').checked : false;
+            const mayarLink = document.getElementById('prompt-mayarLink') ? document.getElementById('prompt-mayarLink').value : '';
+
             const promptData = {
                 id: promptId,
                 title: document.getElementById('prompt-title').value,
@@ -830,6 +945,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 promptText: document.getElementById('prompt-text').value,
                 imageUrl: imageUrl,
                 tags: document.getElementById('prompt-tags').value,
+                // Data Baru
+                isPremium: isPremium,
+                mayarLink: isPremium ? mayarLink : '' 
             };
             if (!promptId) promptData.creatorId = currentUser.uid;
         
@@ -844,7 +962,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const target = e.target;
             const editBtn = target.closest('.edit-btn');
             const deleteBtn = target.closest('.delete-btn');
-            const copyBtn = target.closest('.copy-btn-overlay'); 
+            // Untuk copy button di grid, pastikan bukan tombol premium
+            const copyBtn = target.closest('.copy-btn-overlay:not(.premium-btn)'); 
             const clickedFilter = target.closest('[data-filter-type]');
             const viewBtn = target.closest('[data-action="view-prompt"]'); 
 
@@ -868,7 +987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else if (filterType === 'tag') {
                     if(textFilterDesktop) {
                         textFilterDesktop.value = filterValue;
-                        toggleClearButton(); 
+                        if(toggleClearButton) toggleClearButton(); 
                     }
                     if(handleCategoryClick) handleCategoryClick('all'); 
                 }
@@ -882,6 +1001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (deleteBtn) deletePrompt(deleteBtn.dataset.id);
             
+            // Logic Copy hanya jalan jika bukan Premium
             if (copyBtn) {
                 const textToCopy = decodeURIComponent(copyBtn.dataset.promptText);
                 navigator.clipboard.writeText(textToCopy).then(() => {
@@ -911,6 +1031,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(viewModalCopyBtn) {
             viewModalCopyBtn.addEventListener('click', (e) => {
                 const btn = e.currentTarget;
+                
+                // [UPDATE PREMIUM] Cek jika tombol berfungsi sebagai tombol Beli
+                if (btn.querySelector('.material-icons').textContent === 'shopping_cart') {
+                    // Jangan jalankan logika copy
+                    return; 
+                }
+
                 const textToCopy = decodeURIComponent(btn.dataset.promptText);
                 const isMobile = window.innerWidth <= 768;
 
@@ -1056,7 +1183,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (textFilterDesktop) {
+        // Fix potential circular ref or undefined if overriding prototype carelessly
+        // Simple event listener is enough as added above
         const originalListener = textFilterDesktop.addEventListener.bind(textFilterDesktop);
+        // Monkey patch aman untuk updateSearchFromTag
         Object.defineProperty(textFilterDesktop, '__updateSearchFromTag', {
             value: function() {
                 toggleClearButton();
