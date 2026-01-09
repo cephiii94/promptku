@@ -1,6 +1,19 @@
 // Menunggu DOM dimuat sepenuhnya
 document.addEventListener('DOMContentLoaded', async () => {
 
+    // === [TAMBAHAN BARU] CEK PESAN PERINGATAN ===
+    // Kalau ada titipan pesan dari Satpam, tampilkan Notifikasi!
+    if (sessionStorage.getItem('alert_must_login')) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Akses Dibatasi',
+            text: 'Mohon Log In dulu untuk mengakses halaman Generator.',
+            confirmButtonColor: '#F59E0B' // Warna oranye biar senada
+        });
+        // Hapus pesan supaya tidak muncul terus-menerus kalau di-refresh
+        sessionStorage.removeItem('alert_must_login');
+    }
+
     // =========================================================================
     // 1. KONFIGURASI & LIST KATEGORI RESMI
     // =========================================================================
@@ -784,11 +797,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (promptData) showViewPromptModal(promptData);
     };
 
-    const updateAuthStateUI = (user) => {
+const updateAuthStateUI = (user) => {
+        // Ambil elemen tombol FAB Mobile (Tombol +)
+        const fabMobile = document.getElementById('nav-add-prompt-mobile');
+
         if (user) {
+            // === KONDISI: USER LOGIN ===
+            
+            // UI Desktop
             if(authButtonsDesktop) authButtonsDesktop.style.display = 'none';
             if(userProfileDesktop) userProfileDesktop.style.display = 'flex';
             
+            // Update Foto & Nama di Header
             if(headerAvatar) headerAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=2563EB&color=fff`;
             
             if(dropdownUsername) {
@@ -801,11 +821,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if(dropdownEmail) dropdownEmail.textContent = user.email;
 
+            // Update Auth Container Mobile (Jadi tombol Logout)
             if(authContainerMobile) {
                 authContainerMobile.innerHTML = `<button class="auth-icon-btn logout" id="logout-btn-mobile-icon"><span class="material-icons">logout</span></button>`;
                 document.getElementById('logout-btn-mobile-icon')?.addEventListener('click', logoutUser);
             }
             
+            // Menu Navigasi Login/Logout
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <a href="#" class="nav-link-inner" id="nav-logout" style="display: flex; flex-direction: column; align-items: center; color: inherit; text-decoration: none; width: 100%;">
@@ -818,18 +840,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            if(addPromptLinkMobile) addPromptLinkMobile.style.display = 'flex';
+            // --- BAGIAN INI YANG PENTING UNTUK TOMBOL (+) ---
+            // Munculkan tombol Buat Prompt di Desktop & Mobile
             if(navAddPrompt) navAddPrompt.style.display = 'flex';
+            
+            // [REVISI BRI] Lepas class hidden dari FAB Mobile
+            if(fabMobile) fabMobile.classList.remove('hidden'); 
 
         } else {
+            // === KONDISI: USER TAMU / LOGOUT ===
+
+            // UI Desktop
             if(authButtonsDesktop) authButtonsDesktop.style.display = 'block';
             if(userProfileDesktop) userProfileDesktop.style.display = 'none';
 
+            // Auth Container Mobile (Jadi tombol Login)
             if(authContainerMobile) {
                 authContainerMobile.innerHTML = `<button class="auth-icon-btn" id="login-btn-mobile-icon"><span class="material-icons">login</span></button>`;
                 document.getElementById('login-btn-mobile-icon')?.addEventListener('click', () => showModal('login-modal'));
             }
             
+            // Menu Navigasi Login/Logout
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <a href="#" class="nav-link-inner" id="nav-login" style="display: flex; flex-direction: column; align-items: center; color: inherit; text-decoration: none; width: 100%;">
@@ -842,8 +873,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            if(addPromptLinkMobile) addPromptLinkMobile.style.display = 'none';
+            // --- BAGIAN INI YANG PENTING UNTUK TOMBOL (+) ---
+            // Sembunyikan tombol Buat Prompt
             if(navAddPrompt) navAddPrompt.style.display = 'none';
+            
+            // [REVISI BRI] Pasang class hidden ke FAB Mobile
+            if(fabMobile) fabMobile.classList.add('hidden'); 
         }
         
         applyFilters();
@@ -1226,11 +1261,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // =========================================================================
-    // 11. INIT
+// =========================================================================
+    // 11. INIT & SECURITY GUARD (SATPAM)
     // =========================================================================
 
     auth.onAuthStateChanged(async (user) => { 
+        
+        // --- [MULAI] SATPAM AREA: KICK USER BELUM LOGIN DARI TOOLS.HTML ---
+        const isToolsPage = window.location.pathname.includes('tools.html');
+        
+        if (isToolsPage && !user) {
+            // 1. Titip pesan di saku browser user
+            sessionStorage.setItem('alert_must_login', 'true');
+            
+            // 2. Tendang ke halaman utama
+            window.location.replace("index.html"); 
+            return; // Stop proses
+        }
+        // --- [SELESAI] SATPAM AREA ---
+
         if (user) {
             const tokenResult = await user.getIdTokenResult(true); 
             currentUser = user;
@@ -1238,7 +1287,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             currentUser = null;
         }
+        
+        // Update tampilan UI (Tombol login/logout, dll)
         updateAuthStateUI(user);
+        document.body.style.display = 'block';
     });
 
     fetchAndRenderPrompts();
