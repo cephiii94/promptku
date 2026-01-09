@@ -1955,3 +1955,115 @@ header.pinterest-style input#filter-input {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* ==========================================================================
+   AUTH MODAL STYLES (Login & Register Tabs) - Added by Bri
+   ========================================================================== */
+
+/* Wrapper biar lebar modal pas */
+.auth-content-wrapper {
+    max-width: 450px; /* Sedikit lebih ramping biar elegan */
+    padding: 0; /* Reset padding bawaan modal-content */
+    overflow: hidden;
+}
+
+/* Header khusus Auth */
+.auth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--light-gray-border);
+    background-color: var(--light-gray-bg);
+}
+
+/* Tabs Container */
+.auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: #e5e7eb;
+    padding: 4px;
+    border-radius: 99px;
+}
+
+/* Tombol Tab */
+.auth-tab {
+    border: none;
+    background: transparent;
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-medium);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* State Aktif Tab */
+.auth-tab.active {
+    background-color: var(--white);
+    color: var(--primary-blue);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Body Modal Auth */
+.auth-content-wrapper .modal-body {
+    padding: 2rem;
+}
+
+/* Container Form (Login/Register) */
+.auth-form-container {
+    display: none; /* Sembunyikan secara default */
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-form-container.active {
+    display: block; /* Tampilkan jika ada class active */
+}
+
+/* Judul & Subjudul */
+.auth-title {
+    font-size: 1.5rem;
+    color: var(--primary-blue-dark);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-medium);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Utility tambahan */
+.full-width {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    font-size: 1rem;
+}
+
+.forgot-password-link {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    text-decoration: none;
+}
+.forgot-password-link:hover {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+
+/* Form Group Spacing */
+.auth-form-container .form-group {
+    margin-bottom: 1rem;
+}
+
+/* Animasi Halus saat ganti tab */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -856,14 +856,14 @@ const updateAuthStateUI = (user) => {
 
             // Auth Container Mobile (Jadi tombol Login)
             if(authContainerMobile) {
-                authContainerMobile.innerHTML = `<button class="auth-icon-btn" id="login-btn-mobile-icon"><span class="material-icons">login</span></button>`;
+                authContainerMobile.innerHTML = `<div id="login-btn-mobile" class="nav-item" style="cursor: pointer;"><span class="material-icons">login</span></button>`;
                 document.getElementById('login-btn-mobile-icon')?.addEventListener('click', () => showModal('login-modal'));
             }
             
             // Menu Navigasi Login/Logout
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
-                    <a href="#" class="nav-link-inner" id="nav-login" style="display: flex; flex-direction: column; align-items: center; color: inherit; text-decoration: none; width: 100%;">
+                    <a href="#" class="nav-link-inner" id="login-btn-mobile" style="display: flex; flex-direction: column; align-items: center; color: inherit; text-decoration: none; width: 100%;">
                         <span class="material-icons">login</span>
                         <span class="nav-label">Login</span>
                     </a>`;
