@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         UI.updateAuthStateUI(
             currentUser, 
             currentUser?.isAdmin, 
-            () => UI.showModal('login-modal'), 
+            () => UI.showModal('auth-modal'), 
             () => Auth.logoutUser(auth)
         );
         applyFilters(); // Re-render to update Admin buttons
@@ -221,7 +221,7 @@ const deletePrompt = async (id) => {
 const toggleLikePrompt = async (promptId) => {
     if (!currentUser) {
         Swal.fire({ icon: 'info', title: 'Login Dulu', text: 'Silakan login untuk menyukai prompt.' });
-        UI.showModal('login-modal');
+        UI.showModal('auth-modal');
         return;
     }
     const promptRef = db.collection("prompts").doc(promptId);
@@ -281,7 +281,7 @@ function setupEventListeners() {
     if(UI.els.loginForm) {
         UI.els.loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            Auth.loginUser(auth, document.getElementById('login-email').value, document.getElementById('login-password').value, () => UI.hideModal('login-modal'));
+            Auth.loginUser(auth, document.getElementById('login-email').value, document.getElementById('login-password').value, () => UI.hideModal('auth-modal'));
         });
     }
 
@@ -527,7 +527,7 @@ function setupEventListeners() {
     if (UI.els.navAddPromptMobile) UI.els.navAddPromptMobile.addEventListener('click', (e) => { e.preventDefault(); UI.showModal('prompt-modal'); });
     
     // Header Pinterest Style Logic
-    if (UI.els.loginBtnDesktop) UI.els.loginBtnDesktop.addEventListener('click', () => UI.showModal('login-modal'));
+    if (UI.els.loginBtnDesktop) UI.els.loginBtnDesktop.addEventListener('click', () => UI.showModal('auth-modal'));
     if (UI.els.logoutBtnDesktop) UI.els.logoutBtnDesktop.addEventListener('click', (e) => {
         e.preventDefault();
         Auth.logoutUser(auth);
