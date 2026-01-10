@@ -1,6 +1,8 @@
-// js/config.js
+// config.js
+// =========================================================================
+// KONFIGURASI & HELPER
+// =========================================================================
 
-// 1. Daftar Kategori Resmi
 export const OFFICIAL_CATEGORIES = [
     "Character",
     "Filter",
@@ -9,26 +11,42 @@ export const OFFICIAL_CATEGORIES = [
     "Lainnya"
 ];
 
-// 2. Konfigurasi Cloudinary
 export const CLOUDINARY_CLOUD_NAME = "dx4pxe7ji"; 
 
-// 3. Fungsi Init Firebase
+// Helper: Ekstrak Username dari URL Sosmed
+export const extractUsernameFromUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+    try {
+        const cleanedUrl = url.split('?')[0].replace(/\/$/, '');
+        const parts = cleanedUrl.split('/');
+        const username = parts[parts.length - 1];
+        return username.charAt(0).toUpperCase() + username.slice(1);
+    } catch (error) {
+        return '';
+    }
+};
+
+// Helper: Inisialisasi Firebase (Mengambil config dari Netlify)
 export async function initFirebase() {
-    // Ambil config dari Netlify Function (Sama seperti logika lama)
+    let firebaseConfig;
     try {
         const response = await fetch('/.netlify/functions/get-firebase-config');
         if (!response.ok) throw new Error('Gagal mengambil konfigurasi Firebase.');
-        const firebaseConfig = await response.json();
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        return { 
-            auth: firebase.auth(), 
-            db: firebase.firestore() 
-        };
+        firebaseConfig = await response.json();
     } catch (error) {
-        console.error("Firebase Init Error:", error);
-        return { auth: null, db: null };
+        console.error("Config Error:", error);
+        return null;
     }
+
+    if (firebaseConfig && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    } else if (!firebase.apps.length) {
+        console.error("Firebase config missing.");
+        return null;
+    }
+
+    return {
+        auth: firebase.auth(),
+        db: firebase.firestore()
+    };
 }
