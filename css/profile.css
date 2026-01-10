@@ -1,0 +1,237 @@
+/* css/profile.css */
+
+/* --- Profile Container --- */
+.profile-container {
+    max-width: 1000px; /* Lebih sempit dari home biar fokus */
+    padding-bottom: 6rem;
+}
+
+/* --- Header Card --- */
+.profile-header-card {
+    background: var(--white);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    position: relative;
+    border: 1px solid var(--light-gray-border);
+}
+
+.profile-cover {
+    height: 120px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    width: 100%;
+}
+
+.profile-info-wrapper {
+    padding: 0 2rem 2rem 2rem;
+    margin-top: -60px; /* Biar avatar naik ke atas cover */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- Avatar --- */
+.profile-avatar-large {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1rem;
+}
+
+.profile-avatar-large img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid var(--white);
+    object-fit: cover;
+    background: var(--white);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.edit-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--text-dark);
+    color: var(--white);
+    border: 2px solid var(--white);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+.edit-avatar-btn:hover { transform: scale(1.1); }
+.edit-avatar-btn .material-icons { font-size: 18px; }
+
+/* --- Text Info --- */
+.profile-text h1 {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+.username {
+    color: var(--primary-blue);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+.bio {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto 1.5rem auto;
+    line-height: 1.5;
+}
+
+/* --- Level Badge (Gamification) --- */
+.level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFFBEB;
+    color: #B45309;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: 1px solid #FCD34D;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Stats Row --- */
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    width: 100%;
+    border-top: 1px solid var(--light-gray-border);
+    padding-top: 1.5rem;
+}
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- XP Progress Bar --- */
+.xp-container {
+    padding: 1rem 2rem 2rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+}
+.xp-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+.xp-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: #E5E7EB;
+    border-radius: 99px;
+    overflow: hidden;
+}
+.xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+    border-radius: 99px;
+    transition: width 1s ease-out;
+}
+
+/* --- Tabs --- */
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--light-gray-border);
+    padding-bottom: 1px;
+}
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    color: var(--text-medium);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+.tab-btn:hover { color: var(--primary-blue); }
+.tab-btn.active {
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+}
+
+/* --- Achievements Grid --- */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+.achievement-card {
+    background: var(--white);
+    border: 1px solid var(--light-gray-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+.achievement-card:hover { transform: translateY(-5px); }
+
+.badge-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Badge Terkunci (Locked) */
+.achievement-card.locked {
+    opacity: 0.6;
+    filter: grayscale(100%);
+    background: #f9fafb;
+}
+.achievement-card.locked h3 { font-size: 0.9rem; color: var(--text-medium); }
+.achievement-card.locked p { font-size: 0.75rem; color: #9ca3af; }
+
+/* Badge Terbuka (Unlocked) - Tambahkan class ini nanti via JS */
+.achievement-card.unlocked {
+    opacity: 1;
+    filter: grayscale(0%);
+    border-color: #FCD34D;
+    background: #FFFBEB;
+    box-shadow: 0 4px 10px rgba(251, 191, 36, 0.2);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .profile-info-wrapper { padding: 0 1rem 1.5rem 1rem; }
+    .profile-avatar-large { width: 100px; height: 100px; }
+    .profile-cover { height: 100px; }
+    .profile-stats { gap: 1rem; }
+    .tab-btn { padding: 0.75rem 0.5rem; font-size: 0.9rem; }
+    .tab-btn .material-icons { font-size: 18px; }
+}

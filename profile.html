@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengguna - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <link rel="stylesheet" href="css/profile.css">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+</head>
+<body>
+
+    <header class="sticky-header pinterest-style">
+        <div class="header-left">
+            <a href="index.html" class="logo-link">
+                <img src="img/favicon-32x32.png" alt="Logo" class="header-logo">
+            </a>
+            <a href="index.html" class="desktop-nav-link" style="display: flex; align-items: center; gap: 5px;">
+                <span class="material-icons">arrow_back</span> Kembali ke Galeri
+            </a>
+        </div>
+        
+        <div class="header-right">
+            <div id="user-profile-desktop" class="user-profile-wrapper">
+                <div class="profile-icon-container">
+                    <img id="header-avatar" src="https://placehold.co/100x100?text=U" alt="User">
+                </div>
+                <button id="logout-btn-profile" class="icon-btn-pinterest" title="Keluar">
+                    <span class="material-icons" style="color: var(--danger-red);">logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container profile-container">
+        
+        <section class="profile-header-card">
+            <div class="profile-cover"></div> <div class="profile-info-wrapper">
+                <div class="profile-avatar-large">
+                    <img id="profile-image" src="https://placehold.co/150x150?text=User" alt="Foto Profil">
+                    <button class="edit-avatar-btn" onclick="document.getElementById('edit-profile-modal').style.display='flex'">
+                        <span class="material-icons">edit</span>
+                    </button>
+                </div>
+
+                <div class="profile-text">
+                    <h1 id="profile-name">Memuat Nama...</h1>
+                    <p id="profile-email" class="username">@memuat...</p>
+                    <p id="profile-bio" class="bio">"Belum ada bio. Tulis sesuatu yang keren di sini!"</p>
+                    
+                    <div class="level-badge">
+                        <span class="material-icons">military_tech</span>
+                        <span id="profile-rank">Level 1: Newbie</span>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-prompts">0</span>
+                        <span class="stat-label">Prompt</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-likes">0</span>
+                        <span class="stat-label">Disukai</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-xp">0</span>
+                        <span class="stat-label">XP Total</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xp-container">
+                <div class="xp-info">
+                    <span>Progress ke Level Berikutnya</span>
+                    <span id="xp-text">0 / 100 XP</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="my-prompts">
+                <span class="material-icons">grid_view</span> Karya Saya
+            </button>
+            <button class="tab-btn" data-tab="liked-prompts">
+                <span class="material-icons">favorite</span> Disukai
+            </button>
+            <button class="tab-btn" data-tab="achievements">
+                <span class="material-icons">emoji_events</span> Pencapaian
+            </button>
+        </div>
+
+        <div id="profile-content-area" class="prompt-grid">
+            <div class="loader-container">
+                <div class="spinner"></div>
+                <p>Memuat data profil...</p>
+            </div>
+        </div>
+
+        <div id="achievements-area" class="achievements-grid hidden">
+            <div class="achievement-card locked">
+                <div class="badge-icon">🏅</div>
+                <h3>First Blood</h3>
+                <p>Upload prompt pertamamu.</p>
+            </div>
+            <div class="achievement-card locked">
+                <div class="badge-icon">🔥</div>
+                <h3>On Fire</h3>
+                <p>Dapatkan 100 Like total.</p>
+            </div>
+            <div class="achievement-card locked">
+                <div class="badge-icon">🤖</div>
+                <h3>AI Master</h3>
+                <p>Capai Level 10.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profil</h2>
+                <button class="close-btn" onclick="document.getElementById('edit-profile-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-profile-form">
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="edit-name" placeholder="Nama Anda">
+                    </div>
+                    <div class="form-group">
+                        <label>Bio Singkat</label>
+                        <textarea id="edit-bio" rows="3" placeholder="Ceritakan sedikit tentang dirimu..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Foto URL (Sementara)</label>
+                        <input type="url" id="edit-photo-url" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="auth-button login-btn full-width">Simpan Perubahan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav-mobile">
+        <a href="index.html" class="nav-item">
+            <span class="material-icons">home</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <span class="material-icons">person</span>
+            <span class="nav-label">Profil</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/profile.js"></script>
+    
+    <script>
+        // Script SEMENTARA untuk Tab Logic (Biar Tuan bisa klik-klik dulu)
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Reset active class
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const tab = btn.dataset.tab;
+                const grid = document.getElementById('profile-content-area');
+                const badges = document.getElementById('achievements-area');
+
+                if (tab === 'achievements') {
+                    grid.classList.add('hidden');
+                    badges.classList.remove('hidden');
+                } else {
+                    grid.classList.remove('hidden');
+                    badges.classList.add('hidden');
+                    // Nanti di sini logic fetch prompt berdasarkan tab
+                    grid.innerHTML = `<p style="text-align:center; width:100%; margin-top:20px;">Menampilkan konten: <strong>${tab}</strong> (Segera Hadir)</p>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

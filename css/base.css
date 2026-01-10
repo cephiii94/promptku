@@ -1,0 +1,26 @@
+/* ==========================================================================
+   BASE STYLES & RESETS
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-sans);
+    background-color: var(--soft-blue-bg);
+    color: var(--text-dark);
+    line-height: 1.6;
+    padding-top: var(--header-height-desktop);
+    padding-bottom: 80px; 
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.full-width {
+    width: 100%;
+}

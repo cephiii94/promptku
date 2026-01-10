@@ -8,7 +8,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/mobile.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
@@ -43,10 +49,10 @@
 
             <div id="user-profile-desktop" class="user-profile-wrapper" style="display: none;">
                 
-                <div class="profile-icon-container tooltip-container">
+                <a href="profile.html" class="profile-icon-container tooltip-container">
                     <img id="header-avatar" src="https://placehold.co/100x100/e3f2fd/1e3a5a?text=U" alt="User">
-                    <span class="tooltip">Profil Anda</span>
-                </div>
+                    <span class="tooltip">Lihat Profil</span>
+                </a>
 
                 <button id="profile-dropdown-trigger" class="icon-btn-pinterest">
                     <span class="material-icons">keyboard_arrow_down</span>
@@ -59,6 +65,11 @@
                         <p id="dropdown-email">user@email.com</p>
                     </div>
                     <hr>
+                    
+                    <a href="profile.html" class="dropdown-item">
+                        <span class="material-icons">person</span> Lihat Profil
+                    </a>
+                    
                     <a href="#" class="dropdown-item">
                         <span class="material-icons">settings</span> Pengaturan
                     </a>
@@ -292,6 +303,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://mayar.id/mayar-min.js"></script>
     <script type="module" src="js/main.js"></script>
+    
     
         <footer class="site-footer">
         <div class="container">

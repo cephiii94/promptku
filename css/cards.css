@@ -1,0 +1,201 @@
+/* ==========================================================================
+   CARD COMPONENT
+   ========================================================================== */
+.card {
+    background: var(--light-gray-bg);
+    position: relative;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    break-inside: avoid;
+    border: none;
+    transition: transform 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    animation: glow 2s infinite ease-in-out;
+}
+
+.card-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--border-radius-lg);
+    line-height: 0;
+    cursor: zoom-in;
+}
+.card-image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--border-radius-lg);
+    transition: transform 0.3s ease;
+}
+.card:hover .card-image-container img { transform: scale(1.05); }
+
+/* Overlay Category Text */
+.image-overlay-text {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    z-index: 6;
+}
+.image-overlay-text:hover {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+/* Card Actions (Admin) */
+.card-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease-in-out;
+}
+.card:hover .card-actions {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.action-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+}
+.action-btn:hover { transform: scale(1.1) translateY(-2px); }
+.edit-btn { background-color: var(--primary-blue); }
+.delete-btn { background-color: var(--danger-red); }
+
+/* Overlay Actions (Copy) */
+.copy-btn-overlay {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    border-radius: var(--border-radius-md);
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.copy-btn-overlay .material-icons { font-size: 20px; }
+.copy-btn-overlay .copy-text { display: none; font-size: 0.8rem; font-weight: 500; }
+.copy-btn-overlay:hover { background: rgba(255, 255, 255, 0.4); }
+.copy-btn-overlay.copied {
+    background-color: var(--success-green);
+    border-color: var(--success-green);
+}
+.copy-btn-overlay.copied .material-icons { display: none; }
+.copy-btn-overlay.copied .copy-text { display: inline; padding: 0 0.25rem; }
+
+/* Card Info Overlay */
+.card-prompt-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--white);
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+.card:hover .card-prompt-overlay { transform: translateY(0); opacity: 1; }
+
+.overlay-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1;
+    min-width: 0;
+}
+.overlay-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    display: block;
+}
+.overlay-user {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+}
+
+/* Tags in Overlay */
+.card-tags-overlay { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem; }
+.tag-overlay {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.tag-overlay:hover { background: var(--primary-blue); color: var(--white); }
+
+/* Expand Hint */
+.card-expand-hint {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    padding: 5px;
+    z-index: 6; 
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+    transition: all 0.2s ease;
+}
+.card:hover .card-actions + .card-expand-hint { display: none; }
+@media (min-width: 769px) {
+    .card:hover .card-expand-hint { opacity: 0; visibility: hidden; }
+}

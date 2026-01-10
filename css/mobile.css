@@ -1,0 +1,131 @@
+/* ==========================================================================
+   MOBILE & RESPONSIVE STYLES
+   ========================================================================== */
+
+/* Bottom Navigation (Glassmorphism) */
+.bottom-nav-mobile {
+    display: flex; 
+    position: fixed;
+    bottom: 1rem; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 450px;
+    z-index: 1010;
+    height: 65px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.6);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--text-medium);
+    text-decoration: none;
+    padding: 4px 0;
+    transition: color 0.2s ease-in-out;
+}
+.nav-item:hover { color: var(--primary-blue); }
+.nav-item.active { color: var(--primary-blue-dark); font-weight: 500; }
+.nav-item .material-icons { font-size: 24px; }
+.nav-label { font-size: 11px; margin-top: 2px; }
+
+.nav-add-fab {
+    transform: translateY(-20px);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-green);
+    color: var(--white);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--white);
+    flex: none; 
+}
+.nav-add-fab .material-icons { font-size: 32px; }
+.nav-add-fab:hover { background-color: var(--success-green); color: var(--white); }
+
+.bottom-nav-mobile .tooltip { top: auto; bottom: 115%; }
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    body { padding-top: var(--header-height-mobile); }
+    .sticky-header { padding: 0.5rem 0.5rem; }
+    .header-title h1 { font-size: 1rem; }
+    .container { padding: 2rem 2rem; }
+
+    /* Hide Desktop Elements */
+    .pinterest-style .header-left .desktop-nav-link,
+    .pinterest-style .header-center,
+    .header-controls .filter-input,
+    .header-controls .auth-button,
+    .header-controls #add-prompt-link,
+    #search-btn,
+    #add-prompt-link-mobile,
+    #auth-container-mobile {
+        display: none !important;
+    }
+    
+    #category-filter { display: inline-flex; flex-grow: 1; }
+
+    /* Full View Modal Adjustments for Mobile */
+    .modal-content-fullview { flex-direction: column; height: 85vh; }
+    .modal-image-side {
+        flex: 1;
+        min-height: 0;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+    .modal-prompt-side {
+        flex: none;
+        height: auto;
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        padding: 1.5rem;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+    .modal-prompt-side h2, .modal-prompt-side .prompt-text-container { display: none; }
+    .prompt-author-info { margin-top: 0; margin-bottom: 1rem; text-align: center; }
+    
+    .modal-button-group { gap: 0.5rem; }
+    .modal-button-group .auth-button { font-size: 0.8rem; padding: 0.6rem; }
+    .modal-button-group .like-btn { padding: 0.6rem 0.75rem; flex: 0 1 auto; }
+    .modal-button-group .auth-button .material-icons { font-size: 1rem; }
+    
+    .close-btn-fullview {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        line-height: 32px;
+    }
+
+    /* Modal Nav Buttons */
+    .modal-nav-btn { width: 36px; height: 36px; font-size: 20px; }
+    .modal-nav-btn#modal-nav-prev { left: 0.5rem; }
+    .modal-nav-btn#modal-nav-next { right: 0.5rem; }
+
+    /* Tooltip */
+    .help-tooltip-content { width: 280px; }
+    .help-tooltip-icon { top: -38px; width: 24px; height: 24px; }
+    .help-tooltip-icon .material-icons { font-size: 18px; }
+}
+
+@media (min-width: 769px) {
+    #search-btn { display: none; }
+    .header-controls .filter-input,
+    .header-controls .auth-button,
+    .header-controls #add-prompt-link,
+    #category-filter {
+        display: inline-flex;
+    }
+    .search-form-overlay { display: none !important; }
+}

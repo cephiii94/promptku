@@ -285,6 +285,44 @@ function setupEventListeners() {
         });
     }
 
+    // --- A. LOGIKA TAB (MASUK vs DAFTAR) ---
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const authForms = document.querySelectorAll('.auth-form-container');
+
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // 1. Hapus class 'active' dari semua tab & form
+            authTabs.forEach(t => t.classList.remove('active'));
+            authForms.forEach(f => f.classList.remove('active'));
+
+            // 2. Tambah class 'active' ke tab yang diklik
+            tab.classList.add('active');
+
+            // 3. Munculkan form yang sesuai (Login atau Register)
+            const targetId = tab.dataset.target; // ambil data-target="register-form-wrapper"
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
+
+    // --- B. LOGIKA SUBMIT FORM DAFTAR ---
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            // Panggil fungsi register dari Auth
+            Auth.registerUser(auth, email, password, name, () => {
+                UI.hideModal('auth-modal'); // Tutup modal kalau sukses
+                registerForm.reset(); // Kosongkan form
+            });
+        });
+    }
+
     // 2. Add Prompt Form & Cloudinary
     if(UI.els.promptForm) {
         UI.els.promptForm.addEventListener('submit', async (e) => {
