@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         Swal.fire({
             icon: 'warning',
             title: 'Akses Dibatasi',
-            text: 'Mohon Log In dulu untuk mengakses halaman Generator.',
+            text: 'Mohon Log In dulu untuk mengakses halaman',
             confirmButtonColor: '#F59E0B'
         });
         sessionStorage.removeItem('alert_must_login');
@@ -431,7 +431,8 @@ function setupEventListeners() {
             if (editBtn) {
                 const promptToEdit = allPrompts.find(p => p.id === editBtn.dataset.id);
                 if (promptToEdit) {
-                    UI.fillPromptModal(promptToEdit);
+                    // PERBAIKAN: Kirim status admin (currentUser?.isAdmin) sebagai parameter kedua
+                    UI.fillPromptModal(promptToEdit, currentUser?.isAdmin);
                     UI.showModal('prompt-modal');
                 }
             }
@@ -559,11 +560,18 @@ function setupEventListeners() {
     }
 
     // Header & Mobile Nav Actions
-    if(UI.els.addPromptLinkMobile) UI.els.addPromptLinkMobile.addEventListener('click', (e) => { e.preventDefault(); UI.showModal('prompt-modal'); });
+    const openNewPromptModal = (e) => {
+        e.preventDefault();
+        // Param 1: null (data kosong), Param 2: status admin
+        UI.fillPromptModal(null, currentUser?.isAdmin); 
+        UI.showModal('prompt-modal');
+    };
+
     if (UI.els.navSearch) UI.els.navSearch.addEventListener('click', (e) => { e.preventDefault(); if(UI.els.searchOverlay) UI.els.searchOverlay.classList.toggle('active'); window.scrollTo(0, 0); });
-    if (UI.els.navAddPrompt) UI.els.navAddPrompt.addEventListener('click', (e) => { e.preventDefault(); UI.showModal('prompt-modal'); });
-    if (UI.els.navAddPromptMobile) UI.els.navAddPromptMobile.addEventListener('click', (e) => { e.preventDefault(); UI.showModal('prompt-modal'); });
-    
+    if(UI.els.addPromptLinkMobile) UI.els.addPromptLinkMobile.addEventListener('click', openNewPromptModal);
+    if (UI.els.navAddPrompt) UI.els.navAddPrompt.addEventListener('click', openNewPromptModal);
+    if (UI.els.navAddPromptMobile) UI.els.navAddPromptMobile.addEventListener('click', openNewPromptModal);
+
     // Header Pinterest Style Logic
     if (UI.els.loginBtnDesktop) UI.els.loginBtnDesktop.addEventListener('click', () => UI.showModal('auth-modal'));
     if (UI.els.logoutBtnDesktop) UI.els.logoutBtnDesktop.addEventListener('click', (e) => {

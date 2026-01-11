@@ -226,26 +226,26 @@ export const renderPagination = (totalPages, currentPage, onPageChange) => {
 };
 
 // === 4. AUTH STATE UI (LOGIKA DIPERBAIKI: LANGSUNG KE DIV) ===
+// File: js/ui.js
+
 export const updateAuthStateUI = (user, isAdmin, onLoginClick, onLogoutClick) => {
     
-    // Pastikan container navigasi ada
-    const container = els.navAuthContainer;
-    if (!container) return;
+    // 1. Ambil elemen Navigasi User Mobile (Si Bunglon)
+    const navUserMobile = document.getElementById('nav-user-mobile');
 
-    // Reset isi container
-    container.innerHTML = '';
-    
-    // Pastikan cursornya pointer agar terlihat bisa diklik
-    container.style.cursor = 'pointer';
+    // Reset Pointer (agar bisa diklik)
+    if (navUserMobile) navUserMobile.style.cursor = 'pointer';
 
     if (user) {
-        // === USER SUDAH LOGIN ===
+        // =======================
+        // KONDISI: SUDAH LOGIN
+        // =======================
         
-        // 1. Desktop UI
+        // A. UI Desktop (Tetap sama)
         if(els.authButtonsDesktop) els.authButtonsDesktop.style.display = 'none';
         if(els.userProfileDesktop) els.userProfileDesktop.style.display = 'flex';
         
-        if(els.headerAvatar) els.headerAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=2563EB&color=fff`;
+        if(els.headerAvatar) els.headerAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=2563EB&color=fff`;
         if(els.dropdownUsername) {
             let nameHTML = user.displayName || 'Pengguna';
             if (isAdmin) nameHTML += ` <span style="background-color: #EF4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; font-weight: 700;">ADMIN</span>`;
@@ -253,49 +253,58 @@ export const updateAuthStateUI = (user, isAdmin, onLoginClick, onLogoutClick) =>
         }
         if(els.dropdownEmail) els.dropdownEmail.textContent = user.email;
 
-        // 2. Mobile Bottom Nav -> Icon LOGOUT
-        // Isi langsung ke div kontainer, jangan bikin button baru
-        container.innerHTML = `
-            <span class="material-icons" style="color: #EF4444;">logout</span>
-            <span class="nav-label" style="color: #EF4444;">Keluar</span>
-        `;
-        
-        // Pasang onclick langsung ke div kontainer
-        container.onclick = (e) => {
-            e.preventDefault(); // Mencegah scrolling ke atas jika ada href="#"
-            onLogoutClick();
-        };
+        // B. UI Mobile: Ubah tombol jadi PROFIL
+        if (navUserMobile) {
+            navUserMobile.innerHTML = `
+                <span class="material-icons">person</span>
+                <span class="nav-label">Profil</span>
+            `;
+            navUserMobile.href = "profile.html"; // Arahkan ke halaman profil
+            
+            // Hapus event listener 'Login' sebelumnya (PENTING!)
+            // Cara termudah: clone node untuk membuang semua event listener lama
+            const newNav = navUserMobile.cloneNode(true);
+            navUserMobile.parentNode.replaceChild(newNav, navUserMobile);
+        }
 
-        // 3. Tombol (+) FAB
+        // C. Munculkan Tombol (+) FAB
         if(els.navAddPromptMobile) els.navAddPromptMobile.classList.remove('hidden');
 
     } else {
-        // === USER BELUM LOGIN (TAMU) ===
+        // =======================
+        // KONDISI: BELUM LOGIN (TAMU)
+        // =======================
 
-        // 1. Desktop UI
+        // A. UI Desktop
         if(els.authButtonsDesktop) els.authButtonsDesktop.style.display = 'block';
         if(els.userProfileDesktop) els.userProfileDesktop.style.display = 'none';
 
-        // 2. Mobile Bottom Nav -> Icon LOGIN
-        // Isi langsung ke div kontainer
-        container.innerHTML = `
-            <span class="material-icons">login</span>
-            <span class="nav-label">Masuk</span>
-        `;
+        // B. UI Mobile: Ubah tombol jadi MASUK (LOGIN)
+        if (navUserMobile) {
+            navUserMobile.innerHTML = `
+                <span class="material-icons">login</span>
+                <span class="nav-label">Masuk</span>
+            `;
+            navUserMobile.href = "#"; // Jangan pindah halaman
+            
+            // Pasang Event Listener untuk Buka Modal Login
+            // Kita clone dulu biar bersih dari event lama
+            const newNav = navUserMobile.cloneNode(true);
+            navUserMobile.parentNode.replaceChild(newNav, navUserMobile);
+            
+            newNav.addEventListener('click', (e) => {
+                e.preventDefault();
+                onLoginClick(); // Panggil fungsi buka modal
+            });
+        }
 
-        // Pasang onclick langsung ke div kontainer
-        container.onclick = (e) => {
-            e.preventDefault();
-            onLoginClick();
-        };
-
-        // 3. Tombol (+) FAB (Sembunyikan)
+        // C. Sembunyikan Tombol (+) FAB
         if(els.navAddPromptMobile) els.navAddPromptMobile.classList.add('hidden');
     }
 };
 
 // === 5. FORM FILLING HELPER ===
-export const fillPromptModal = (data) => {
+export const fillPromptModal = (data, isAdmin) => {
     document.getElementById('modal-title').innerText = data ? 'Edit Prompt' : 'Tambah Prompt Baru';
     document.getElementById('prompt-id').value = data?.id || '';
     document.getElementById('prompt-title').value = data?.title || '';
@@ -312,6 +321,17 @@ export const fillPromptModal = (data) => {
     if(els.promptPremiumCheck) els.promptPremiumCheck.checked = isPrem;
     if(els.promptMayarLink) els.promptMayarLink.value = data?.mayarLink || '';
     
+    const premiumContainer = document.getElementById('premium-container');
+    if (premiumContainer) {
+        if (isAdmin) {
+            premiumContainer.style.display = 'flex'; // Munculkan kalau Admin
+        } else {
+            premiumContainer.style.display = 'none'; // Sembunyikan kalau User Biasa
+            // Reset nilai kalau user biasa (biar gak sengaja ke-submit)
+            if(els.promptPremiumCheck) els.promptPremiumCheck.checked = false;
+        }
+    }
+
     // Toggle UI Premium Input
     if (els.mayarLinkContainer) {
         if (isPrem) {
@@ -386,7 +406,7 @@ export const showFullViewModal = (data, currentUser, currentViewIndex, totalItem
             copyBtn.classList.add('login-btn');
             copyBtn.style.backgroundColor = ''; 
             copyBtn.style.color = '';
-            copyBtn.innerHTML = `<span class="material-icons">content_copy</span><span>Salin Prompt</span>`;
+            copyBtn.innerHTML = `<span class="material-icons">file_open</span><span>Lihat Prompt</span>`;
             copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
             copyBtn.dataset.isPremium = "false";
         }
