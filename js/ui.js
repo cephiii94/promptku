@@ -111,18 +111,16 @@ export const renderPrompts = (prompts, currentUser, currentPage, itemsPerPage) =
     const allCardsHTML = prompts.map((prompt, index) => {
         const absoluteIndex = ((currentPage - 1) * itemsPerPage) + index;
 
-        // Admin/Owner Actions
+        // 1. Admin/Owner Actions
         let adminActions = '';
         if (currentUser && (prompt.creatorId === currentUser.uid || currentUser.isAdmin === true)) {
             adminActions = `
             <div class="card-actions" style="gap: 4px; align-items: center;">
-                
                 <button type="button" class="action-btn" 
                     style="width: auto; padding: 0 8px; font-size: 11px; background: rgba(0,0,0,0.7); border-radius: 4px;"
                     onclick="event.stopPropagation(); navigator.clipboard.writeText('${prompt.id}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'ID Disalin!', showConfirmButton: false, timer: 1000});">
                     ID
                 </button>
-
                 <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                 <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
             </div>`;
@@ -132,15 +130,27 @@ export const renderPrompts = (prompts, currentUser, currentPage, itemsPerPage) =
             ? `<span class="image-overlay-text" data-filter-type="category" data-filter-value="${prompt.category}">${prompt.category}</span>` 
             : ''; 
         
-        // Logika Tombol Overlay (PREMIUM vs GRATIS)
+        // =========================================================
+        // [PERBAIKAN] DEFINISI VARIABEL isOwned (YANG TADI HILANG)
+        // =========================================================
+        const isOwned = currentUser && (
+            (currentUser.ownedPrompts && currentUser.ownedPrompts.includes(prompt.id)) || 
+            currentUser.isAdmin || 
+            currentUser.uid === prompt.creatorId
+        );
+        // =========================================================
+
+        // 2. Logika Tombol Overlay (PREMIUM vs GRATIS)
         let actionButtonHtml = '';
-        if (prompt.isPremium) {
+        if (prompt.isPremium && !isOwned) {
+            // Tombol BELI (Embed Style)
             actionButtonHtml = `
-            <a href="${prompt.mayarLink}" target="_blank" class="copy-btn-overlay premium-btn" style="text-decoration: none; background: #F59E0B; border-color: #D97706;">
+            <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
                 <span class="material-icons">shopping_cart</span>
                 <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
-            </a>`;
+            </button>`;
         } else {
+            // Tombol SALIN (Gratis/Sudah Beli)
             actionButtonHtml = `
             <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText || '')}">
                 <span class="material-icons">content_copy</span>
@@ -399,9 +409,12 @@ export const showFullViewModal = (data, currentUser, currentViewIndex, totalItem
         // Ubah Tombol Copy jadi Beli
         if(copyBtn) {
             copyBtn.classList.remove('login-btn'); 
+            copyBtn.classList.add('pay-btn'); // Tambah class ini
             copyBtn.style.backgroundColor = '#F59E0B';
             copyBtn.style.color = '#fff';
             copyBtn.innerHTML = `<span class="material-icons">shopping_cart</span><span>Beli Sekarang</span>`;
+            
+            // Simpan Link di dataset
             copyBtn.dataset.mayarLink = data.mayarLink;
             copyBtn.dataset.isPremium = "true";
         }

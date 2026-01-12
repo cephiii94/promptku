@@ -272,6 +272,47 @@ const toggleLikePrompt = async (promptId) => {
     }
 };
 
+const triggerMayarCheckout = (link) => {
+    if (!link) {
+        Swal.fire('Error', 'Link pembayaran tidak ditemukan!', 'error');
+        return;
+    }
+
+    console.log("--- DEBUG FINAL START ---");
+    
+    // Script resmi Mayar menggunakan 'window.Mayar' (M Besar)
+    const mayarInstance = window.Mayar; 
+
+    if (mayarInstance && typeof mayarInstance.checkout === 'function') {
+        console.log("✅ Script Mayar Resmi Terdeteksi!");
+        
+        mayarInstance.checkout(link, {
+            onClosed: () => {
+                console.log("Popup ditutup.");
+            },
+            onSuccess: () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pembayaran Berhasil!',
+                    text: 'Membuka akses prompt...',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    } else {
+        // JIKA MASIH GAGAL:
+        console.warn("⚠️ Script Masih Terblokir / Gagal Dimuat.");
+        console.log("Cek ikon Perisai/Shield di browser & matikan proteksi.");
+        
+        // Tetap buka tab baru agar user bisa bayar
+        window.open(link, '_blank');
+    }
+    console.log("--- DEBUG FINAL END ---");
+};
+
 // =========================================================================
 // EVENT LISTENERS SETUP
 // =========================================================================
@@ -324,7 +365,7 @@ function setupEventListeners() {
     }
 
     // 2. Add Prompt Form & Cloudinary
-if (UI.els.promptForm) {
+    if (UI.els.promptForm) {
         UI.els.promptForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -388,11 +429,27 @@ if (UI.els.promptForm) {
 
                 // 3. Upload Gambar (Jika ada file baru)
                 if (imageFile) {
-                    const storageRef = firebase.storage().ref();
-                    const fileRef = storageRef.child(`prompts/${Date.now()}_${imageFile.name}`);
-                    await fileRef.put(imageFile);
-                    imageUrl = await fileRef.getDownloadURL();
-                }
+                        // Siapkan Data untuk Cloudinary
+                        const formData = new FormData();
+                        formData.append('file', imageFile);
+                        
+                        // ⚠️ PENTING: Pastikan Tuan sudah buat "Upload Preset" (Unsigned) di Dashboard Cloudinary
+                        // Ganti 'promptku_preset' dengan nama preset Tuan (misal: 'ml_default' atau bikin baru)
+                        formData.append('upload_preset', 'galeri-prompt-uploads'); 
+                        
+                        // Kirim ke Cloudinary
+                        const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!cloudinaryRes.ok) {
+                            throw new Error('Gagal upload gambar ke Cloudinary. Cek Upload Preset!');
+                        }
+
+                        const cloudinaryData = await cloudinaryRes.json();
+                        imageUrl = cloudinaryData.secure_url; // Ambil URL hasil upload
+                    }
 
                 // 4. Siapkan Data untuk Disimpan
                 const promptData = {
@@ -463,7 +520,7 @@ if (UI.els.promptForm) {
                 const btn = e.currentTarget;
                 // Jika Premium (Beli), buka link
                 if (btn.dataset.isPremium === "true") {
-                    window.open(btn.dataset.mayarLink, '_blank');
+                    triggerMayarCheckout(btn.dataset.mayarLink); // <--- UBAH BARIS INI
                     return; 
                 }
 
@@ -534,6 +591,7 @@ if (UI.els.promptForm) {
     // [BARU] 5.5. INTERAKSI GRID (KLIK KARTU, EDIT, DELETE)
     if (UI.els.promptGrid) {
         UI.els.promptGrid.addEventListener('click', (e) => {
+            
             
             // A. Handle Tombol Edit
             const editBtn = e.target.closest('.edit-btn');
