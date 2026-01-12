@@ -324,132 +324,129 @@ function setupEventListeners() {
     }
 
     // 2. Add Prompt Form & Cloudinary
-    if(UI.els.promptForm) {
+if (UI.els.promptForm) {
         UI.els.promptForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'Login untuk menyimpan.' });
-        
-            const fileInput = document.getElementById('prompt-imageFile');
-            const file = fileInput ? fileInput.files[0] : null;
-            const existingImageUrl = document.getElementById('prompt-imageUrl').value;
-            const promptId = document.getElementById('prompt-id').value;
-        
-            if (!promptId && !file) return Swal.fire({ icon: 'warning', title: 'Gambar Kosong', text: 'Silakan upload gambar.' });
-        
-            const submitButton = UI.els.promptForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="material-icons spin">hourglass_top</span>'; 
-        
-            let imageUrl = existingImageUrl; 
-            if (file) {
-                try {
-                    const signatureResponse = await fetch('/.netlify/functions/generate-signature');
-                    if (!signatureResponse.ok) throw new Error('Signature failed');
-                    const { signature, timestamp, api_key } = await signatureResponse.json();
-                    
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('api_key', api_key);
-                    formData.append('timestamp', timestamp);
-                    formData.append('signature', signature);
-                    formData.append('upload_preset', 'galeri-prompt-uploads'); 
-                    
-                    const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-                    const response = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
-                    if (!response.ok) throw new Error('Cloudinary failed');
-                    const data = await response.json();
-                    imageUrl = data.secure_url; 
-                } catch (error) {
-                    Swal.fire({ icon: 'error', title: 'Upload Gagal', text: 'Coba lagi nanti.' });
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = '<span class="material-icons">save</span>';
-                    return;
-                }
-            }
-        
+
+            // 1. Ambil Value dari Input
+            const title = document.getElementById('prompt-title').value;
             const socialUrl = document.getElementById('prompt-socialUrl').value;
-            const isPremium = document.getElementById('prompt-isPremium') ? document.getElementById('prompt-isPremium').checked : false;
-            const mayarLink = document.getElementById('prompt-mayarLink') ? document.getElementById('prompt-mayarLink').value : '';
-
-            const promptData = {
-                id: promptId,
-                title: document.getElementById('prompt-title').value,
-                user: extractUsernameFromUrl(socialUrl),
-                socialUrl: socialUrl,
-                category: document.getElementById('prompt-category').value, 
-                promptText: document.getElementById('prompt-text').value,
-                imageUrl: imageUrl,
-                tags: document.getElementById('prompt-tags').value,
-                isPremium: isPremium,
-                mayarLink: isPremium ? mayarLink : '' 
-            };
-            if (!promptId) promptData.creatorId = currentUser.uid;
-        
-            await savePrompt(promptData); 
-            submitButton.disabled = false;
-            submitButton.innerHTML = '<span class="material-icons">save</span>';
-        });
-    }
-
-    // 3. Grid Interaction (View, Edit, Delete, Copy)
-    if(UI.els.promptGrid) {
-        UI.els.promptGrid.addEventListener('click', (e) => {
-            const target = e.target;
-            const editBtn = target.closest('.edit-btn');
-            const deleteBtn = target.closest('.delete-btn');
-            const copyBtn = target.closest('.copy-btn-overlay:not(.premium-btn)'); 
-            const clickedFilter = target.closest('[data-filter-type]');
-            const viewBtn = target.closest('[data-action="view-prompt"]'); 
-
-            if (viewBtn && !editBtn && !deleteBtn && !copyBtn && !clickedFilter) {
-                const index = parseInt(viewBtn.dataset.index, 10);
-                if (!isNaN(index)) {
-                    currentViewIndex = index;
-                    const promptData = currentFilteredPrompts[currentViewIndex];
-                    if (promptData) UI.showFullViewModal(promptData, currentUser, currentViewIndex, currentFilteredPrompts.length);
-                }
-                return;
-            }
-
-            if (clickedFilter) {
-                const { filterType, filterValue } = clickedFilter.dataset;
-                if(UI.els.textFilterDesktop) UI.els.textFilterDesktop.value = '';
-                if(UI.els.textFilterMobile) UI.els.textFilterMobile.value = '';
-                
-                if (filterType === 'category') handleCategoryClick(filterValue);
-                else if (filterType === 'tag') {
-                    if(UI.els.textFilterDesktop) {
-                        UI.els.textFilterDesktop.value = filterValue;
-                        UI.toggleClearButton();
-                    }
-                    handleCategoryClick('all'); 
-                }
-                window.scrollTo(0, 0); 
-                return;
-            }
-
-            if (editBtn) {
-                const promptToEdit = allPrompts.find(p => p.id === editBtn.dataset.id);
-                if (promptToEdit) {
-                    // PERBAIKAN: Kirim status admin (currentUser?.isAdmin) sebagai parameter kedua
-                    UI.fillPromptModal(promptToEdit, currentUser?.isAdmin);
-                    UI.showModal('prompt-modal');
-                }
-            }
-            if (deleteBtn) deletePrompt(deleteBtn.dataset.id);
             
-            if (copyBtn) {
-                const textToCopy = decodeURIComponent(copyBtn.dataset.promptText);
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    const textSpan = copyBtn.querySelector('.copy-text');
-                    const originalText = textSpan.textContent; 
-                    copyBtn.classList.add('copied');
-                    textSpan.textContent = 'Tersalin!';
-                    setTimeout(() => {
-                        copyBtn.classList.remove('copied');
-                        textSpan.textContent = originalText;
-                    }, 2000);
-                });
+            // Ambil Kategori (Bisa dari Dropdown atau pakai default)
+            let category = '';
+            if (UI.els.promptCategoryInput) category = UI.els.promptCategoryInput.value;
+            
+            // Ambil Tags
+            const tagsInput = document.getElementById('prompt-tags').value;
+            const tags = tagsInput.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag !== '');
+
+            // Ambil Text Prompt (Fix yang tadi kita tambahkan textarea)
+            const promptTextElement = document.getElementById('prompt-text');
+            const promptText = promptTextElement ? promptTextElement.value : '';
+
+            // Ambil Status Premium
+            const isPremium = document.getElementById('prompt-isPremium').checked;
+            
+            // Ambil Link Mayar
+            const mayarLinkInput = document.getElementById('prompt-mayarLink');
+            const mayarLink = mayarLinkInput ? mayarLinkInput.value : '';
+
+            // --- [BARU] AMBIL PRODUCT ID / SKU MAYAR ---
+            const mayarSkuInput = document.getElementById('prompt-mayarSku');
+            const mayarSku = mayarSkuInput ? mayarSkuInput.value.trim() : '';
+            // -------------------------------------------
+
+            const imageFile = document.getElementById('prompt-imageFile').files[0];
+            const promptId = document.getElementById('prompt-id').value;
+            const currentImageUrl = document.getElementById('prompt-imageUrl').value;
+
+            // 2. Validasi Sederhana
+            if (!title) {
+                Swal.fire('Error', 'Judul prompt wajib diisi!', 'error');
+                return;
+            }
+
+            // Jika prompt baru (tidak ada ID) dan tidak ada gambar yang diupload
+            if (!promptId && !imageFile) {
+                Swal.fire('Error', 'Wajib upload gambar hasil prompt!', 'error');
+                return;
+            }
+            
+            // Jika Premium, pastikan Link & SKU diisi (Opsional: bisa diperketat di sini)
+            if (isPremium && (!mayarLink || !mayarSku)) {
+                Swal.fire('Peringatan', 'Untuk Prompt Premium, Link Checkout & Product ID Mayar sebaiknya diisi agar sistem otomatis berjalan.', 'warning');
+            }
+
+            // Tampilkan Loading
+            const submitBtn = UI.els.promptForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-icons spin">refresh</span> Menyimpan...';
+
+            try {
+                let imageUrl = currentImageUrl;
+
+                // 3. Upload Gambar (Jika ada file baru)
+                if (imageFile) {
+                    const storageRef = firebase.storage().ref();
+                    const fileRef = storageRef.child(`prompts/${Date.now()}_${imageFile.name}`);
+                    await fileRef.put(imageFile);
+                    imageUrl = await fileRef.getDownloadURL();
+                }
+
+                // 4. Siapkan Data untuk Disimpan
+                const promptData = {
+                    title: title,
+                    title_lowercase: title.toLowerCase(), // Helper untuk pencarian
+                    socialUrl: socialUrl,
+                    category: category,
+                    tags: tags,
+                    promptText: promptText, // Simpan teks prompt
+                    imageUrl: imageUrl,
+                    isPremium: isPremium,
+                    
+                    // Simpan Data Mayar (Hanya kalau Premium)
+                    mayarLink: isPremium ? mayarLink : '',
+                    mayarSku: isPremium ? mayarSku : '', // <--- FIELD BARU KITA
+                    
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // 5. Simpan ke Firestore
+                if (promptId) {
+                    // --- MODE EDIT ---
+                    await db.collection('prompts').doc(promptId).update(promptData);
+                    Swal.fire('Berhasil!', 'Prompt berhasil diperbarui.', 'success');
+                } else {
+                    // --- MODE TAMBAH BARU ---
+                    promptData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    promptData.creatorId = currentUser.uid;
+                    promptData.user = currentUser.displayName || 'Anonymous';
+                    promptData.likeCount = 0;
+                    promptData.likedBy = [];
+
+                    await db.collection('prompts').add(promptData);
+                    Swal.fire('Berhasil!', 'Prompt baru berhasil ditambahkan!', 'success');
+                }
+
+                // 6. Bersih-bersih
+                UI.hideModal('prompt-modal');
+                UI.els.promptForm.reset();
+                // Reset preview gambar
+                document.getElementById('prompt-image-preview').src = '';
+                document.getElementById('image-preview-wrapper').style.display = 'none';
+                document.getElementById('file-input-wrapper').style.display = 'block';
+
+                // Refresh Grid
+                applyFilters();
+
+            } catch (error) {
+                console.error("Error saving prompt: ", error);
+                Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan prompt: ' + error.message, 'error');
+            } finally {
+                // Kembalikan Tombol
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
     }
@@ -533,6 +530,64 @@ function setupEventListeners() {
             applyFilters();
         });
     }
+
+    // [BARU] 5.5. INTERAKSI GRID (KLIK KARTU, EDIT, DELETE)
+    if (UI.els.promptGrid) {
+        UI.els.promptGrid.addEventListener('click', (e) => {
+            
+            // A. Handle Tombol Edit
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) {
+                e.stopPropagation(); // Biar gak ngebuka modal view
+                const id = editBtn.dataset.id;
+                const promptData = allPrompts.find(p => p.id === id);
+                if (promptData) {
+                    // Isi form dengan data prompt & status admin
+                    UI.fillPromptModal(promptData, currentUser?.isAdmin);
+                    UI.showModal('prompt-modal');
+                }
+                return;
+            }
+
+            // B. Handle Tombol Hapus
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                e.stopPropagation();
+                const id = deleteBtn.dataset.id;
+                deletePrompt(id); // Panggil fungsi delete
+                return;
+            }
+
+            // C. Handle Klik Kartu (Buka Modal Preview)
+            const cardContainer = e.target.closest('.card-image-container');
+            if (cardContainer) {
+                // Cegah jika yang diklik adalah tombol copy/beli/link overlay
+                if (e.target.closest('.copy-btn-overlay') || 
+                    e.target.closest('a') || 
+                    e.target.closest('button')) {
+                    return;
+                }
+
+                // Ambil index dari data-index
+                const index = parseInt(cardContainer.dataset.index);
+                
+                // Set global state agar tombol Next/Prev jalan
+                currentViewIndex = index;
+                
+                // Tampilkan Modal Full View
+                // Pastikan variabel currentFilteredPrompts sudah terisi dari fungsi applyFilters()
+                if (currentFilteredPrompts[index]) {
+                    UI.showFullViewModal(
+                        currentFilteredPrompts[index], 
+                        currentUser, 
+                        currentViewIndex, 
+                        currentFilteredPrompts.length
+                    );
+                }
+            }
+        });
+    }
+
 
     // 6. Navigation Buttons
     if (UI.els.modalNavPrev) UI.els.modalNavPrev.addEventListener('click', () => {

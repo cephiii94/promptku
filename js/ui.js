@@ -38,6 +38,7 @@ export const els = {
     promptPremiumCheck: document.getElementById('prompt-isPremium'),
     mayarLinkContainer: document.getElementById('mayar-link-container'),
     promptMayarLink: document.getElementById('prompt-mayarLink'),
+    promptMayarSku: document.getElementById('prompt-mayarSku'),
     promptTextInput: document.getElementById('prompt-text'),
     
     // Image Handling
@@ -114,7 +115,14 @@ export const renderPrompts = (prompts, currentUser, currentPage, itemsPerPage) =
         let adminActions = '';
         if (currentUser && (prompt.creatorId === currentUser.uid || currentUser.isAdmin === true)) {
             adminActions = `
-            <div class="card-actions">
+            <div class="card-actions" style="gap: 4px; align-items: center;">
+                
+                <button type="button" class="action-btn" 
+                    style="width: auto; padding: 0 8px; font-size: 11px; background: rgba(0,0,0,0.7); border-radius: 4px;"
+                    onclick="event.stopPropagation(); navigator.clipboard.writeText('${prompt.id}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'ID Disalin!', showConfirmButton: false, timer: 1000});">
+                    ID
+                </button>
+
                 <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                 <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
             </div>`;
@@ -305,8 +313,8 @@ export const updateAuthStateUI = (user, isAdmin, onLoginClick, onLogoutClick) =>
 
 // === 5. FORM FILLING HELPER ===
 export const fillPromptModal = (data, isAdmin) => {
-    document.getElementById('modal-title').innerText = data ? 'Edit Prompt' : 'Tambah Prompt Baru';
-    document.getElementById('prompt-id').value = data?.id || '';
+    const titleText = data ? `Edit Prompt (ID: ${data.id})` : 'Tambah Prompt Baru';
+    document.getElementById('modal-title').innerText = titleText;    document.getElementById('prompt-id').value = data?.id || '';
     document.getElementById('prompt-title').value = data?.title || '';
     document.getElementById('prompt-socialUrl').value = data?.socialUrl || '';
     
@@ -320,6 +328,7 @@ export const fillPromptModal = (data, isAdmin) => {
     const isPrem = data?.isPremium || false;
     if(els.promptPremiumCheck) els.promptPremiumCheck.checked = isPrem;
     if(els.promptMayarLink) els.promptMayarLink.value = data?.mayarLink || '';
+    if(els.promptMayarSku) els.promptMayarSku.value = data?.mayarSku || '';
     
     const premiumContainer = document.getElementById('premium-container');
     if (premiumContainer) {

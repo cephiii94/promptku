@@ -1,4 +1,5 @@
 // netlify/functions/mayar-webhook.js
+// VERSI CERDAS: Support Lookup SKU Mayar
 
 const admin = require('firebase-admin');
 
@@ -17,13 +18,12 @@ exports.handler = async (event, context) => {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // 2. Cek Keamanan (UBAHAN DISINI)
-    // Kita ambil secret dari URL (?secret=...)
+    // 2. Cek Keamanan (Secret dari URL)
     const mySecret = process.env.MAYAR_WEBHOOK_SECRET;
-    const incomingSecret = event.queryStringParameters.secret; // <--- BACA DARI URL
+    const incomingSecret = event.queryStringParameters.secret;
 
     if (mySecret && incomingSecret !== mySecret) {
-        console.log("Secret Key Salah/Tidak Ada di URL! 🥷");
+        console.log("Secret Key Salah! 🥷");
         return { statusCode: 403, body: 'Forbidden' };
     }
 
@@ -31,13 +31,31 @@ exports.handler = async (event, context) => {
         const payload = JSON.parse(event.body);
         console.log("Laporan Masuk:", payload);
 
-        // Ambil data Email & SKU
+        // Ambil data Email & SKU dari Mayar
         const emailPembeli = payload.customer_email || payload.email; 
-        const idPrompt = payload.product_code || payload.sku; 
+        const incomingSku = payload.product_code || payload.sku; 
 
-        if (!emailPembeli || !idPrompt) {
-            return { statusCode: 400, body: 'Data tidak lengkap (Butuh Email & SKU).' };
+        if (!emailPembeli || !incomingSku) {
+            return { statusCode: 400, body: 'Data tidak lengkap.' };
         }
+
+        // --- LOGIKA BARU: CARI ID ASLI ---
+        let realPromptId = incomingSku; // Default: anggap SKU = ID
+
+        // Coba cari di database: "Prompt mana yang punya mayarSku = incomingSku?"
+        const promptQuery = await db.collection('prompts')
+                                    .where('mayarSku', '==', incomingSku)
+                                    .limit(1)
+                                    .get();
+
+        if (!promptQuery.empty) {
+            // KETEMU! Pakai ID asli dokumennya
+            realPromptId = promptQuery.docs[0].id;
+            console.log(`SKU Mayar ${incomingSku} diterjemahkan menjadi ID: ${realPromptId}`);
+        } else {
+            console.log(`Peringatan: Tidak ada prompt dengan mayarSku '${incomingSku}'. Mencoba pakai SKU langsung sebagai ID.`);
+        }
+        // --------------------------------
 
         // Cari User
         const userQuery = await db.collection('users').where('email', '==', emailPembeli).limit(1).get();
@@ -49,12 +67,12 @@ exports.handler = async (event, context) => {
 
         const userDoc = userQuery.docs[0];
 
-        // Update Database
+        // Update Database User
         await userDoc.ref.update({
-            ownedPrompts: admin.firestore.FieldValue.arrayUnion(idPrompt)
+            ownedPrompts: admin.firestore.FieldValue.arrayUnion(realPromptId)
         });
 
-        console.log(`Sukses! Prompt ${idPrompt} dibuka untuk ${emailPembeli}`);
+        console.log(`Sukses! Prompt ${realPromptId} dibuka untuk ${emailPembeli}`);
         return { statusCode: 200, body: 'Webhook Success' };
 
     } catch (error) {
