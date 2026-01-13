@@ -643,6 +643,15 @@ function setupEventListeners() {
                     );
                 }
             }
+
+            // D. Handle Klik Tombol PREMIUM / BELI (Di Grid)
+            const premiumBtn = e.target.closest('.premium-btn');
+            if (premiumBtn) {
+                e.stopPropagation(); // Stop biar gak buka modal view
+                const link = premiumBtn.dataset.mayarLink;
+                triggerMayarCheckout(link); // Panggil fungsi checkout Mayar
+                return;
+            }
         });
     }
 

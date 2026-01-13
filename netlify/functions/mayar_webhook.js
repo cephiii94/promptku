@@ -1,9 +1,9 @@
 // netlify/functions/mayar_webhook.js
-// VERSI MULTI-PRODUK: Support Token & Premium Membership 💎
+// VERSI SUPER: Token + Membership + Produk Satuan (SKU) 🦸‍♂️
 
 const admin = require('firebase-admin');
 
-// --- 1. SETUP FIREBASE (Sama seperti sebelumnya) ---
+// 1. SETUP FIREBASE
 if (!admin.apps.length) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY 
         ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
@@ -21,85 +21,100 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 exports.handler = async (event, context) => {
-    // --- 2. VALIDASI BASIC ---
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
-    }
+    // 2. CEK METHOD & SECRET
+    if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
     const mySecret = process.env.MAYAR_WEBHOOK_SECRET;
-    const incomingSecret = event.queryStringParameters.secret;
-
-    if (mySecret && incomingSecret !== mySecret) {
-        console.warn("⚠️ Akses ditolak: Secret Key salah.");
+    if (mySecret && event.queryStringParameters.secret !== mySecret) {
+        console.warn("⚠️ Secret Key Salah!");
         return { statusCode: 403, body: 'Forbidden' };
     }
 
     try {
-        // --- 3. BACA DATA MAYAR ---
+        // 3. PARSE DATA
         const payload = JSON.parse(event.body);
-        console.log("📨 Payload Masuk:", JSON.stringify(payload));
+        const data = payload.data || payload; // Jaga-jaga struktur beda
+        
+        const emailPembeli = data.customerEmail || data.email;
+        const status = data.transactionStatus || data.status;
+        const productName = data.productName ? data.productName.trim() : "";
+        const incomingSku = data.productCode || data.sku || data.product_code; // SKU dari Mayar
 
-        const dataPaket = payload.data || {}; 
-        const emailPembeli = dataPaket.customerEmail;
-        const statusTransaksi = dataPaket.transactionStatus;
-        // Kita ambil nama produk, lalu kita 'trim' (hapus spasi depan/belakang) biar aman
-        const productName = dataPaket.productName ? dataPaket.productName.trim() : ""; 
+        console.log(`📨 Webhook Masuk: ${emailPembeli} | Produk: ${productName} | SKU: ${incomingSku}`);
 
-        if (!emailPembeli || statusTransaksi !== 'paid') {
-            console.log(`ℹ️ Transaksi diabaikan (Email kosong atau status bukan paid).`);
-            return { statusCode: 200, body: 'Ignored' };
+        // Hanya proses yang sudah dibayar
+        if (status !== 'paid' && status !== 'settled') {
+            return { statusCode: 200, body: 'Ignored: Not paid yet' };
         }
 
-        // --- 4. CARI USER ---
-        const userQuery = await db.collection('users')
-                                    .where('email', '==', emailPembeli)
-                                    .limit(1)
-                                    .get();
-
+        // Cari User
+        const userQuery = await db.collection('users').where('email', '==', emailPembeli).limit(1).get();
         if (userQuery.empty) {
             console.error(`❌ User ${emailPembeli} tidak ditemukan.`);
             return { statusCode: 200, body: 'User not found' };
         }
-
         const userDoc = userQuery.docs[0];
-        
-        // --- 5. LOGIKA POLISI LALU LINTAS (ROUTER PRODUK) 🚦 ---
-        // Variabel penampung update apa yang mau dilakukan
-        let updateData = {}; 
 
-        // Cek Nama Produk (Sesuaikan STRING ini dengan nama persis di Mayar Tuan)
+        // 4. LOGIKA UTAMA (ROUTER) 🚦
+        let updateData = {};
+        let logMessage = "";
+
+        // -- CEK 1: APAKAH INI TOP UP TOKEN / MEMBER? --
+        // (Sesuaikan string case ini dengan Nama Produk di Mayar Tuan)
         switch (productName) {
-            case 'Paket Token Hemat': // Contoh nama di Mayar
-            case 'Paket Token':       // Jaga-jaga kalau namanya beda dikit
-                console.log("🪙 Mendeteksi pembelian TOKEN");
-                updateData = {
-                    token: admin.firestore.FieldValue.increment(5), // Nambah 5
-                    lastTransaction: admin.firestore.FieldValue.serverTimestamp()
+            case 'Paket Token Hemat':
+            case 'Paket Token':
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(5),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
+                logMessage = "🪙 Top Up Token +5";
                 break;
 
-            case 'Membership Premium': // Contoh nama di Mayar
-            case 'Akun Sultan':        // Nama lain misal Tuan iseng
-                console.log("💎 Mendeteksi pembelian PREMIUM");
-                updateData = {
-                    isPremium: true, // Set flag jadi User Premium
-                    premiumSince: admin.firestore.FieldValue.serverTimestamp(),
-                    // Opsional: Kasih bonus token juga kalau beli premium
-                    token: admin.firestore.FieldValue.increment(10) 
+            case 'Membership Premium':
+            case 'Akun Sultan':
+                updateData = { 
+                    isPremium: true,
+                    premiumSince: admin.firestore.FieldValue.serverTimestamp()
                 };
+                logMessage = "💎 Upgrade ke Premium Member";
                 break;
-
+                
             default:
-                console.warn(`⚠️ Produk "${productName}" dibayar tapi tidak dikenali di kode.`);
-                // Jangan error, return success aja biar Mayar gak retry terus
-                return { statusCode: 200, body: `Product ${productName} not handled.` };
+                // -- CEK 2: JIKA BUKAN TOKEN/MEMBER, MUNGKIN BELI PROMPT SATUAN? --
+                if (incomingSku) {
+                    console.log(`🔍 Bukan paket rutin. Mencari prompt dengan SKU: ${incomingSku}...`);
+                    
+                    // Cari prompt di DB yang punya mayarSku sama
+                    const promptQuery = await db.collection('prompts')
+                                              .where('mayarSku', '==', incomingSku)
+                                              .limit(1)
+                                              .get();
+                    
+                    if (!promptQuery.empty) {
+                        const promptId = promptQuery.docs[0].id;
+                        
+                        // Masukkan ID Prompt ke Array ownedPrompts user
+                        updateData = {
+                            ownedPrompts: admin.firestore.FieldValue.arrayUnion(promptId)
+                        };
+                        logMessage = `🛍️ Membeli Prompt Satuan (ID: ${promptId})`;
+                    } else {
+                        console.warn(`⚠️ SKU '${incomingSku}' dibayar tapi tidak ada di Database Prompts.`);
+                        return { statusCode: 200, body: 'Product SKU not found in DB' };
+                    }
+                } else {
+                    console.warn(`⚠️ Produk '${productName}' tidak dikenali logic.`);
+                    return { statusCode: 200, body: 'Product unhandled' };
+                }
+                break;
         }
 
-        // --- 6. EKSEKUSI UPDATE DATABASE ---
+        // 5. EKSEKUSI UPDATE
         await userDoc.ref.update(updateData);
+        console.log(`✅ SUKSES: ${logMessage} untuk ${emailPembeli}`);
 
-        console.log(`✅ Sukses update user ${emailPembeli} untuk produk: ${productName}`);
-        return { statusCode: 200, body: 'Webhook Processed Successfully' };
+        return { statusCode: 200, body: 'Webhook Success' };
 
     } catch (error) {
         console.error("🔥 Error:", error);
