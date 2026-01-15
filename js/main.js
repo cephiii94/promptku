@@ -605,15 +605,23 @@ function setupEventListeners() {
     if (UI.els.promptGrid) {
         UI.els.promptGrid.addEventListener('click', (e) => {
             
+            // --- [PINDAHAN] D. CEK DULU: TOMBOL PREMIUM / BELI ---
+            // (Wajib ditaruh paling atas sebelum logika kartu/modal)
+            const premiumBtn = e.target.closest('.premium-btn');
+            if (premiumBtn) {
+                e.stopPropagation(); 
+                const link = premiumBtn.dataset.mayarLink;
+                triggerMayarCheckout(link); 
+                return; // Stop di sini agar tidak membuka modal
+            }
             
             // A. Handle Tombol Edit
             const editBtn = e.target.closest('.edit-btn');
             if (editBtn) {
-                e.stopPropagation(); // Biar gak ngebuka modal view
+                e.stopPropagation();
                 const id = editBtn.dataset.id;
                 const promptData = allPrompts.find(p => p.id === id);
                 if (promptData) {
-                    // Isi form dengan data prompt & status admin
                     UI.fillPromptModal(promptData, currentUser?.isAdmin);
                     UI.showModal('prompt-modal');
                 }
@@ -625,7 +633,7 @@ function setupEventListeners() {
             if (deleteBtn) {
                 e.stopPropagation();
                 const id = deleteBtn.dataset.id;
-                deletePrompt(id); // Panggil fungsi delete
+                deletePrompt(id);
                 return;
             }
 
@@ -639,14 +647,9 @@ function setupEventListeners() {
                     return;
                 }
 
-                // Ambil index dari data-index
                 const index = parseInt(cardContainer.dataset.index);
-                
-                // Set global state agar tombol Next/Prev jalan
                 currentViewIndex = index;
                 
-                // Tampilkan Modal Full View
-                // Pastikan variabel currentFilteredPrompts sudah terisi dari fungsi applyFilters()
                 if (currentFilteredPrompts[index]) {
                     UI.showFullViewModal(
                         currentFilteredPrompts[index], 
@@ -655,15 +658,6 @@ function setupEventListeners() {
                         currentFilteredPrompts.length
                     );
                 }
-            }
-
-            // D. Handle Klik Tombol PREMIUM / BELI (Di Grid)
-            const premiumBtn = e.target.closest('.premium-btn');
-            if (premiumBtn) {
-                e.stopPropagation(); // Stop biar gak buka modal view
-                const link = premiumBtn.dataset.mayarLink;
-                triggerMayarCheckout(link); // Panggil fungsi checkout Mayar
-                return;
             }
         });
     }
