@@ -63,8 +63,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     currentUser.isPremium = userData.isPremium || false;
                     console.log("👤 User Profile Loaded:", currentUser.ownedPrompts.length, "prompts owned.");
                 } else {
-                    // Init empty profile if not exists
+                    // [SELF-HEALING] Jika doc user belum ada di Firestore, buat sekarang!
+                    // Webhook butuh field 'email' untuk mencocokkan pembeli.
+                    console.log("⚠️ User Doc missing in Firestore. Creating new one...");
+                    
+                    const newUserData = {
+                        email: user.email,
+                        displayName: user.displayName || 'User',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        ownedPrompts: [],
+                        isPremium: false
+                    };
+
+                    await db.collection('users').doc(user.uid).set(newUserData);
+                    
                     currentUser.ownedPrompts = [];
+                    currentUser.isPremium = false;
+                    console.log("✅ New User Doc created in Firestore.");
                 }
             } catch (err) {
                 console.error("Gagal ambil data user:", err);
