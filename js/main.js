@@ -48,9 +48,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         // --- SATPAM AREA END ---
 
         if (user) {
+            // 3.A. Get Token Claims (Admin Status)
             const tokenResult = await user.getIdTokenResult(true); 
             currentUser = user;
             currentUser.isAdmin = tokenResult.claims.admin === true;
+
+            // 3.B. [FIX] FETCH USER DATA FROM FIRESTORE (Owned Prompts, etc.)
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    // Merge Firestore data into currentUser object
+                    currentUser.ownedPrompts = userData.ownedPrompts || [];
+                    currentUser.isPremium = userData.isPremium || false;
+                    console.log("👤 User Profile Loaded:", currentUser.ownedPrompts.length, "prompts owned.");
+                } else {
+                    // Init empty profile if not exists
+                    currentUser.ownedPrompts = [];
+                }
+            } catch (err) {
+                console.error("Gagal ambil data user:", err);
+            }
+
         } else {
             currentUser = null;
         }
@@ -61,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             () => UI.showModal('auth-modal'), 
             () => Auth.logoutUser(auth)
         );
-        applyFilters(); // Re-render to update Admin buttons
+        applyFilters(); // Re-render to update Admin & Purchased buttons
     });
 
     // 4. Init Data & UI
