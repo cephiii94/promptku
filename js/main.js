@@ -291,42 +291,99 @@ const triggerMayarCheckout = (link) => {
         return;
     }
 
-    console.log("--- DEBUG MAYAR START ---");
+    console.log("--- START MAYAR CHECKOUT via IframeLightbox ---");
 
-    // SOLUSI: NATIVE TRIGGER (Memancing Script Mayar)
-    // Kita buat elemen <a> yang menyamar sebagai tombol resmi Mayar
-    const fakeLink = document.createElement('a');
-    
-    fakeLink.href = link;
-    fakeLink.target = '_blank'; // Jaga-jaga agar kalau script mati, dia buka tab baru (aman)
-    fakeLink.setAttribute('data-mayar-link', 'true'); // <--- Ini atribut kuncinya!
-    
-    // Sembunyikan elemen ini
-    fakeLink.style.display = 'none';
-    document.body.appendChild(fakeLink);
+    // 1. Helper function to find the global class
+    const findLibrary = () => {
+        return window.IframeLightbox;
+    };
 
-    console.log("🚀 Memicu klik pada link Mayar virtual...");
+    let StartLibrary = findLibrary();
 
-    // KLIK OTOMATIS
-    // Jika script Mayar aktif, dia akan INTERCEPT (cegat) klik ini dan buka Popup.
-    // Jika script Mayar mati/error, browser akan jalankan fungsi asli (buka tab baru).
-    try {
-        fakeLink.click();
-    } catch (err) {
-        console.error("Gagal melakukan klik otomatis:", err);
-        // Fallback manual banget kalau browser memblokir
-        window.open(link, '_blank');
+    if (StartLibrary) {
+        console.log("✅ IframeLightbox library found immediately.");
+        openLightbox(StartLibrary, link);
+    } else {
+        console.warn("⚠️ IframeLightbox not found yet. Starting retry mechanism...");
+        
+        // 2. Retry Mechanism
+        let attempts = 0;
+        const maxAttempts = 5;
+        const interval = setInterval(() => {
+            attempts++;
+            StartLibrary = findLibrary();
+            
+            if (StartLibrary) {
+                clearInterval(interval);
+                console.log(`✅ Library found on attempt ${attempts}!`);
+                openLightbox(StartLibrary, link);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                console.error("❌ Failed to find IframeLightbox after multiple attempts.");
+                
+                // FALLBACK
+                Swal.fire({
+                    title: 'Popup Gagal Dimuat',
+                    text: 'Sistem pembayaran popup tidak merespon. Buka halaman pembayaran di tab baru?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Buka Tab Baru',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.open(link, '_blank');
+                    }
+                });
+            }
+        }, 500);
     }
+};
 
-    // Bersihkan jejak setelah 2 detik
-    setTimeout(() => {
-        if (document.body.contains(fakeLink)) {
-            document.body.removeChild(fakeLink);
-        }
-    }, 2000);
+// Execute Checkout Logic using IframeLightbox
+const openLightbox = (LibraryClass, link) => {
+    try {
+        console.log("🚀 Opening Mayar Lightbox:", link);
+        
+        // Create a dummy hidden trigger element
+        // The library binds to an element and reads href/data-src
+        const dummyBtn = document.createElement('a');
+        dummyBtn.href = link;
+        dummyBtn.style.display = 'none';
+        document.body.appendChild(dummyBtn);
 
-    // Kita asumsikan user sedang bayar, tampilkan pesan status di background
-    console.log("--- DEBUG MAYAR END ---");
+        // Instantiate Lightbox
+        // Note: The library lacks a clear onSuccess callback in its minified code.
+        // We will reload page on close as a "best guess" refresh interaction,
+        // or just let the user initiate refresh.
+        const lightbox = new LibraryClass(dummyBtn, {
+            scrolling: true, // [FIX] Mengaktifkan scroll agar user bisa melihat konten panjang
+            rate: 500, // Default rate
+            onCreated: () => console.log("Lightbox created"),
+            onLoaded: () => console.log("Lightbox loaded"),
+            onClosed: () => {
+                console.log("Lightbox closed. Cleaning up.");
+                dummyBtn.remove();
+                
+                // Optional: ask user if they finished payment
+                Swal.fire({
+                    title: 'Status Pembayaran',
+                    text: 'Apakah Anda sudah menyelesaikan pembayaran?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sudah, Refresh Halaman',
+                    cancelButtonText: 'Belum'
+                }).then((res) => {
+                     if(res.isConfirmed) window.location.reload();
+                });
+            }
+        });
+        
+        lightbox.open();
+
+    } catch (e) {
+        console.error("🔥 Exception during lightbox execution:", e);
+        window.open(link, '_blank'); 
+    }
 };
 
 // =========================================================================
