@@ -92,7 +92,16 @@
         <div class="container">
             
             <div id="home-category-list" class="category-scroll-container">
-                </div>
+            </div>
+
+            <div class="filter-toolbar" style="display: flex; justify-content: flex-end; margin-bottom: 1rem; padding: 0 1rem;">
+                <select id="sort-filter" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; background: white; font-family: inherit; font-size: 0.9rem; cursor: pointer;">
+                    <option value="date_desc" selected>✨ Terbaru</option>
+                    <option value="date_asc">📅 Terlama</option>
+                    <option value="popular">🔥 Terpopuler</option>
+                    <option value="title_asc">🔤 A-Z</option>
+                </select>
+            </div>
 
             <main class="prompt-grid" id="prompt-grid">
                 <div class="loader-container">

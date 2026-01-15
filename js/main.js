@@ -114,11 +114,14 @@ const applyFilters = () => {
         searchTerm = UI.els.textFilterMobile.value.toLowerCase();
     }
 
-    const sortBy = UI.els.sortByFilter ? UI.els.sortByFilter.value : 'title_asc';
+    let sortBy = 'date_desc'; // Default sort
+    if (UI.els.sortByFilter) {
+        sortBy = UI.els.sortByFilter.value;
+    }
     
     // Reset Filters Button Logic
     if (UI.els.resetFiltersBtn) {
-        if (category !== 'all' || searchTerm !== '' || sortBy !== 'title_asc') {
+        if (category !== 'all' || searchTerm !== '' || sortBy !== 'date_desc') {
             UI.els.resetFiltersBtn.style.display = 'inline-flex';
         } else {
             UI.els.resetFiltersBtn.style.display = 'none';
@@ -135,10 +138,20 @@ const applyFilters = () => {
         );
     }
     
+    // Helper untuk konversi date (Firestore Timestamp atau Date object atau null)
+    const getTime = (p) => {
+        if (p.createdAt && p.createdAt.seconds) return p.createdAt.seconds; // Firestore Timestamp
+        if (p.createdAt instanceof Date) return p.createdAt.getTime() / 1000;
+        return 0; // Kalau null/undefined, dianggap 0 (sangat lama)
+    };
+
     switch(sortBy) {
+        case 'date_desc': filtered.sort((a, b) => getTime(b) - getTime(a)); break; // Terbaru (Desc)
+        case 'date_asc': filtered.sort((a, b) => getTime(a) - getTime(b)); break; // Terlama (Asc)
         case 'title_asc': filtered.sort((a, b) => (a.title || '').localeCompare(b.title || '')); break;
         case 'title_desc': filtered.sort((a, b) => (b.title || '').localeCompare(a.title || '')); break;
         case 'popular': filtered.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0) || (a.title || '').localeCompare(b.title || '')); break;
+        default: filtered.sort((a, b) => getTime(b) - getTime(a)); // Default Fallback
     }
 
     currentFilteredPrompts = filtered;
@@ -583,7 +596,7 @@ function setupEventListeners() {
             handleCategoryClick('all');
             if(UI.els.textFilterDesktop) UI.els.textFilterDesktop.value = '';
             if(UI.els.textFilterMobile) UI.els.textFilterMobile.value = '';
-            if(UI.els.sortByFilter) UI.els.sortByFilter.value = 'title_asc';
+            if(UI.els.sortByFilter) UI.els.sortByFilter.value = 'date_desc';
             applyFilters();
         });
     }
