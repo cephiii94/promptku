@@ -291,39 +291,42 @@ const triggerMayarCheckout = (link) => {
         return;
     }
 
-    console.log("--- DEBUG FINAL START ---");
-    
-    // Script resmi Mayar menggunakan 'window.Mayar' (M Besar)
-    const mayarInstance = window.Mayar; 
+    console.log("--- DEBUG MAYAR START ---");
 
-    if (mayarInstance && typeof mayarInstance.checkout === 'function') {
-        console.log("✅ Script Mayar Resmi Terdeteksi!");
-        
-        mayarInstance.checkout(link, {
-            onClosed: () => {
-                console.log("Popup ditutup.");
-            },
-            onSuccess: () => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Pembayaran Berhasil!',
-                    text: 'Membuka akses prompt...',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.reload();
-                });
-            }
-        });
-    } else {
-        // JIKA MASIH GAGAL:
-        console.warn("⚠️ Script Masih Terblokir / Gagal Dimuat.");
-        console.log("Cek ikon Perisai/Shield di browser & matikan proteksi.");
-        
-        // Tetap buka tab baru agar user bisa bayar
+    // SOLUSI: NATIVE TRIGGER (Memancing Script Mayar)
+    // Kita buat elemen <a> yang menyamar sebagai tombol resmi Mayar
+    const fakeLink = document.createElement('a');
+    
+    fakeLink.href = link;
+    fakeLink.target = '_blank'; // Jaga-jaga agar kalau script mati, dia buka tab baru (aman)
+    fakeLink.setAttribute('data-mayar-link', 'true'); // <--- Ini atribut kuncinya!
+    
+    // Sembunyikan elemen ini
+    fakeLink.style.display = 'none';
+    document.body.appendChild(fakeLink);
+
+    console.log("🚀 Memicu klik pada link Mayar virtual...");
+
+    // KLIK OTOMATIS
+    // Jika script Mayar aktif, dia akan INTERCEPT (cegat) klik ini dan buka Popup.
+    // Jika script Mayar mati/error, browser akan jalankan fungsi asli (buka tab baru).
+    try {
+        fakeLink.click();
+    } catch (err) {
+        console.error("Gagal melakukan klik otomatis:", err);
+        // Fallback manual banget kalau browser memblokir
         window.open(link, '_blank');
     }
-    console.log("--- DEBUG FINAL END ---");
+
+    // Bersihkan jejak setelah 2 detik
+    setTimeout(() => {
+        if (document.body.contains(fakeLink)) {
+            document.body.removeChild(fakeLink);
+        }
+    }, 2000);
+
+    // Kita asumsikan user sedang bayar, tampilkan pesan status di background
+    console.log("--- DEBUG MAYAR END ---");
 };
 
 // =========================================================================
