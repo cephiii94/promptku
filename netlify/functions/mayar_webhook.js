@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
         const emailPembeli = data.customerEmail || data.email;
         const status = data.transactionStatus || data.status;
         const productName = data.productName ? data.productName.trim() : "";
-        const incomingSku = data.productCode || data.sku || data.product_code; // SKU dari Mayar
+        const incomingSku = data.productCode || data.sku || data.product_code || data.id; // Product ID dari Mayar
 
         console.log(`📨 Webhook Masuk: ${emailPembeli} | Produk: ${productName} | SKU: ${incomingSku}`);
 

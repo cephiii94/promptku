@@ -163,23 +163,32 @@ export const renderPrompts = (
 
       // 2. Logika Tombol Overlay (PREMIUM vs GRATIS)
       let actionButtonHtml = "";
+
+      // KONDISI 1: Premium & Belum Punya -> Tombol BELI
       if (prompt.isPremium && !isOwned) {
-        // Tombol BELI (Embed Style)
-        actionButtonHtml = `
-            <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
-                <span class="material-icons">shopping_cart</span>
-                <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
-            </button>`;
+          actionButtonHtml = `
+              <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
+                  <span class="material-icons">shopping_cart</span>
+                  <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
+              </button>`;
+
+      // KONDISI 2 (BARU): Premium & SUDAH Punya -> Tombol SUDAH BELI
+      } else if (prompt.isPremium && isOwned) {
+          // Kita kasih warna hijau biar kelihatan beda
+          actionButtonHtml = `
+              <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText || "")}" style="background: #10B981; border-color: #059669; color: white;">
+                  <span class="material-icons">check_circle</span>
+                  <span class="copy-text">Sudah Beli (Salin)</span>
+              </button>`;
+
+      // KONDISI 3: Gratisan -> Tombol SALIN Biasa
       } else {
-        // Tombol SALIN (Gratis/Sudah Beli)
-        actionButtonHtml = `
-            <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(
-              prompt.promptText || ""
-            )}">
-                <span class="material-icons">content_copy</span>
-                <span class="copy-text">Salin</span>
-            </button>`;
-      }
+          actionButtonHtml = `
+              <button class="copy-btn-overlay" data-prompt-text="${encodeURIComponent(prompt.promptText || "")}">
+                  <span class="material-icons">content_copy</span>
+                  <span class="copy-text">Salin</span>
+              </button>`;
+      } 
 
       const premiumBadge = prompt.isPremium
         ? `<span style="position: absolute; top: 10px; right: 10px; background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; z-index: 5;">PREMIUM</span>`
@@ -472,7 +481,18 @@ export const showFullViewModal = (
   const generateBtn = document.getElementById("view-modal-generate-btn");
 
   // Logic Premium di Modal
-  if (data.isPremium) {
+// === GANTI BLOK INI DI DALAM FUNGSI showFullViewModal (js/ui.js) ===
+
+  // 1. Cek Kepemilikan (Sama seperti di Grid)
+  const isOwned = currentUser && (
+      (currentUser.ownedPrompts && currentUser.ownedPrompts.includes(data.id)) ||
+      currentUser.isAdmin ||
+      currentUser.uid === data.creatorId
+  );
+
+  // 2. Logic Tampilan (Premium vs Gratis/Owned)
+  if (data.isPremium && !isOwned) {
+    // --- KONDISI A: Premium & BELUM BELI (Terkunci) ---
     if (modalPromptText) {
       modalPromptText.innerHTML = `
             <div style="text-align: center; padding: 2rem; color: #D97706; background: #FFFBEB; border-radius: 8px;">
@@ -486,31 +506,49 @@ export const showFullViewModal = (
     }
     if (generateBtn) generateBtn.style.display = "none";
 
-    // Ubah Tombol Copy jadi Beli
+    // Ubah Tombol jadi "Beli Sekarang" (Orange)
     if (copyBtn) {
       copyBtn.classList.remove("login-btn");
-      copyBtn.classList.add("pay-btn"); // Tambah class ini
+      copyBtn.classList.add("pay-btn");
       copyBtn.style.backgroundColor = "#F59E0B";
+      copyBtn.style.borderColor = "#D97706";
       copyBtn.style.color = "#fff";
       copyBtn.innerHTML = `<span class="material-icons">shopping_cart</span><span>Beli Sekarang</span>`;
 
-      // Simpan Link di dataset
       copyBtn.dataset.mayarLink = data.mayarLink;
-      copyBtn.dataset.isPremium = "true";
+      copyBtn.dataset.isPremium = "true"; // Agar mentrigger checkout
     }
+
   } else {
+    // --- KONDISI B: Gratis ATAU SUDAH BELI (Terbuka) ---
+    
     if (modalPromptText) modalPromptText.textContent = data.promptText;
+    
     if (generateBtn) {
       generateBtn.style.display = "flex";
       generateBtn.dataset.promptText = encodeURIComponent(data.promptText);
     }
+    
     if (copyBtn) {
       copyBtn.classList.add("login-btn");
-      copyBtn.style.backgroundColor = "";
-      copyBtn.style.color = "";
-      copyBtn.innerHTML = `<span class="material-icons">file_open</span><span>Lihat Prompt</span>`;
+      copyBtn.classList.remove("pay-btn");
+      
+      // Cek: Jika ini Premium TAPI Sudah Beli -> Kasih Tampilan Spesial (Hijau)
+      if (data.isPremium && isOwned) {
+          copyBtn.style.backgroundColor = "#10B981"; // Hijau
+          copyBtn.style.borderColor = "#059669";
+          copyBtn.style.color = "#fff";
+          copyBtn.innerHTML = `<span class="material-icons">check_circle</span><span>Sudah Beli (Salin)</span>`;
+      } else {
+          // Tampilan Standar Gratisan
+          copyBtn.style.backgroundColor = ""; 
+          copyBtn.style.borderColor = "";
+          copyBtn.style.color = "";
+          copyBtn.innerHTML = `<span class="material-icons">file_open</span><span>Lihat Prompt</span>`;
+      }
+
       copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
-      copyBtn.dataset.isPremium = "false";
+      copyBtn.dataset.isPremium = "false"; // Agar mentrigger fungsi salin
     }
   }
 
