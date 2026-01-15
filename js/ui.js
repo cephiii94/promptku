@@ -167,10 +167,19 @@ export const renderPrompts = (
       // KONDISI 1: Premium & Belum Punya -> Tombol BELI
       if (prompt.isPremium && !isOwned) {
           actionButtonHtml = `
-              <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
-                  <span class="material-icons">shopping_cart</span>
-                  <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
-              </button>`;
+              <div style="position: relative;">
+                  <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
+                      <span class="material-icons">shopping_cart</span>
+                      <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
+                  </button>
+                  <div class="help-tooltip-icon" style="top: -38px; right: 0;">
+                      <span class="material-icons">help_outline</span>
+                      <div class="help-tooltip-content" style="width: 220px; bottom: 120%; font-size: 0.75rem;">
+                         <strong>PENTING:</strong><br>
+                         Gunakan <strong>EMAIL SAMA</strong> dgn login akun.
+                      </div>
+                  </div>
+              </div>`;
 
       // KONDISI 2 (BARU): Premium & SUDAH Punya -> Tombol SUDAH BELI
       } else if (prompt.isPremium && isOwned) {
@@ -517,9 +526,18 @@ export const showFullViewModal = (
 
       copyBtn.dataset.mayarLink = data.mayarLink;
       copyBtn.dataset.isPremium = "true"; // Agar mentrigger checkout
+      
+      // [FIX] Tampilkan Tooltip Bantuan Pembayaran
+      const helpIcon = document.getElementById('payment-help-icon');
+      if(helpIcon) helpIcon.style.display = 'flex';
     }
 
   } else {
+    // --- KONDISI B: Gratis ATAU SUDAH BELI (Terbuka) ---
+    
+    // Sembunyikan Tooltip Bantuan Pembayaran (karena sudah tidak perlu bayar)
+    const helpIcon = document.getElementById('payment-help-icon');
+    if(helpIcon) helpIcon.style.display = 'none';
     // --- KONDISI B: Gratis ATAU SUDAH BELI (Terbuka) ---
     
     if (modalPromptText) modalPromptText.textContent = data.promptText;
