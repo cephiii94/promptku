@@ -429,7 +429,7 @@ function setupEventListeners() {
     if(UI.els.loginForm) {
         UI.els.loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            Auth.loginUser(auth, document.getElementById('login-email').value, document.getElementById('login-password').value, () => UI.hideModal('auth-modal'));
+            Auth.loginUser(auth, document.getElementById('login-email').value.toLowerCase(), document.getElementById('login-password').value, () => UI.hideModal('auth-modal'));
         });
     }
 
@@ -460,7 +460,7 @@ function setupEventListeners() {
             e.preventDefault();
             
             const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
+            const email = document.getElementById('reg-email').value.toLowerCase();
             const password = document.getElementById('reg-password').value;
 
             // Panggil fungsi register dari Auth

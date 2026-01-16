@@ -35,7 +35,8 @@ exports.handler = async (event, context) => {
         const payload = JSON.parse(event.body);
         const data = payload.data || payload; // Jaga-jaga struktur beda
         
-        const emailPembeli = data.customerEmail || data.email;
+        const emailRaw = data.customerEmail || data.email;
+        const emailPembeli = emailRaw ? emailRaw.toLowerCase() : "";
         const status = data.transactionStatus || data.status;
         const productName = data.productName ? data.productName.trim() : "";
         const incomingSku = data.productCode || data.sku || data.product_code || data.id; // Product ID dari Mayar
