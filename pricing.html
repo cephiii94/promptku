@@ -349,6 +349,54 @@
         // --- FUNGSI CHECKOUT ---
         function triggerCheckout(link) {
             if (!link) return;
+            
+            // 1. Cek Login User via Firebase Auth
+            const user = firebase.auth().currentUser;
+            
+            if (!user) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Belum Login',
+                    text: 'Silakan login terlebih dahulu agar paket bisa otomatis masuk ke akun Anda.',
+                    confirmButtonText: 'Login Sekarang',
+                    showCancelButton: true
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                       // Redirect ke Login (index.html trigger open modal, or just index.html)
+                       sessionStorage.setItem('alert_must_login', 'true');
+                       window.location.href = 'index.html'; 
+                    }
+                });
+                return;
+            }
+
+            const userEmail = user.email;
+
+            // 2. Konfirmasi Email
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran',
+                html: `
+                    <div style="text-align: left; font-size: 0.95rem; color: #334155;">
+                        <p style="margin-bottom: 10px;">Agar paket otomatis aktif, <b>WAJIB</b> gunakan email yang sama dengan akun ini saat pembayaran:</p>
+                        <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; border: 1px dashed #94a3b8; text-align: center; font-weight: 700; color: #0f172a; margin-bottom: 15px;">
+                            ${userEmail}
+                        </div>
+                        <p style="font-size: 0.85rem; color: #64748b;">*Jika email beda, verifikasi harus manual ke Admin.</p>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Mengerti, Lanjut Bayar',
+                confirmButtonColor: '#10B981',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                     proceedToPayment(link);
+                }
+            });
+        }
+
+        function proceedToPayment(link) {
             console.log("🚀 Starting Checkout: " + link);
             
             if (window.IframeLightbox) {
@@ -369,7 +417,10 @@
                             confirmButtonText: 'Sudah, Cek Status',
                             cancelButtonText: 'Belum'
                         }).then((res) => {
-                             if(res.isConfirmed) window.location.href = 'index.html'; 
+                             if(res.isConfirmed) {
+                                 // Force Reload untuk update status
+                                 window.location.href = 'index.html?payment_check=true'; 
+                             }
                         });
                         dummyBtn.remove();
                     }
