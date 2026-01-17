@@ -71,7 +71,9 @@
     .header-controls #add-prompt-link,
     #search-btn,
     #add-prompt-link-mobile,
-    #auth-container-mobile {
+    #auth-container-mobile,
+    #user-profile-desktop,
+    #auth-buttons-desktop {
         display: none !important;
     }
     

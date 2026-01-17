@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koleksi Tools - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="../css/modals.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <style>
+        .tools-container {
+            padding-top: 2rem;
+            max-width: 900px; /* Batasi lebar agar fokus */
+            margin: 0 auto;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .tool-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem 2rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--light-gray-border);
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        .tool-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .tool-card-header .material-icons {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+        }
+        .tool-card-header h2 {
+            font-size: 1.25rem;
+            color: var(--primary-blue-dark);
+        }
+        .tool-card p {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+        .tool-card-badge {
+            position: absolute;
+            top: 0;
+            right: -40px;
+            background-color: var(--primary-green);
+            color: white;
+            padding: 4px 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    
+    <header class="sticky-header pinterest-style">
+        
+        <div class="header-left">
+            <a href="../index.html" class="logo-link">
+                <img src="../img/favicon-32x32.png" alt="Promptku Logo" class="header-logo">
+            </a>
+        </div>
+
+        <div class="header-center">
+            <div class="search-bar-wrapper">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="filter-input" placeholder="Cari tool...">
+
+                <span id="clear-search-btn" class="material-icons clear-btn hidden">close</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            
+            <div id="auth-buttons-desktop" class="auth-buttons-desktop">
+                <a href="../index.html" class="pinterest-btn btn-primary" style="text-decoration: none;">Log Masuk</a>
+            </div>
+
+            <div id="user-profile-desktop" class="user-profile-wrapper" style="display: none;">
+                
+                <!-- Saldo Header -->
+                <a href="../pricing.html" id="header-user-balance" class="balance-link" style="margin-right: 12px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; color: #059669; background: #ecfdf5; padding: 6px 12px; border-radius: 20px; text-decoration: none; border: 1px solid transparent; transition: all 0.2s;">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">account_balance_wallet</span> ...
+                </a>
+                <style>
+                    .balance-link:hover {
+                        background: #d1fae5 !important;
+                        border-color: #10B981 !important;
+                        transform: translateY(-1px);
+                    }
+                </style>
+
+                <a href="../profile.html" class="profile-icon-container tooltip-container">
+                    <img id="header-avatar" src="https://placehold.co/100x100/e3f2fd/1e3a5a?text=U" alt="User">
+                    <span class="tooltip">Lihat Profil</span>
+                </a>
+
+                <button id="profile-dropdown-trigger" class="icon-btn-pinterest">
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </button>
+
+                <div id="profile-dropdown-menu" class="dropdown-menu">
+                    <div class="dropdown-header">
+                        <p class="dropdown-label">Sedang login sebagai:</p>
+                        <h4 id="dropdown-username">Nama User</h4>
+                        <p id="dropdown-email">user@email.com</p>
+                    </div>
+                    <hr>
+                    
+                    <a href="../profile.html" class="dropdown-item">
+                        <span class="material-icons">person</span> Lihat Profil
+                    </a>
+                    
+                    <a href="#" id="logout-btn-desktop" class="dropdown-item text-danger">
+                        <span class="material-icons">logout</span> Keluar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="search-form-overlay" class="search-form-overlay">
+            <input type="text" id="filter-input-mobile" class="filter-input" placeholder="Cari...">
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="tools-container">
+            <div class="tools-grid">
+
+                <a href="prompt-generator/index.html" class="tool-card">
+                    <div class="tool-card-header">
+                        <span class="material-icons">auto_awesome</span>
+                        <h2>Prompt Generator</h2>
+                    </div>
+                    <p>Buat dan kustomisasi prompt kompleks dengan antarmuka visual yang mudah digunakan.</p>
+                </a>
+
+                <a href="#" class="tool-card" onclick="return false;" style="cursor: not-allowed; opacity: 0.7;">
+                    <span class="tool-card-badge">Segera</span>
+                    <div class="tool-card-header">
+                        <span class="material-icons">image_search</span>
+                        <h2>Analisis Foto (Image to Prompt)</h2>
+                    </div>
+                    <p>Upload sebuah gambar untuk mendapatkan analisis mendalam dan ide prompt yang relevan.</p>
+                </a>
+
+                </div>
+        </main>
+    </div>
+
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-content-wrapper">
+            
+            <div class="auth-header">
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab active" data-target="login-form-wrapper">Masuk</button>
+                    <button type="button" class="auth-tab" data-target="register-form-wrapper">Daftar</button>
+                </div>
+                <button class="close-btn" data-modal="auth-modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                
+                <div id="login-form-wrapper" class="auth-form-container active">
+                    <h3 class="auth-title">Selamat Datang Kembali! 👋</h3>
+                    <p class="auth-subtitle">Masuk untuk simpan prompt favoritmu.</p>
+                    
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="login-email" placeholder="nama@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" placeholder="Masukkan password" required>
+                        </div>
+                        <button type="submit" class="auth-button login-btn full-width">Masuk Sekarang</button>
+                    </form>
+                    <a href="#" class="forgot-password-link">Lupa password?</a>
+                </div>
+
+                <div id="register-form-wrapper" class="auth-form-container">
+                    <h3 class="auth-title">Gabung Komunitas Promptku 🚀</h3>
+                    <p class="auth-subtitle">Buat akun gratis dalam hitungan detik.</p>
+
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="reg-name" placeholder="Tuan Cecep" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="reg-email" placeholder="nama@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="reg-password" placeholder="Minimal 6 karakter" required>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 1rem;">
+                            <input type="checkbox" id="reg-terms" required style="width: 16px; height: 16px; margin-top: 4px;">
+                            <label for="reg-terms" style="font-size: 0.85rem; line-height: 1.4; margin: 0; color: var(--text-medium);">
+                                Saya setuju dengan <a href="../terms.html" target="_blank" style="color: var(--primary-blue); text-decoration: underline;">Syarat & Ketentuan</a> yang berlaku.
+                            </label>
+                        </div>
+                        <button type="submit" class="auth-button login-btn full-width" style="background-color: var(--primary-green);">Daftar Akun</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="prompt-modal" class="modal">...</div>
+    <div id="login-modal" class="modal">...</div>
+    <div id="view-prompt-modal" class="modal modal-fullview">...</div>
+    <div id="prompt-text-popup" class="modal">...</div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="../js/main.js"></script> 
+    
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana | <a href="../terms.html" style="color: inherit; text-decoration: none;">S&K</a> | Dibuat Dengan Cinta &hearts;</p>
+        </div>
+    </footer>
+
+    <nav class="bottom-nav-mobile">
+        <a href="../index.html" class="nav-item active" id="nav-home">
+            <span class="material-icons">home</span>
+            <span class="nav-label">Home</span>
+        </a>
+
+        <a href="#" class="nav-item" id="nav-search">
+            <span class="material-icons">search</span>
+            <span class="nav-label">Cari</span>
+        </a>
+
+        <a href="#" class="nav-item active" id="nav-generator">
+            <span class="material-icons">interests</span>
+            <span class="nav-label">Tools</span>
+        </a>
+
+        <a href="#" class="nav-item" id="nav-user-mobile">
+            <span class="material-icons">login</span> <span class="nav-label">Masuk</span>    </a>
+    </nav>
+
+</body>
+</html>

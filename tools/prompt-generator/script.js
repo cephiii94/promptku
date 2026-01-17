@@ -76,9 +76,139 @@
         addCharacterButton.addEventListener('click', addNewCharacterField);
         addNewCharacterField(); // Tambah satu saat dimuat
 
-        // === FUNGSI PANGGIL NETLIFY (Logika tetap sama) ===
+
+        // --- [BARU] Setup Auth & User State (With Wait Logic) ---
+        let currentUser = null;
+
+        // UI Header Elements
+        const authButtonsDesktop = document.getElementById('auth-buttons-desktop');
+        const userProfileDesktop = document.getElementById('user-profile-desktop');
+        const headerAvatar = document.getElementById('header-avatar');
+        const dropdownUsername = document.getElementById('dropdown-username');
+        const dropdownEmail = document.getElementById('dropdown-email');
+        const headerUserBalance = document.getElementById('header-user-balance');
+        const profileDropdownTrigger = document.getElementById('profile-dropdown-trigger');
+        const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
+        const logoutBtnDesktop = document.getElementById('logout-btn-desktop');
+
+
+        function initAuthListener() {
+            if (!firebase.apps.length) return; // Guard
+
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    buttonText.textContent = 'Buat Prompt Cerdas (5 Promtium)';
+                    generateButton.disabled = false;
+
+                    // Update UI Header: Show Profile, Hide Login
+                    if (authButtonsDesktop) authButtonsDesktop.style.display = 'none';
+                    if (userProfileDesktop) userProfileDesktop.style.display = 'flex';
+
+                    // Update Data Header
+                    if (headerAvatar) {
+                        headerAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=2563EB&color=fff`;
+                    }
+                    
+                    // Fetch Token Balance from Custom Claims (or Firestore if needed, but simplified here)
+                    // Note: Token usually in Firestore 'users/{uid}'. Let's fetch it.
+                    db.collection('users').doc(user.uid).onSnapshot(doc => {
+                        const userData = doc.data();
+                        const token = userData ? (userData.token || 0) : 0;
+                        const isAdmin = userData ? (userData.isAdmin || false) : false;
+
+                        // Dropdown Name
+                        if (dropdownUsername) {
+                             let nameHTML = user.displayName || "Pengguna";
+                             if (isAdmin) nameHTML += ` <span style="background-color: #EF4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; font-weight: 700;">ADMIN</span>`;
+                             nameHTML += `<div style="margin-top: 4px; font-size: 0.85rem; color: #059669; font-weight: 600; background: #e6fffa; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
+                                            <img src="/img/promtium.png" class="currency-icon" style="width: 14px; height: 14px; margin-right: 4px;" alt="P"> ${token} Promtium
+                                           </div>`;
+                             dropdownUsername.innerHTML = nameHTML;
+                        }
+
+                        // Header Balance Pill
+                        if (headerUserBalance) {
+                            headerUserBalance.innerHTML = `<img src="/img/promtium.png" class="currency-icon" style="width: 16px; height: 16px; margin-right: 4px;" alt="P"> ${token} Promtium`;
+                            headerUserBalance.style.display = 'flex';
+                        }
+                    });
+
+                    if (dropdownEmail) dropdownEmail.textContent = user.email;
+
+                } else {
+                    currentUser = null;
+                    buttonText.textContent = 'Login untuk Generate (5 Promtium)';
+                    
+                    // Update UI Header: Show Login, Hide Profile
+                    if (authButtonsDesktop) authButtonsDesktop.style.display = 'block';
+                    if (userProfileDesktop) userProfileDesktop.style.display = 'none';
+                }
+            });
+        }
+        
+        // Setup Dropdown Toggle
+        if (profileDropdownTrigger && profileDropdownMenu) {
+            profileDropdownTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // [FIX] Use 'show' to match css/components.css, not 'active'
+                profileDropdownMenu.classList.toggle('show');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!profileDropdownTrigger.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
+                    profileDropdownMenu.classList.remove('show');
+                }
+            });
+        }
+
+        // Setup Logout
+        if (logoutBtnDesktop) {
+            logoutBtnDesktop.addEventListener('click', (e) => {
+                e.preventDefault();
+                firebase.auth().signOut().then(() => {
+                    window.location.reload();
+                });
+            });
+        }
+
+        // Handle Race Condition (Script runs before Firebase Init)
+        // Handle Race Condition (Script runs before Firebase Init)
+        // Check global `db` or `firebase` validity inside initAuthListener too, but here we trigger it.
+        
+        let db; // Declare db in outer scope
+
+        if (firebase.apps.length) {
+            db = firebase.firestore();
+            initAuthListener();
+        } else {
+            window.addEventListener('firebase-ready', () => {
+                db = firebase.firestore(); // Initialize db when ready
+                initAuthListener();
+            });
+        }
+
+        // === FUNGSI PANGGIL NETLIFY (Logika UPDATE) ===
         document.getElementById('prompt-form').addEventListener('submit', async (e) => {
             e.preventDefault(); // Mencegah submit form standar
+
+            // 1. Cek Login
+            if (!currentUser) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Login Diperlukan',
+                    text: 'Anda harus login untuk menggunakan fitur ini.',
+                    confirmButtonText: 'Login Sekarang'
+                }).then((res) => {
+                    if(res.isConfirmed) {
+                        // Redirect ke home login atau buka modal login (tergantung implementasi global)
+                        // Karena ini di /prompt-generator/, lebih aman redirect ke home
+                        window.location.href = '../index.html'; 
+                    }
+                });
+                return;
+            }
 
             const core = corePromptEl.value.trim();
             const style = styleMediumEl.value;
@@ -113,13 +243,16 @@
             // Tampilkan status loading
             generateButton.disabled = true;
             loadingSpinner.classList.remove('hidden');
-            buttonText.textContent = 'Memproses AI...';
+            buttonText.textContent = 'Memproses AI (-5 P)...';
             finalPromptEl.classList.add('hidden'); // Sembunyikan textarea
             copyButton.classList.add('hidden'); // Sembunyikan tombol salin
             resultLoaderEl.classList.remove('hidden'); // Tampilkan skeleton
 
             const functionEndpoint = '/.netlify/functions/generate-prompt';
-            const payload = { core, characterDetails, actionDetails, atmosphereDetails, style, quality, negative };
+            const payload = { 
+                userId: currentUser.uid, // [PENTING] Kirim UID
+                core, characterDetails, actionDetails, atmosphereDetails, style, quality, negative 
+            };
 
             try {
                 const response = await fetch(functionEndpoint, {
@@ -127,6 +260,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
+                // Handle Error Khusus
+                if (response.status === 402) {
+                     const errData = await response.json();
+                     throw new Error("INSUFFICIENT_FUNDS");
+                }
 
                 if (!response.ok) {
                     const errorResult = await response.json();
@@ -137,17 +276,32 @@
                 
                 if (result.text) {
                     finalPromptEl.value = result.text.trim();
+                    // Optional: Beritahu user saldo berkurang?
+                    // Swal.fire('Berhasil', 'Prompt dibuat. Saldo -5 Promtium.', 'success');
                 } else {
                     finalPromptEl.value = 'Maaf, server tidak memberikan respons yang valid.';
                 }
 
             } catch (error) {
-                finalPromptEl.value = `Gagal terhubung ke server: ${error.message}.`;
+                if (error.message === 'INSUFFICIENT_FUNDS') {
+                    finalPromptEl.value = "Saldo habis.";
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Saldo Promtium Kurang',
+                        text: 'Fitur ini butuh 5 Promtium. Silakan Top Up.',
+                        confirmButtonText: 'Top Up',
+                        showCancelButton: true
+                    }).then((res) => {
+                        if(res.isConfirmed) window.location.href = '../pricing.html';
+                    });
+                } else {
+                    finalPromptEl.value = `Gagal terhubung ke server: ${error.message}.`;
+                }
             } finally {
                 // Sembunyikan status loading
                 generateButton.disabled = false;
                 loadingSpinner.classList.add('hidden');
-                buttonText.textContent = 'Buat Prompt Cerdas (AI)';
+                buttonText.textContent = 'Buat Prompt Cerdas (5 Promtium)';
                 
                 resultLoaderEl.classList.add('hidden'); // Sembunyikan skeleton
                 finalPromptEl.classList.remove('hidden'); // Tampilkan textarea

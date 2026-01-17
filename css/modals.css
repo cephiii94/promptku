@@ -147,7 +147,7 @@
 .auth-content-wrapper {
   max-width: 450px;
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto; /* Changed from hidden to auto to fix scrolling */
 }
 .auth-header {
   display: flex;

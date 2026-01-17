@@ -345,7 +345,7 @@ export const updateAuthStateUI = (
       // [BARU] Tampilkan Saldo Promtium di Dropdown
       const token = user.token || 0;
       nameHTML += `<div style="margin-top: 4px; font-size: 0.85rem; color: #059669; font-weight: 600; background: #e6fffa; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
-                    <img src="img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium
+                    <img src="/img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium
                    </div>`;
 
       els.dropdownUsername.innerHTML = nameHTML;
@@ -353,7 +353,7 @@ export const updateAuthStateUI = (
       // [BARU] Update Saldo di Header (Desktop)
       const headerBalance = document.getElementById('header-user-balance');
       if(headerBalance) {
-          headerBalance.innerHTML = `<img src="img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium`;
+          headerBalance.innerHTML = `<img src="/img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium`;
           headerBalance.style.display = 'flex';
       }
     }
