@@ -37,15 +37,21 @@ exports.handler = async (event, context) => {
         
         const emailRaw = data.customerEmail || data.email;
         const emailPembeli = emailRaw ? emailRaw.toLowerCase() : "";
-        const status = data.transactionStatus || data.status;
+        
+        let status = data.transactionStatus || data.status || "";
+        status = status.toLowerCase(); // [FIX] Case insensitive
+
         const productName = data.productName ? data.productName.trim() : "";
+        
         // PRIORITAS UTAMA: productId (karena ini yang muncul di paylod Produk_Demo Tuan)
         const incomingSku = data.productCode || data.sku || data.product_code || data.productId || data.id;
 
-        console.log(`📨 Webhook Masuk: ${emailPembeli} | Produk: ${productName} | SKU: ${incomingSku}`);
+        console.log(`📨 Webhook Masuk: ${emailPembeli} | Status: ${status} | SKU: ${incomingSku}`);
+        console.log("📦 Full Payload (Debug):", JSON.stringify(data)); // [DEBUG]
 
         // Hanya proses yang sudah dibayar
-        if (status !== 'paid' && status !== 'settled') {
+        if (status !== 'paid' && status !== 'settled' && status !== 'success') { // [ADD] 'success' just in case
+            console.log("⚠️ Status belum paid/settled, diabaikan.");
             return { statusCode: 200, body: 'Ignored: Not paid yet' };
         }
 
@@ -66,41 +72,50 @@ exports.handler = async (event, context) => {
         
         switch (incomingSku) {
             // --- TOKEN PACKS ---
-            case 'sku_token_10': // Placeholder
-            case 'TOKEN_10':     // Jaga-jaga nama lain
-                updateData = { 
-                    token: admin.firestore.FieldValue.increment(10),
-                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
-                };
-                logMessage = "🪙 Top Up Token +10";
-                break;
-
-            case 'sku_token_25': 
-            case 'TOKEN_25':
-                updateData = { 
-                    token: admin.firestore.FieldValue.increment(25),
-                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
-                };
-                logMessage = "🪙 Top Up Token +25";
-                break;
-            
-            case 'sku_token_50': 
-            case 'TOKEN_50':
+            // --- PROMTIUM PACKS ---
+            // 1. Paket Coba-coba (50 Promtium)
+            case '36ecd528-5e6e-4903-bc32-bf76d9d5cf20': 
                 updateData = { 
                     token: admin.firestore.FieldValue.increment(50),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Token +50";
+                logMessage = "🪙 Top Up Promtium +50";
+                break;
+
+            // 2. Paket Hemat (150 Promtium)
+            case '276517df-ba82-45a4-b2d0-667e8bbbb1a0': 
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(150),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                };
+                logMessage = "🪙 Top Up Promtium +150";
+                break;
+            
+            // 3. Paket Standar (200 Promtium)
+            case 'e3fa41de-6c27-4ac6-8c84-905885c3fc89': 
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(200),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                };
+                logMessage = "🪙 Top Up Promtium +200";
+                break;
+
+             // 4. Paket Jumbo (300 + 10 Bonus)
+            case '2829f4d4-bee9-41c7-94c1-ba08c26d1a3b': 
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(310),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                };
+                logMessage = "🪙 Top Up Promtium +310";
                 break;
 
             // --- MEMBERSHIP ---
-            case 'SKU_MEMBERSHIP_SULTAN':
-            case 'MEMBERSHIP_PREMIUM':
+            case '1f489245-8118-4dd5-b44a-9caa0d3d9f91':
                 updateData = { 
                     isPremium: true,
                     premiumSince: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "💎 Upgrade ke Premium Member";
+                logMessage = "💎 Upgrade ke Premium Member (Sultan)";
                 break;
 
             default:

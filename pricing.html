@@ -206,33 +206,45 @@
         </div>
 
         <div class="token-grid">
-            <!-- Paket Hemat -->
+            <!-- Paket Coba-coba (50) -->
             <div class="token-card">
                 <img src="img/promtium.png" alt="P" style="width: 50px; height: 50px; margin-bottom: 1rem;">
-                <div class="token-amount">10 Promtium</div>
-                <span class="token-price">Rp 15.000</span>
-                <button class="btn-pricing btn-token" onclick="buyToken('link_mayar_paket_10', 'sku_token_10')">
-                    Beli Paket Hemat
+                <div class="token-amount">50 Promtium</div>
+                <span class="token-price"><s style="color:#94a3b8; font-size:0.8rem; margin-right:4px;">Rp 15.000</s> Rp 10.000</span>
+                <button class="btn-pricing btn-token" onclick="buyToken('paket_50')">
+                    Beli Coba-coba
                 </button>
             </div>
 
-            <!-- Paket Standar -->
+            <!-- Paket Hemat (150) -->
             <div class="token-card" style="border-color: #3b82f6; background: #eff6ff;">
+                <div class="popular-badge" style="background:#3b82f6; font-size:0.7rem; padding:2px 10px;">HEMAT</div>
                 <img src="img/promtium.png" alt="P" style="width: 60px; height: 60px; margin-bottom: 1rem;">
-                <div class="token-amount">25 Promtium</div>
-                <span class="token-price">Rp 35.000</span>
-                <button class="btn-pricing btn-token" style="background: #3b82f6; color: white;" onclick="buyToken('link_mayar_paket_25', 'sku_token_25')">
-                    Beli Paket Standar
+                <div class="token-amount">150 Promtium</div>
+                <span class="token-price">Rp 25.000</span>
+                <button class="btn-pricing btn-token" style="background: #3b82f6; color: white;" onclick="buyToken('paket_150')">
+                    Beli Hemat
                 </button>
             </div>
 
-            <!-- Paket Jumbo -->
+            <!-- Paket Standar (200) -->
             <div class="token-card">
                 <img src="img/promtium.png" alt="P" style="width: 70px; height: 70px; margin-bottom: 1rem;">
-                <div class="token-amount">50 Promtium</div>
-                <span class="token-price">Rp 60.000</span>
-                <button class="btn-pricing btn-token" onclick="buyToken('link_mayar_paket_50', 'sku_token_50')">
-                    Beli Paket Jumbo
+                <div class="token-amount">200 Promtium</div>
+                <span class="token-price">Rp 30.000</span>
+                <button class="btn-pricing btn-token" onclick="buyToken('paket_200')">
+                    Beli Standar
+                </button>
+            </div>
+
+            <!-- Paket Jumbo (300 + 10) -->
+            <div class="token-card" style="border: 1px solid #F59E0B; background: #fffbeb;">
+                <img src="img/promtium.png" alt="P" style="width: 80px; height: 80px; margin-bottom: 1rem;">
+                <div class="token-amount">300 <span style="font-size:0.8rem;color:#d97706;">+10</span></div>
+                <div style="font-size:0.9rem; color:#d97706; font-weight:600; margin-bottom:5px;">(310 Promtium)</div>
+                <span class="token-price">Rp 50.000</span>
+                <button class="btn-pricing btn-token" style="background: #F59E0B; color: white;" onclick="buyToken('paket_310')">
+                    Beli Jumbo 🚀
                 </button>
             </div>
         </div>
@@ -294,35 +306,25 @@
     <script>
         // document.getElementById('current-year').textContent = new Date().getFullYear(); // Pindah ke module atas
 
-        // --- KONFIGURASI MAYAR (ISI DISINI YA TUAN) ---
+        // --- KONFIGURASI MAYAR ---
         const CONFIG = {
             membership: {
-                link: "https://mayar.id/pl/ISI_LINK_MEMBERSHIP_DISINI", // Ganti dengan Link Payment Mayar
-                sku: "SKU_MEMBERSHIP_SULTAN" // Ganti dengan Product ID Mayar
+                link: "https://promptku.myr.id/pl/akun-sultan-membership", 
+                sku: "1f489245-8118-4dd5-b44a-9caa0d3d9f91"
             },
             tokens: {
-                // Contoh pengisian (nanti disesuaikan dengan onclick di HTML atas)
-                'link_mayar_paket_10': "https://mayar.id/pl/LINK_TOKEN_10",
-                'link_mayar_paket_25': "https://mayar.id/pl/LINK_TOKEN_25",
-                'link_mayar_paket_50': "https://mayar.id/pl/LINK_TOKEN_50"
+                'paket_50': "https://promptku.myr.id/pl/paket-coba-coba-50-promtium",
+                'paket_150': "https://promptku.myr.id/pl/paket-hemat-150-promtium",
+                'paket_200': "https://promptku.myr.id/pl/paket-standar-200-promtium",
+                'paket_310': "https://promptku.myr.id/pl/paket-jumbo-300-promtium"
             }
         };
 
         // --- FUNGSI CHECKOUT ---
-        // (Kita copy logika triggerMayarCheckout dari main.js tapi disederhanakan)
         function triggerCheckout(link) {
-            if (!link || link.includes("ISI_LINK")) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Segera Hadir',
-                    text: 'Link pembayaran belum dikonfigurasi oleh Admin.',
-                });
-                return;
-            }
-
+            if (!link) return;
             console.log("🚀 Starting Checkout: " + link);
             
-            // Cek Library IframeLightbox
             if (window.IframeLightbox) {
                 const dummyBtn = document.createElement('a');
                 dummyBtn.href = link;
@@ -341,33 +343,23 @@
                             confirmButtonText: 'Sudah, Cek Status',
                             cancelButtonText: 'Belum'
                         }).then((res) => {
-                             if(res.isConfirmed) window.location.href = 'index.html'; // Balik ke Home
+                             if(res.isConfirmed) window.location.href = 'index.html'; 
                         });
                         dummyBtn.remove();
                     }
                 });
                 lightbox.open();
             } else {
-                // Fallback kalau library gagal load
                 window.open(link, '_blank');
             }
         }
 
-        // --- EVENT HANDLERS ---
         document.getElementById('btn-buy-membership').addEventListener('click', () => {
             triggerCheckout(CONFIG.membership.link);
         });
 
-        // Fungsi Global untuk Token (dipanggil via onclick)
-        window.buyToken = (linkKey, skuKey) => {
-            // Di sini kita mapping key ke Link asli dari CONFIG
-            // Tapi untuk sekarang karena masih placeholder, kita ambil direct string/key-nya dulu
-            // Nanti Tuan ganti logic ini kalau sudah isi CONFIG.tokens
-            
-            // Contoh cara pakai yg benar nanti: const realLink = CONFIG.tokens[linkKey];
-            
-            // Sementara:
-            triggerCheckout(CONFIG.tokens[linkKey] || linkKey); 
+        window.buyToken = (key) => {
+            triggerCheckout(CONFIG.tokens[key]); 
         };
 
     </script>

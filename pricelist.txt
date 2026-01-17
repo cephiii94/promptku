@@ -1,0 +1,34 @@
+1. Paket Coba-coba (50 Promtium)
+Nama Produk: Paket Coba-coba 50 Promtium
+Tipe: Produk Digital / Satuan
+Harga: Rp 10.000 harga coret Rp 15.000
+Link: https://promptku.myr.id/pl/paket-coba-coba-50-promtium
+Product ID / SKU: 36ecd528-5e6e-4903-bc32-bf76d9d5cf20
+
+2. Paket Hemat (150 Promtium)
+Nama Produk: Paket Hemat 150 Promtium
+Tipe: Produk Digital / Satuan
+Harga: Rp 25.000
+Link: https://promptku.myr.id/pl/paket-hemat-150-promtium
+Product ID / SKU: 276517df-ba82-45a4-b2d0-667e8bbbb1a0
+
+3. Paket Standar (200 Promtium)
+Nama Produk: Paket Standar 200 Promtium
+Tipe: Produk Digital / Satuan
+Harga: Rp 30.000
+Link: https://promptku.myr.id/pl/paket-standar-200-promtium
+Product ID / SKU: e3fa41de-6c27-4ac6-8c84-905885c3fc89
+
+4. Paket Jumbo (300 Promtium) + 10 Promtium
+Nama Produk: Paket Jumbo 300 Promtium + bonus 10 Promtium
+Tipe: Produk Digital / Satuan
+Harga: Rp 50.000
+Link: https://promptku.myr.id/pl/paket-jumbo-300-promtium
+Product ID / SKU: 2829f4d4-bee9-41c7-94c1-ba08c26d1a3b
+
+4. Akun Sultan (Membership)
+Nama Produk: Membership Akun Sultan
+Tipe: Produk Digital / Satuan (atau Langganan/Recurring jika Tuan ingin debet otomatis)
+Harga: Rp 99.000
+Link:  https://promptku.myr.id/pl/akun-sultan-membership
+Product ID / SKU: 1f489245-8118-4dd5-b44a-9caa0d3d9f91

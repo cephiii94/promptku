@@ -66,16 +66,25 @@
         <div class="header-right">
             
             <div id="auth-buttons-desktop" class="auth-buttons-desktop">
-                <a href="pricing.html" class="pinterest-btn" style="background-color: #F59E0B; color: white; margin-right: 10px;">Upgrade 💎</a>
+                <!-- Tombol Upgrade dihapus, pindah ke Saldo Header -->
+                <!-- <a href="pricing.html" ...>Upgrade 💎</a> -->
                 <button id="login-btn-desktop" class="pinterest-btn btn-primary">Log Masuk</button>
             </div>
 
             <div id="user-profile-desktop" class="user-profile-wrapper" style="display: none;">
                 
                 <!-- [BARU] Saldo Header -->
-                <div id="header-user-balance" style="margin-right: 12px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; color: #059669; background: #ecfdf5; padding: 6px 10px; border-radius: 20px;">
+                <!-- [BARU] Saldo Header (Klik untuk Top Up) -->
+                <a href="pricing.html" id="header-user-balance" class="balance-link" style="margin-right: 12px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; color: #059669; background: #ecfdf5; padding: 6px 12px; border-radius: 20px; text-decoration: none; border: 1px solid transparent; transition: all 0.2s;">
                     <!-- Diisi via JS -->
-                </div>
+                </a>
+                <style>
+                    .balance-link:hover {
+                        background: #d1fae5 !important;
+                        border-color: #10B981 !important;
+                        transform: translateY(-1px);
+                    }
+                </style>
 
                 <a href="profile.html" class="profile-icon-container tooltip-container">
                     <img id="header-avatar" src="https://placehold.co/100x100/e3f2fd/1e3a5a?text=U" alt="User">
@@ -394,10 +403,6 @@
             <span class="nav-label">Cari</span>
         </a>
 
-        <a href="pricing.html" class="nav-item" id="nav-pricing">
-            <span class="material-icons" style="color: #F59E0B;">diamond</span>
-            <span class="nav-label">Upgrade</span>
-        </a>
 
         <a href="#" class="nav-item nav-add-fab hidden" id="nav-add-prompt-mobile">
             <span class="material-icons">add</span>

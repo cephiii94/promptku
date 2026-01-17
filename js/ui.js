@@ -353,7 +353,7 @@ export const updateAuthStateUI = (
       // [BARU] Update Saldo di Header (Desktop)
       const headerBalance = document.getElementById('header-user-balance');
       if(headerBalance) {
-          headerBalance.innerHTML = `<img src="img/promtium.png" class="currency-icon" alt="P"> ${token}`;
+          headerBalance.innerHTML = `<img src="img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium`;
           headerBalance.style.display = 'flex';
       }
     }
