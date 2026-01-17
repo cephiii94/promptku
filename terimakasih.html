@@ -105,14 +105,14 @@
     <div class="success-page">
         <div class="success-card">
             <div class="success-icon-wrapper">
-                <span class="material-icons">check_circle</span>
+                <span class="material-icons">local_mall</span>
             </div>
             
             <h1 id="success-title">Pembayaran Berhasil!</h1>
             <p id="success-message">Terima kasih, pembayaran Anda telah kami terima.</p>
 
-            <a href="index.html" class="btn-success">
-                <span class="material-icons">home</span> Kembali ke Dashboard
+            <a href="#" onclick="closePopup(); return false;" class="btn-success">
+                <span class="material-icons">close</span> Tutup Pop Up
             </a>
 
             <div class="order-id" id="order-ref" style="display: none;">
@@ -150,6 +150,24 @@
             // Optional: Auto-refresh user profile data if needed
             // Since main.js initializes Firebase, the auth observer will pick up changes if the backend updated them.
         });
+
+        function closePopup() {
+            try {
+                // Strategi 1: PostMessage ke Parent (cocok untuk Iframe/Lightbox)
+                window.parent.postMessage('close-modal', '*');
+                window.parent.postMessage('close-iframe', '*');
+                window.parent.postMessage({ action: 'close' }, '*');
+                
+                // Strategi 2: Coba tutup window langsung (cocok untuk Popup Window)
+                window.close();
+                
+                // Strategi 3: Fallback jika dibuka di tab baru dan window.close diblokir
+                // Kita biarkan user menutup manual atau redirect jika perlu
+            } catch (e) {
+                console.error("Gagal menutup popup automatic:", e);
+                window.close();
+            }
+        }
     </script>
 </body>
 </html>
