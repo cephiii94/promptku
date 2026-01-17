@@ -1,0 +1,188 @@
+/* Avatar Grid Styles */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    /* Custom Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.avatar-grid::-webkit-scrollbar {
+    width: 8px;
+}
+.avatar-grid::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+.avatar-grid::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Avatar Item Card */
+.avatar-item {
+    position: relative;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 3px solid transparent;
+    aspect-ratio: 1/1;
+    background: #f8fafc;
+    padding: 2px; /* Inner spacing */
+}
+
+.avatar-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.avatar-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: #e2e8f0;
+}
+
+.avatar-item.selected {
+    border-color: var(--primary-blue);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+.avatar-item.selected::after {
+    content: '\e876'; /* check_circle */
+    font-family: 'Material Icons';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary-blue);
+    color: white;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    padding: 2px;
+    border: 3px solid white;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0) rotate(-45deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Locked State */
+.avatar-item.locked {
+    filter: grayscale(100%);
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.avatar-item.locked img {
+    opacity: 0.5;
+}
+
+.avatar-item.locked .lock-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #475569;
+    font-size: 2rem;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+}
+
+/* Price Tag */
+.avatar-price-tag {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FFFBEB;
+    color: #D97706;
+    border: 1px solid #FCD34D;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Achievement Tag */
+.avatar-price-tag.achievement-tag {
+    background: #EEF2FF;
+    color: #4F46E5;
+    border-color: #C7D2FE;
+}
+
+/* Modal UI Improvements */
+#avatar-selection-modal .modal-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+#avatar-selection-modal .modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+}
+
+#avatar-selection-modal .profile-tabs {
+    background: #f8fafc;
+    padding: 4px;
+    border-radius: 12px;
+    display: inline-flex;
+    gap: 0;
+}
+
+#avatar-selection-modal .tab-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    color: #64748b;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    border-bottom: none;
+}
+
+#avatar-selection-modal .tab-btn.active {
+    background: white;
+    color: var(--primary-blue);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom: none;
+}
+
+#avatar-selection-modal .modal-actions {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.5rem;
+}
+
+/* Button Secondary */
+.btn-secondary {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius-md);
+    background-color: white;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    color: #334155;
+    border-color: #cbd5e1;
+}

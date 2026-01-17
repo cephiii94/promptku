@@ -73,40 +73,40 @@ exports.handler = async (event, context) => {
         switch (incomingSku) {
             // --- TOKEN PACKS ---
             // --- PROMTIUM PACKS ---
-            // 1. Paket Coba-coba (50 Promtium)
+            // 1. Paket Coba-coba (25 Promtium)
             case '36ecd528-5e6e-4903-bc32-bf76d9d5cf20': 
                 updateData = { 
-                    token: admin.firestore.FieldValue.increment(50),
+                    token: admin.firestore.FieldValue.increment(25),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Promtium +50";
+                logMessage = "🪙 Top Up Promtium +25";
                 break;
 
-            // 2. Paket Hemat (150 Promtium)
+            // 2. Paket Hemat (75 Promtium)
             case '276517df-ba82-45a4-b2d0-667e8bbbb1a0': 
                 updateData = { 
-                    token: admin.firestore.FieldValue.increment(150),
+                    token: admin.firestore.FieldValue.increment(75),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Promtium +150";
+                logMessage = "🪙 Top Up Promtium +75";
                 break;
             
-            // 3. Paket Standar (200 Promtium)
+            // 3. Paket Standar (100 Promtium)
             case 'e3fa41de-6c27-4ac6-8c84-905885c3fc89': 
                 updateData = { 
-                    token: admin.firestore.FieldValue.increment(200),
+                    token: admin.firestore.FieldValue.increment(100),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Promtium +200";
+                logMessage = "🪙 Top Up Promtium +100";
                 break;
 
-             // 4. Paket Jumbo (300 + 10 Bonus)
+             // 4. Paket Jumbo (200 + 20 Bonus)
             case '2829f4d4-bee9-41c7-94c1-ba08c26d1a3b': 
                 updateData = { 
-                    token: admin.firestore.FieldValue.increment(310),
+                    token: admin.firestore.FieldValue.increment(220),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Promtium +310";
+                logMessage = "🪙 Top Up Promtium +220";
                 break;
 
             // --- MEMBERSHIP ---

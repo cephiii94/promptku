@@ -72,9 +72,37 @@
     #search-btn,
     #add-prompt-link-mobile,
     #auth-container-mobile,
-    #user-profile-desktop,
     #auth-buttons-desktop {
         display: none !important;
+    }
+
+    /* [UPDATED] Show Profile Desktop on Mobile (Compact) */
+    #user-profile-desktop {
+        display: flex !important;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    #user-profile-desktop #header-user-balance {
+        display: none !important; /* Saldo biasanya hidden di header mobile karena sempit, tapi user minta. Kita coba tampilkan atau sembunyikan nama user? */
+    }
+    
+    /* Tampilkan Saldo jika diminta user, tapi perlu trick agar muat */
+    /* Opsional: Tampilkan saldo kecil */
+    #user-profile-desktop #header-user-balance {
+        display: flex !important;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }    
+    
+    #user-profile-desktop #dropdown-trigger-btn {
+        display: none !important; /* Hide nama/dropdown arrow trigger text if any */
+    }
+
+    #user-profile-desktop .profile-icon-container {
+        width: 36px;
+        height: 36px;
     }
     
     #category-filter { display: inline-flex; flex-grow: 1; }

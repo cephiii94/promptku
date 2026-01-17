@@ -6,6 +6,26 @@ import { initFirebase } from './config.js';
 let db, auth, currentUser;
 let userDocRef = null;
 
+// Konfigurasi Avatar
+const AVATAR_LIST = [
+    // --- FREE ---
+    { id: 'free_1', url: 'https://cdn-icons-png.flaticon.com/128/4140/4140048.png', type: 'free', name: 'Cool Guy' },
+    { id: 'free_2', url: 'https://cdn-icons-png.flaticon.com/128/4140/4140047.png', type: 'free', name: 'Cool Girl' },
+    { id: 'free_3', url: 'https://cdn-icons-png.flaticon.com/128/4140/4140037.png', type: 'free', name: 'Artist' },
+    { id: 'free_4', url: 'https://cdn-icons-png.flaticon.com/128/4140/4140051.png', type: 'free', name: 'Geek' },
+    
+    // --- PREMIUM (Beli pakai Promtium) ---
+    { id: 'prem_1', url: 'https://cdn-icons-png.flaticon.com/128/3408/3408455.png', type: 'premium', cost: 50, name: 'Cyber Punk' },
+    { id: 'prem_2', url: 'https://cdn-icons-png.flaticon.com/128/3408/3408466.png', type: 'premium', cost: 100, name: 'Neon Robot' },
+    { id: 'prem_3', url: 'https://cdn-icons-png.flaticon.com/128/3408/3408470.png', type: 'premium', cost: 200, name: 'Space Walker' },
+
+    // --- EXCLUSIVE (Achievement) ---
+    { id: 'ach_1', url: 'https://cdn-icons-png.flaticon.com/128/949/949666.png', type: 'achievement', req: 'first_blood', name: 'Veteran' },
+    { id: 'ach_2', url: 'https://cdn-icons-png.flaticon.com/128/949/949635.png', type: 'achievement', req: 'on_fire', name: 'Hotshot' }
+];
+
+let selectedAvatarUrl = null;
+
 // Konfigurasi Rank (Gamifikasi)
 const RANKS = [
     { maxLvl: 5, name: "Newbie Prompt", icon: "school", color: "#6B7280" },      // Level 1-5
@@ -55,19 +75,29 @@ const loadUserProfile = async () => {
         // Default value jika user baru
         const xp = userData.xp || 0;
         const bio = userData.bio || "Pengguna baru yang belum mengisi bio.";
-        const photoURL = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.displayName}&background=random`;
+        const photoURL = currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || 'User')}&background=random`;
+        
+        // [BARU] Promtium & Membership Status
+        const balance = userData.token || 0;
+        const isSultan = userData.isPremium || false;
 
         // --- 1. Update UI Identitas ---
-        document.getElementById('profile-name').textContent = currentUser.displayName;
-        document.getElementById('profile-email').textContent = `@${currentUser.email.split('@')[0]}`; // Username ala-ala
+        document.getElementById('profile-name').innerHTML = `${currentUser.displayName} ${isSultan ? '<span class="material-icons" style="color:#F59E0B; font-size:1.2rem; vertical-align:middle; margin-left:4px;" title="Sultan Member">verified</span>' : ''}`;
+        document.getElementById('profile-email').textContent = `@${currentUser.email.split('@')[0]}`; 
         document.getElementById('profile-bio').textContent = bio;
         document.getElementById('profile-image').src = photoURL;
         document.getElementById('header-avatar').src = photoURL;
 
+        // Update Saldo Header
+        const balEl = document.getElementById('balance-amount');
+        if (balEl) balEl.textContent = `${balance} Promtium`;
+
         // Isi Form Edit dengan data saat ini
         document.getElementById('edit-name').value = currentUser.displayName;
         document.getElementById('edit-bio').value = bio;
-        document.getElementById('edit-photo-url').value = currentUser.photoURL || '';
+        // Update Preview di Modal Edit
+        const editPreview = document.getElementById('edit-modal-avatar-preview');
+        if(editPreview) editPreview.src = photoURL;
 
         // --- 2. Update Gamification (Level & Rank) ---
         const level = Math.floor(xp / 100) + 1; // Rumus: Tiap 100 XP naik 1 Level
@@ -233,25 +263,36 @@ const setupEventListeners = () => {
     
     // 1. Tab Navigation
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Reset active styles
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        btn.addEventListener('click', (e) => {
+            const btn = e.currentTarget;
 
-            const tab = btn.dataset.tab;
-            const grid = document.getElementById('profile-content-area');
-            const badges = document.getElementById('achievements-area');
+            // [NEW] Avatar Tab Logic (Biar gak bentrok sama Main Tab)
+            if (btn.dataset.avatarTab) {
+                document.querySelectorAll('#avatar-selection-modal .tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderAvatars(btn.dataset.avatarTab);
+                return;
+            }
 
-            // Switch Content
-            if (tab === 'achievements') {
-                grid.classList.add('hidden');
-                badges.classList.remove('hidden');
-                loadAchievements();
-            } else {
-                grid.classList.remove('hidden');
-                badges.classList.add('hidden');
-                if (tab === 'my-prompts') loadMyPrompts();
-                if (tab === 'liked-prompts') loadLikedPrompts();
+            // Normal Profile Tabs
+            if (btn.dataset.tab) {
+                document.querySelectorAll('.profile-tabs > .tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const tab = btn.dataset.tab;
+                const grid = document.getElementById('profile-content-area');
+                const badges = document.getElementById('achievements-area');
+
+                if (tab === 'achievements') {
+                    grid.classList.add('hidden');
+                    badges.classList.remove('hidden');
+                    loadAchievements();
+                } else {
+                    grid.classList.remove('hidden');
+                    badges.classList.add('hidden');
+                    if (tab === 'my-prompts') loadMyPrompts();
+                    if (tab === 'liked-prompts') loadLikedPrompts();
+                }
             }
         });
     });
@@ -263,21 +304,20 @@ const setupEventListeners = () => {
             e.preventDefault();
             const newName = document.getElementById('edit-name').value;
             const newBio = document.getElementById('edit-bio').value;
-            const newPhoto = document.getElementById('edit-photo-url').value;
-
+            
             try {
-                // Update Auth Profile (Display Name & Photo)
+                // Update Auth Profile (Display Name only)
                 await currentUser.updateProfile({
-                    displayName: newName,
-                    photoURL: newPhoto || currentUser.photoURL
+                    displayName: newName
+                    // PhotoURL handled by Avatar Selector
                 });
 
                 // Update Firestore (Bio & Redundant Info)
                 await userDocRef.set({
                     bio: newBio,
                     email: currentUser.email,
-                    photoURL: newPhoto || currentUser.photoURL,
                     displayName: newName
+                    // PhotoURL handled by Avatar Selector
                 }, { merge: true });
 
                 Swal.fire("Berhasil", "Profil diperbarui!", "success");
@@ -295,6 +335,191 @@ const setupEventListeners = () => {
     document.getElementById('logout-btn-profile').addEventListener('click', () => {
         auth.signOut().then(() => window.location.href = 'index.html');
     });
+
+    // 4. [NEW] Avatar Modal Handlers
+    // 4. [UPDATED] Unified Edit Modal Handlers
+    
+    // Saat tombol "Edit Profil" diklik (yang di HTML onclick="...display='flex'")
+    // Kita tambahkan listener global atau update onclick di HTML agar mengisi data gambar juga.
+    // Cara termudah: Tambahkan logic di 'edit-profile-modal' observer atau saat loadUserProfile.
+    
+    // A. Listener Tombol Kamera di dalam Modal Edit
+    const triggerAvatarBtn = document.getElementById('trigger-avatar-selector');
+    if(triggerAvatarBtn) {
+        triggerAvatarBtn.addEventListener('click', () => {
+            // Tutup Modal Edit Profil, Buka Modal Avatar
+            document.getElementById('edit-profile-modal').style.display = 'none';
+            document.getElementById('avatar-selection-modal').style.display = 'flex';
+            renderAvatars('free');
+        });
+    }
+
+    // B. Listener saat Modal Avatar ditutup / Batal -> Kembali ke Edit Profil
+    // (Opsional, tapi bagus UX-nya)
+    const cancelAvatarBtn = document.querySelector('#avatar-selection-modal .btn-secondary');
+    if(cancelAvatarBtn) {
+        // Clone node untuk reset listener lama
+        const newBtn = cancelAvatarBtn.cloneNode(true);
+        cancelAvatarBtn.parentNode.replaceChild(newBtn, cancelAvatarBtn);
+        
+        newBtn.addEventListener('click', () => {
+            document.getElementById('avatar-selection-modal').style.display = 'none';
+            document.getElementById('edit-profile-modal').style.display = 'flex'; // Kembali ke menu edit utama
+        });
+    }
+
+    const saveAvatarBtn = document.getElementById('save-avatar-btn');
+    if(saveAvatarBtn) {
+        saveAvatarBtn.addEventListener('click', saveAvatar);
+    }
+};
+
+// =========================================================================
+// AVATAR LOGIC (NEW)
+// =========================================================================
+const renderAvatars = async (filterType) => {
+    const grid = document.getElementById('avatar-grid');
+    grid.innerHTML = '<div class="loader-container"><div class="spinner"></div></div>'; // Loading
+
+    // Ambil data user terbaru untuk cek Owned Avatars
+    const doc = await userDocRef.get();
+    const userData = doc.exists ? doc.data() : {};
+    const ownedAvatars = userData.ownedAvatars || [];
+    const balance = userData.token || 0;
+
+    // Filter Avatar List
+    let avatarsToShow = AVATAR_LIST.filter(a => a.type === filterType);
+    
+    if (avatarsToShow.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">Tidak ada avatar di kategori ini.</p>';
+        return;
+    }
+
+    grid.innerHTML = avatarsToShow.map(avatar => {
+        // Cek Status (Locked/Unlocked)
+        let isLocked = false;
+        let lockReason = '';
+
+        if (avatar.type === 'premium' && !ownedAvatars.includes(avatar.id)) {
+            isLocked = true;
+            lockReason = `${avatar.cost} P`;
+        } else if (avatar.type === 'achievement') {
+            // Cek Achievement Logic (Sederhana dulu)
+            // Misalnya req='first_blood' -> kita cek badge unlocked logic yang sama kayak loadAchievements
+            // Disini disederhanakan: Anggap belum unlock kalau belum ada di ownedAvatars (harus klaim dulu? atau auto?)
+            // Kita buat simple: Achievement Avatar otomatis masuk ownedAvatars saat achievement tercapai (Logic backend/trigger lain).
+            // Jadi disini cukup cek ownedAvatars.
+            if (!ownedAvatars.includes(avatar.id)) {
+                isLocked = true;
+                lockReason = 'Locked'; 
+            }
+        }
+
+        const isSelected = selectedAvatarUrl === avatar.url || (!selectedAvatarUrl && currentUser.photoURL === avatar.url);
+
+        return `
+            <div class="avatar-item ${isLocked ? 'locked' : ''} ${isSelected ? 'selected' : ''}" 
+                 onclick="selectAvatar('${avatar.id}')">
+                <img src="${avatar.url}" alt="${avatar.name}">
+                ${isLocked ? `<div class="lock-icon"><span class="material-icons">lock</span></div>` : ''}
+                ${avatar.type === 'premium' && isLocked ? `<div class="avatar-price-tag"><img src="img/promtium.png" style="width:12px;"> ${avatar.cost}</div>` : ''}
+                ${avatar.type === 'achievement' && isLocked ? `<div class="avatar-price-tag achievement-tag">Quest</div>` : ''}
+            </div>
+        `;
+    }).join('');
+};
+
+window.selectAvatar = async (id) => {
+    const avatar = AVATAR_LIST.find(a => a.id === id);
+    if (!avatar) return;
+
+    // Cek Status Lock
+    const doc = await userDocRef.get();
+    const userData = doc.exists ? doc.data() : {};
+    const ownedAvatars = userData.ownedAvatars || [];
+
+    if (avatar.type === 'free' || ownedAvatars.includes(avatar.id)) {
+        // Select
+        selectedAvatarUrl = avatar.url;
+        // Re-render untuk update UI Selected
+        renderAvatars(avatar.type); // Tetap di tab yang sama
+    } else if (avatar.type === 'premium') {
+        // Prompt Beli
+        buyAvatar(avatar);
+    } else if (avatar.type === 'achievement') {
+        Swal.fire({
+            icon: 'info',
+            title: 'Terkunci',
+            text: `Selesaikan achievement '${avatar.name}' untuk membuka avatar ini!`
+        });
+    }
+};
+
+const buyAvatar = async (avatar) => {
+    const result = await Swal.fire({
+        title: 'Beli Avatar?',
+        html: `Harga: <b>${avatar.cost} Promtium</b>.<br>Saldo Anda akan dipotong.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Beli',
+        confirmButtonColor: '#F59E0B'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            Swal.showLoading();
+            await db.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userDocRef);
+                if (!userDoc.exists) throw "User tidak ditemukan";
+                const data = userDoc.data();
+                const currentToken = data.token || 0;
+
+                if (currentToken < avatar.cost) throw "Saldo Promtium tidak cukup!";
+
+                transaction.update(userDocRef, {
+                    token: currentToken - avatar.cost,
+                    ownedAvatars: firebase.firestore.FieldValue.arrayUnion(avatar.id)
+                });
+            });
+
+            Swal.fire('Berhasil!', 'Avatar telah terbeli.', 'success');
+            // Auto Select
+            selectedAvatarUrl = avatar.url;
+            renderAvatars('premium');
+            
+            // Update Balance di Header (UI update)
+            loadUserProfile(); 
+
+        } catch (error) {
+            Swal.fire('Gagal', error.toString(), 'error');
+        }
+    }
+};
+
+const saveAvatar = async () => {
+    if (!selectedAvatarUrl) {
+        document.getElementById('avatar-selection-modal').style.display = 'none';
+        return;
+    }
+
+    try {
+        Swal.showLoading();
+        // Update Firebase Auth & Firestore
+        await currentUser.updateProfile({ photoURL: selectedAvatarUrl });
+        await userDocRef.update({ photoURL: selectedAvatarUrl });
+        
+        Swal.fire({ title: "Berhasil", text: "Avatar profil diperbarui!", icon: "success", timer: 1500, showConfirmButton: false });
+        
+        document.getElementById('avatar-selection-modal').style.display = 'none';
+        document.getElementById('edit-profile-modal').style.display = 'flex'; // Kembali ke Edit Profil
+        
+        // Refresh UI
+        loadUserProfile();
+        
+    } catch (error) {
+        console.error(error);
+        Swal.fire("Gagal", "Terjadi kesalahan saat menyimpan avatar.", "error");
+    }
 };
 
 // Global Function untuk Delete (karena dipanggil via onclick HTML string)

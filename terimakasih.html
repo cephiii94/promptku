@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Berhasil! - Promptku</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+
+    <style>
+        .success-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(to bottom, #f0fdf4, #ffffff);
+        }
+        .success-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: #d1fae5;
+            color: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .success-icon-wrapper .material-icons { font-size: 40px; }
+        .success-card h1 {
+            color: #1e293b;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .success-card p {
+            color: #64748b;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .btn-success {
+            background: #10B981;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+        }
+        .order-id {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="sticky-header pinterest-style">
+        <div class="header-left">
+            <a href="index.html" class="logo-link">
+                <img src="img/favicon-32x32.png" alt="Promptku Logo" class="header-logo">
+            </a>
+        </div>
+    </header>
+
+    <div class="success-page">
+        <div class="success-card">
+            <div class="success-icon-wrapper">
+                <span class="material-icons">check_circle</span>
+            </div>
+            
+            <h1 id="success-title">Pembayaran Berhasil!</h1>
+            <p id="success-message">Terima kasih, pembayaran Anda telah kami terima.</p>
+
+            <a href="index.html" class="btn-success">
+                <span class="material-icons">home</span> Kembali ke Dashboard
+            </a>
+
+            <div class="order-id" id="order-ref" style="display: none;">
+                Ref ID: <span id="ref-id-val"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type'); // 'membership' or 'promtium'
+            const status = urlParams.get('status');
+            const id = urlParams.get('id');
+
+            const title = document.getElementById('success-title');
+            const msg = document.getElementById('success-message');
+            const refEl = document.getElementById('order-ref');
+            const refVal = document.getElementById('ref-id-val');
+
+            if (type === 'membership') {
+                msg.innerHTML = "Selamat! Anda resmi menjadi <strong>Sultan</strong>.<br>Nikmati akses tanpa batas ke semua prompt.";
+            } else if (type === 'promtium') {
+                msg.innerHTML = "Top Up Promtium berhasil.<br>Saldo Anda telah ditambahkan. Selamat berkarya!";
+            }
+
+            if (id) {
+                refEl.style.display = 'block';
+                refVal.textContent = id;
+            }
+
+            // Optional: Auto-refresh user profile data if needed
+            // Since main.js initializes Firebase, the auth observer will pick up changes if the backend updated them.
+        });
+    </script>
+</body>
+</html>
