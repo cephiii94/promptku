@@ -292,6 +292,32 @@
                             
                             if(balContainer) balContainer.style.display = 'flex';
                             if(balText) balText.textContent = balance;
+
+                            // [NEW] Cek Status Membership
+                            const isPremium = data.isPremium === true; // Strict check or truthy
+                            console.log("Current User Premium Status:", isPremium, data);
+
+                            const buyBtn = document.getElementById('btn-buy-membership');
+                            const membershipCard = document.querySelector('.membership-card');
+
+                            if (isPremium) {
+                                if (buyBtn) {
+                                    buyBtn.remove(); // Hapus tombol dari DOM
+                                    
+                                    // Opsional: Ganti tampilan card atau tambah pesan
+                                    const msg = document.createElement('div');
+                                    msg.className = 'active-member-msg';
+                                    msg.innerHTML = '<span class="material-icons" style="color:#10B981; vertical-align:middle; margin-right:5px;">verified</span> Anda adalah Sultan (Member Aktif)';
+                                    msg.style.cssText = 'color: #10B981; font-weight: 700; background: #ecfdf5; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #10B981;';
+                                    
+                                    // Cek biar gak double append
+                                    const existingMsg = membershipCard.querySelector('.active-member-msg');
+                                    if (!existingMsg) membershipCard.querySelector('.card-footer').appendChild(msg);
+                                }
+                            } else {
+                                // Fallback jika user sebelumnya premium tapi sekarang tidak (meski onSnapshot jarang revert kecuali expired)
+                                // Kita bisa restore button kalau perlu, tapi untuk sekarang fokus hide.
+                            }
                         }
                     });
                 } else {
