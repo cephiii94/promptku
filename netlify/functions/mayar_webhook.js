@@ -39,7 +39,8 @@ exports.handler = async (event, context) => {
         const emailPembeli = emailRaw ? emailRaw.toLowerCase() : "";
         const status = data.transactionStatus || data.status;
         const productName = data.productName ? data.productName.trim() : "";
-        const incomingSku = data.productCode || data.sku || data.product_code || data.id; // Product ID dari Mayar
+        // PRIORITAS UTAMA: productId (karena ini yang muncul di paylod Produk_Demo Tuan)
+        const incomingSku = data.productCode || data.sku || data.product_code || data.productId || data.id;
 
         console.log(`📨 Webhook Masuk: ${emailPembeli} | Produk: ${productName} | SKU: ${incomingSku}`);
 
