@@ -62,52 +62,95 @@ exports.handler = async (event, context) => {
         let logMessage = "";
 
         // -- CEK 1: APAKAH INI TOP UP TOKEN / MEMBER? --
-        // (Sesuaikan string case ini dengan Nama Produk di Mayar Tuan)
-        switch (productName) {
-            case 'Paket Token Hemat':
-            case 'Paket Token':
+        // (Kita cek SKU/Product ID dulu biar lebih sakti, baru fallback ke Nama)
+        
+        switch (incomingSku) {
+            // --- TOKEN PACKS ---
+            case 'sku_token_10': // Placeholder
+            case 'TOKEN_10':     // Jaga-jaga nama lain
                 updateData = { 
-                    token: admin.firestore.FieldValue.increment(5),
+                    token: admin.firestore.FieldValue.increment(10),
                     lastTopUp: admin.firestore.FieldValue.serverTimestamp()
                 };
-                logMessage = "🪙 Top Up Token +5";
+                logMessage = "🪙 Top Up Token +10";
                 break;
 
-            case 'Membership Premium':
-            case 'Akun Sultan':
+            case 'sku_token_25': 
+            case 'TOKEN_25':
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(25),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                };
+                logMessage = "🪙 Top Up Token +25";
+                break;
+            
+            case 'sku_token_50': 
+            case 'TOKEN_50':
+                updateData = { 
+                    token: admin.firestore.FieldValue.increment(50),
+                    lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                };
+                logMessage = "🪙 Top Up Token +50";
+                break;
+
+            // --- MEMBERSHIP ---
+            case 'SKU_MEMBERSHIP_SULTAN':
+            case 'MEMBERSHIP_PREMIUM':
                 updateData = { 
                     isPremium: true,
                     premiumSince: admin.firestore.FieldValue.serverTimestamp()
                 };
                 logMessage = "💎 Upgrade ke Premium Member";
                 break;
-                
+
             default:
-                // -- CEK 2: JIKA BUKAN TOKEN/MEMBER, MUNGKIN BELI PROMPT SATUAN? --
-                if (incomingSku) {
-                    console.log(`🔍 Bukan paket rutin. Mencari prompt dengan SKU: ${incomingSku}...`);
-                    
-                    // Cari prompt di DB yang punya mayarSku sama
-                    const promptQuery = await db.collection('prompts')
-                                              .where('mayarSku', '==', incomingSku)
-                                              .limit(1)
-                                              .get();
-                    
-                    if (!promptQuery.empty) {
-                        const promptId = promptQuery.docs[0].id;
+                // Kalo SKU khusus diatas gak kena, kita coba cek logic lama (berdasarkan Nama)
+                let handled = false;
+
+                if (productName === 'Paket Token Hemat' || productName === 'Paket Token') {
+                     updateData = { 
+                        token: admin.firestore.FieldValue.increment(5), // Default lama
+                        lastTopUp: admin.firestore.FieldValue.serverTimestamp()
+                    };
+                    logMessage = "🪙 Top Up Token +5 (Legacy Name)";
+                    handled = true;
+                } 
+                else if (productName === 'Membership Premium' || productName === 'Akun Sultan') {
+                    updateData = { 
+                        isPremium: true,
+                        premiumSince: admin.firestore.FieldValue.serverTimestamp()
+                    };
+                    logMessage = "💎 Upgrade ke Premium Member (Legacy Name)";
+                    handled = true;
+                }
+
+                if (!handled) {
+                    // -- CEK 2: JIKA BUKAN TOKEN/MEMBER, MUNGKIN BELI PROMPT SATUAN?
+                    if (incomingSku) {
+                        console.log(`🔍 Bukan paket rutin. Mencari prompt dengan SKU: ${incomingSku}...`);
                         
-                        // Masukkan ID Prompt ke Array ownedPrompts user
-                        updateData = {
-                            ownedPrompts: admin.firestore.FieldValue.arrayUnion(promptId)
-                        };
-                        logMessage = `🛍️ Membeli Prompt Satuan (ID: ${promptId})`;
+                        // Cari prompt di DB yang punya mayarSku sama
+                        const promptQuery = await db.collection('prompts')
+                                                  .where('mayarSku', '==', incomingSku)
+                                                  .limit(1)
+                                                  .get();
+                        
+                        if (!promptQuery.empty) {
+                            const promptId = promptQuery.docs[0].id;
+                            
+                            // Masukkan ID Prompt ke Array ownedPrompts user
+                            updateData = {
+                                ownedPrompts: admin.firestore.FieldValue.arrayUnion(promptId)
+                            };
+                            logMessage = `🛍️ Membeli Prompt Satuan (ID: ${promptId})`;
+                        } else {
+                            console.warn(`⚠️ SKU '${incomingSku}' dibayar tapi tidak ada di Database Prompts.`);
+                            return { statusCode: 200, body: 'Product SKU not found in DB' };
+                        }
                     } else {
-                        console.warn(`⚠️ SKU '${incomingSku}' dibayar tapi tidak ada di Database Prompts.`);
-                        return { statusCode: 200, body: 'Product SKU not found in DB' };
+                        console.warn(`⚠️ Produk '${productName}' tidak dikenali logic.`);
+                        return { statusCode: 200, body: 'Product unhandled' };
                     }
-                } else {
-                    console.warn(`⚠️ Produk '${productName}' tidak dikenali logic.`);
-                    return { statusCode: 200, body: 'Product unhandled' };
                 }
                 break;
         }

@@ -21,7 +21,20 @@
     <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-
+    <style>
+        .currency-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: text-bottom;
+            margin-right: 2px;
+            object-fit: contain;
+        }
+        /* Icon agak besar untuk modal/header */
+        .currency-icon.large {
+            width: 20px; 
+            height: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -45,11 +58,17 @@
         <div class="header-right">
             
             <div id="auth-buttons-desktop" class="auth-buttons-desktop">
+                <a href="pricing.html" class="pinterest-btn" style="background-color: #F59E0B; color: white; margin-right: 10px;">Upgrade 💎</a>
                 <button id="login-btn-desktop" class="pinterest-btn btn-primary">Log Masuk</button>
             </div>
 
             <div id="user-profile-desktop" class="user-profile-wrapper" style="display: none;">
                 
+                <!-- [BARU] Saldo Header -->
+                <div id="header-user-balance" style="margin-right: 12px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; color: #059669; background: #ecfdf5; padding: 6px 10px; border-radius: 20px;">
+                    <!-- Diisi via JS -->
+                </div>
+
                 <a href="profile.html" class="profile-icon-container tooltip-container">
                     <img id="header-avatar" src="https://placehold.co/100x100/e3f2fd/1e3a5a?text=U" alt="User">
                     <span class="tooltip">Lihat Profil</span>
@@ -164,14 +183,9 @@
                     
                     <div class="form-group" id="mayar-link-container" style="display: none; flex: 1; flex-direction: column; gap: 10px;">
                         <div>
-                            <label for="prompt-mayarLink" style="color: #b45309;">Link Checkout Mayar</label>
-                            <input type="url" id="prompt-mayarLink" placeholder="https://mayar.id/pl/xxxx">
-                        </div>
-                        
-                        <div>
-                            <label for="prompt-mayarSku" style="color: #b45309;">Mayar Product ID / SKU</label>
-                            <input type="text" id="prompt-mayarSku" placeholder="Cth: 79ecd..." style="border-color: #fcd34d;">
-                            <small style="color: #92400e; font-size: 0.8rem;">Copy ID dari URL dashboard Mayar</small>
+                            <label for="prompt-tokenPrice" style="color: #b45309;">Harga (Dalam Token 💎)</label>
+                            <input type="number" id="prompt-tokenPrice" placeholder="Contoh: 5" min="1" style="border-color: #fcd34d;">
+                            <small style="color: #92400e; font-size: 0.8rem;">User akan membayar menggunakan saldo token mereka.</small>
                         </div>
                     </div>
                 </div>
@@ -370,6 +384,11 @@
         <a href="#" class="nav-item" id="nav-search">
             <span class="material-icons">search</span>
             <span class="nav-label">Cari</span>
+        </a>
+
+        <a href="pricing.html" class="nav-item" id="nav-pricing">
+            <span class="material-icons" style="color: #F59E0B;">diamond</span>
+            <span class="nav-label">Upgrade</span>
         </a>
 
         <a href="#" class="nav-item nav-add-fab hidden" id="nav-add-prompt-mobile">

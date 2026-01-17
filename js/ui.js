@@ -38,8 +38,7 @@ export const els = {
   promptCategoryInput: document.getElementById("prompt-category"),
   promptPremiumCheck: document.getElementById("prompt-isPremium"),
   mayarLinkContainer: document.getElementById("mayar-link-container"),
-  promptMayarLink: document.getElementById("prompt-mayarLink"),
-  promptMayarSku: document.getElementById("prompt-mayarSku"),
+  promptTokenPrice: document.getElementById("prompt-tokenPrice"), // [BARU]
   promptTextInput: document.getElementById("prompt-text"),
 
   // Image Handling
@@ -164,21 +163,15 @@ export const renderPrompts = (
       // 2. Logika Tombol Overlay (PREMIUM vs GRATIS)
       let actionButtonHtml = "";
 
-      // KONDISI 1: Premium & Belum Punya -> Tombol BELI
+      // KONDISI 1: Premium & Belum Punya -> Tombol BELI (TOKEN)
       if (prompt.isPremium && !isOwned) {
+          const price = prompt.priceInTokens || 0; // Default 0 kalau belum diset
           actionButtonHtml = `
               <div style="position: relative;">
-                  <button class="copy-btn-overlay premium-btn pay-btn" data-mayar-link="${prompt.mayarLink}" style="background: #F59E0B; border-color: #D97706; color: white;">
-                      <span class="material-icons">shopping_cart</span>
-                      <span class="copy-text" style="display:inline; margin-left:4px;">Beli</span>
+                  <button class="copy-btn-overlay premium-btn pay-token-btn" data-token-price="${price}" data-id="${prompt.id}" style="background: #F59E0B; border-color: #D97706; color: white;">
+                      <span class="material-icons">diamond</span>
+                      <span class="copy-text" style="display:inline; margin-left:4px;">Buka (${price})</span>
                   </button>
-                  <div class="help-tooltip-icon" style="top: -38px; right: 0;">
-                      <span class="material-icons">help_outline</span>
-                      <div class="help-tooltip-content" style="width: 220px; bottom: 120%; font-size: 0.75rem;">
-                         <strong>PENTING:</strong><br>
-                         Gunakan <strong>EMAIL SAMA</strong> dgn login akun.
-                      </div>
-                  </div>
               </div>`;
 
       // KONDISI 2 (BARU): Premium & SUDAH Punya -> Tombol SUDAH BELI
@@ -348,7 +341,21 @@ export const updateAuthStateUI = (
       let nameHTML = user.displayName || "Pengguna";
       if (isAdmin)
         nameHTML += ` <span style="background-color: #EF4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; font-weight: 700;">ADMIN</span>`;
+      
+      // [BARU] Tampilkan Saldo Promtium di Dropdown
+      const token = user.token || 0;
+      nameHTML += `<div style="margin-top: 4px; font-size: 0.85rem; color: #059669; font-weight: 600; background: #e6fffa; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
+                    <img src="img/promtium.png" class="currency-icon" alt="P"> ${token} Promtium
+                   </div>`;
+
       els.dropdownUsername.innerHTML = nameHTML;
+
+      // [BARU] Update Saldo di Header (Desktop)
+      const headerBalance = document.getElementById('header-user-balance');
+      if(headerBalance) {
+          headerBalance.innerHTML = `<img src="img/promtium.png" class="currency-icon" alt="P"> ${token}`;
+          headerBalance.style.display = 'flex';
+      }
     }
     if (els.dropdownEmail) els.dropdownEmail.textContent = user.email;
 
@@ -423,8 +430,9 @@ export const fillPromptModal = (data, isAdmin) => {
   // Premium Check
   const isPrem = data?.isPremium || false;
   if (els.promptPremiumCheck) els.promptPremiumCheck.checked = isPrem;
-  if (els.promptMayarLink) els.promptMayarLink.value = data?.mayarLink || "";
-  if (els.promptMayarSku) els.promptMayarSku.value = data?.mayarSku || "";
+  
+  // Isi Harga Token
+  if (els.promptTokenPrice) els.promptTokenPrice.value = data?.priceInTokens || "";
 
   const premiumContainer = document.getElementById("premium-container");
   if (premiumContainer) {
@@ -441,13 +449,13 @@ export const fillPromptModal = (data, isAdmin) => {
   if (els.mayarLinkContainer) {
     if (isPrem) {
       els.mayarLinkContainer.style.display = "block";
-      if (els.promptMayarLink) els.promptMayarLink.required = true;
+      if (els.promptTokenPrice) els.promptTokenPrice.required = true;
       if (els.promptTextInput)
         els.promptTextInput.placeholder =
           "Tulis deskripsi singkat / teaser di sini. JANGAN TULIS PROMPT ASLI!";
     } else {
       els.mayarLinkContainer.style.display = "none";
-      if (els.promptMayarLink) els.promptMayarLink.required = false;
+      if (els.promptTokenPrice) els.promptTokenPrice.required = false;
       if (els.promptTextInput) els.promptTextInput.placeholder = "Isi Prompt";
     }
   }
@@ -502,36 +510,38 @@ export const showFullViewModal = (
   // 2. Logic Tampilan (Premium vs Gratis/Owned)
   if (data.isPremium && !isOwned) {
     // --- KONDISI A: Premium & BELUM BELI (Terkunci) ---
+    const price = data.priceInTokens || 0;
+
     if (modalPromptText) {
       modalPromptText.innerHTML = `
             <div style="text-align: center; padding: 2rem; color: #D97706; background: #FFFBEB; border-radius: 8px;">
                 <span class="material-icons" style="font-size: 48px; margin-bottom: 1rem;">lock</span><br>
                 <strong>Prompt Ini Terkunci (Premium)</strong><br>
-                <p style="margin-top: 10px; color: #4B5563;">${
-                  data.promptText ||
-                  "Dapatkan akses penuh ke prompt berkualitas tinggi ini dengan membelinya."
-                }</p>
+                <div style="margin-top: 10px; color: #4B5563; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  Buka prompt ini seharga <strong>${price} <img src="img/promtium.png" class="currency-icon" alt="P"> Promtium</strong>
+                </div>
             </div>`;
     }
     if (generateBtn) generateBtn.style.display = "none";
 
-    // Ubah Tombol jadi "Beli Sekarang" (Orange)
+    // Ubah Tombol jadi "Buka (X Promtium)" (Orange)
     if (copyBtn) {
       copyBtn.classList.remove("login-btn");
-      copyBtn.classList.add("pay-btn");
+      copyBtn.classList.add("pay-token-btn"); 
+      copyBtn.classList.remove("pay-btn");    
+      
       copyBtn.style.backgroundColor = "#F59E0B";
       copyBtn.style.borderColor = "#D97706";
       copyBtn.style.color = "#fff";
-      copyBtn.innerHTML = `<span class="material-icons">shopping_cart</span><span>Beli Sekarang</span>`;
+      copyBtn.innerHTML = `<img src="img/promtium.png" class="currency-icon large" style="filter: brightness(0) invert(1);" alt="P"><span>Buka (${price} Promtium)</span>`;
 
-      copyBtn.dataset.mayarLink = data.mayarLink;
-      copyBtn.dataset.isPremium = "true"; // Agar mentrigger checkout
+      copyBtn.dataset.tokenPrice = price;
+      copyBtn.dataset.id = data.id;
       
-      // [FIX] Tampilkan Tooltip Bantuan Pembayaran
+      // Sembunyikan Tooltip Bantuan Pembayaran (Gak perlu lagi)
       const helpIcon = document.getElementById('payment-help-icon');
-      if(helpIcon) helpIcon.style.display = 'flex';
+      if(helpIcon) helpIcon.style.display = 'none';
     }
-
   } else {
     // --- KONDISI B: Gratis ATAU SUDAH BELI (Terbuka) ---
     

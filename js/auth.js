@@ -45,29 +45,14 @@ export const logoutUser = (auth) => {
 
 // Tambahkan ini di js/auth.js (setelah logoutUser)
 
-export const registerUser = (auth, email, password, fullName, onSuccess) => {
+// [REFACTORED] Updated to return Promise for better UI control in main.js
+export const registerUser = (auth, email, password, fullName) => {
     return auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Update nama profil pengguna
             const user = userCredential.user;
             return user.updateProfile({
                 displayName: fullName
-            }).then(() => {
-                if(onSuccess) onSuccess();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Akun Dibuat!',
-                    text: `Selamat datang, ${fullName}!`,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
             });
-        })
-        .catch(error => {
-            let errorMsg = error.message;
-            if (error.code === 'auth/email-already-in-use') errorMsg = "Email sudah terdaftar!";
-            if (error.code === 'auth/weak-password') errorMsg = "Password terlalu lemah (min. 6 karakter).";
-            
-            Swal.fire({ icon: 'error', title: 'Gagal Daftar', text: errorMsg });
         });
+        // Error handling will be done in main.js
 };

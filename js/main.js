@@ -53,49 +53,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentUser = user;
             currentUser.isAdmin = tokenResult.claims.admin === true;
 
-            // 3.B. [FIX] FETCH USER DATA FROM FIRESTORE (Owned Prompts, etc.)
-            try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
+            // 3.B. [FIX] REALTIME USER DATA LISTENER
+            // Gunakan onSnapshot agar saldo update otomatis tanpa refresh
+            db.collection('users').doc(user.uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
                     // Merge Firestore data into currentUser object
                     currentUser.ownedPrompts = userData.ownedPrompts || [];
                     currentUser.isPremium = userData.isPremium || false;
-                    console.log("👤 User Profile Loaded:", currentUser.ownedPrompts.length, "prompts owned.");
+                    currentUser.token = userData.token || 0; // [CRITICAL FIX] Load Token
+                    console.log(`👤 User Profile Updated: ${currentUser.token} Tokens, ${currentUser.ownedPrompts.length} Prompts.`);
                 } else {
-                    // [SELF-HEALING] Jika doc user belum ada di Firestore, buat sekarang!
-                    // Webhook butuh field 'email' untuk mencocokkan pembeli.
-                    console.log("⚠️ User Doc missing in Firestore. Creating new one...");
-                    
+                    // [SELF-HEALING] Jika doc user belum ada
+                    console.log("⚠️ User Doc missing. Creating new...");
                     const newUserData = {
                         email: user.email,
                         displayName: user.displayName || 'User',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         ownedPrompts: [],
-                        isPremium: false
+                        isPremium: false,
+                        token: 0 // Default token
                     };
-
-                    await db.collection('users').doc(user.uid).set(newUserData);
-                    
-                    currentUser.ownedPrompts = [];
-                    currentUser.isPremium = false;
-                    console.log("✅ New User Doc created in Firestore.");
+                    db.collection('users').doc(user.uid).set(newUserData);
                 }
-            } catch (err) {
-                console.error("Gagal ambil data user:", err);
-            }
+
+                // Update UI setiap kali data berubah
+                UI.updateAuthStateUI(
+                    currentUser, 
+                    currentUser?.isAdmin, 
+                    () => UI.showModal('auth-modal'), 
+                    () => Auth.logoutUser(auth)
+                );
+                
+                // Refresh Grid (penting untuk update status tombol "Sudah Beli")
+                applyFilters();
+            }, (error) => {
+                console.error("Gagal listen data user:", error);
+            });
 
         } else {
             currentUser = null;
+            // Update UI jika logout
+            UI.updateAuthStateUI(null, false, () => UI.showModal('auth-modal'), () => {});
+            applyFilters();
         }
-
-        UI.updateAuthStateUI(
-            currentUser, 
-            currentUser?.isAdmin, 
-            () => UI.showModal('auth-modal'), 
-            () => Auth.logoutUser(auth)
-        );
-        applyFilters(); // Re-render to update Admin & Purchased buttons
     });
 
     // 4. Init Data & UI
@@ -319,105 +320,112 @@ const toggleLikePrompt = async (promptId) => {
     }
 };
 
-const triggerMayarCheckout = (link) => {
-    if (!link) {
-        Swal.fire('Error', 'Link pembayaran tidak ditemukan!', 'error');
+// =========================================================================
+// TOKEN PURCHASE LOGIC 💎
+// =========================================================================
+const purchaseWithToken = async (promptId, priceInTokens) => {
+    if (!currentUser) {
+        Swal.fire({ icon: 'info', title: 'Login Dulu', text: 'Silakan login untuk membeli prompt.' });
+        UI.showModal('auth-modal');
         return;
     }
 
-    console.log("--- START MAYAR CHECKOUT via IframeLightbox ---");
+    // 1. Cek Saldo Lokal (Optimistic Check)
+    const currentToken = currentUser.token || 0;
+    if (currentToken < priceInTokens) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Saldo Promtium Kurang',
+            text: `Anda butuh ${priceInTokens} Promtium, tapi saldo hanya ${currentToken}.`,
+            showCancelButton: true,
+            confirmButtonText: 'Top Up Sekarang',
+            cancelButtonText: 'Batal'
+        }).then((res) => {
+            if (res.isConfirmed) window.location.href = 'pricing.html';
+        });
+        return;
+    }
 
-    // 1. Helper function to find the global class
-    const findLibrary = () => {
-        return window.IframeLightbox;
-    };
+    // 2. Konfirmasi
+    const confirm = await Swal.fire({
+        title: 'Beli Prompt?',
+        html: `Harga: <b>${priceInTokens} Promtium</b> <img src="img/promtium.png" style="width:20px; vertical-align:middle;">.<br>Saldo Anda akan dipotong.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Buka!',
+        confirmButtonColor: '#10B981'
+    });
 
-    let StartLibrary = findLibrary();
+    if (!confirm.isConfirmed) return;
 
-    if (StartLibrary) {
-        console.log("✅ IframeLightbox library found immediately.");
-        openLightbox(StartLibrary, link);
-    } else {
-        console.warn("⚠️ IframeLightbox not found yet. Starting retry mechanism...");
+    // 3. Eksekusi Pembelian (Transaction)
+    try {
+        Swal.showLoading();
         
-        // 2. Retry Mechanism
-        let attempts = 0;
-        const maxAttempts = 5;
-        const interval = setInterval(() => {
-            attempts++;
-            StartLibrary = findLibrary();
-            
-            if (StartLibrary) {
-                clearInterval(interval);
-                console.log(`✅ Library found on attempt ${attempts}!`);
-                openLightbox(StartLibrary, link);
-            } else if (attempts >= maxAttempts) {
-                clearInterval(interval);
-                console.error("❌ Failed to find IframeLightbox after multiple attempts.");
-                
-                // FALLBACK
-                Swal.fire({
-                    title: 'Popup Gagal Dimuat',
-                    text: 'Sistem pembayaran popup tidak merespon. Buka halaman pembayaran di tab baru?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Buka Tab Baru',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.open(link, '_blank');
-                    }
-                });
+        await db.runTransaction(async (transaction) => {
+            // A. Baca Data User Terbaru (Penting: agar saldo akurat)
+            const userRef = db.collection('users').doc(currentUser.uid);
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) throw "User tidak ditemukan.";
+            const userData = userDoc.data();
+            const serverToken = userData.token || 0;
+
+            // B. Cek Saldo Lagi (Server Side)
+            if (serverToken < priceInTokens) {
+                throw "Saldo Token tidak cukup (Server Check).";
             }
-        }, 500);
+
+            // C. Cek Apakah Sudah Punya
+            const ownedPrompts = userData.ownedPrompts || [];
+            if (ownedPrompts.includes(promptId)) {
+                throw "Anda sudah memiliki prompt ini.";
+            }
+
+            // D. Update Saldo & OwnedPrompts
+            transaction.update(userRef, {
+                token: serverToken - priceInTokens,
+                ownedPrompts: firebase.firestore.FieldValue.arrayUnion(promptId)
+            });
+        });
+
+        // 4. Sukses
+        // Update state lokal
+        if (!currentUser.ownedPrompts) currentUser.ownedPrompts = [];
+        currentUser.ownedPrompts.push(promptId);
+        currentUser.token -= priceInTokens; // Optimistic update
+
+        Swal.fire({ 
+            icon: 'success', 
+            title: 'Berhasil Terbuka! 🔓', 
+            text: 'Prompt telah ditambahkan ke koleksi Anda.',
+            timer: 2000,
+            showConfirmButton: false 
+        });
+
+        // Refresh UI
+        applyFilters(); 
+        
+        // Kalau sedang buka modal, refresh isinya
+        const viewModal = document.getElementById('view-prompt-modal');
+        if(viewModal && viewModal.style.display === 'flex') {
+             const promptData = allPrompts.find(p => p.id === promptId);
+             if(promptData) UI.showFullViewModal(promptData, currentUser, currentViewIndex, currentFilteredPrompts.length);
+        }
+
+    } catch (error) {
+        console.error("Purchase Error:", error);
+        let msg = error;
+        if (typeof error === 'object') msg = error.message;
+        Swal.fire('Gagal', msg, 'error');
     }
 };
 
-// Execute Checkout Logic using IframeLightbox
-const openLightbox = (LibraryClass, link) => {
-    try {
-        console.log("🚀 Opening Mayar Lightbox:", link);
-        
-        // Create a dummy hidden trigger element
-        // The library binds to an element and reads href/data-src
-        const dummyBtn = document.createElement('a');
-        dummyBtn.href = link;
-        dummyBtn.style.display = 'none';
-        document.body.appendChild(dummyBtn);
-
-        // Instantiate Lightbox
-        // Note: The library lacks a clear onSuccess callback in its minified code.
-        // We will reload page on close as a "best guess" refresh interaction,
-        // or just let the user initiate refresh.
-        const lightbox = new LibraryClass(dummyBtn, {
-            scrolling: true, // [FIX] Mengaktifkan scroll agar user bisa melihat konten panjang
-            rate: 500, // Default rate
-            onCreated: () => console.log("Lightbox created"),
-            onLoaded: () => console.log("Lightbox loaded"),
-            onClosed: () => {
-                console.log("Lightbox closed. Cleaning up.");
-                dummyBtn.remove();
-                
-                // Optional: ask user if they finished payment
-                Swal.fire({
-                    title: 'Status Pembayaran',
-                    text: 'Apakah Anda sudah menyelesaikan pembayaran?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sudah, Refresh Halaman',
-                    cancelButtonText: 'Belum'
-                }).then((res) => {
-                     if(res.isConfirmed) window.location.reload();
-                });
-            }
-        });
-        
-        lightbox.open();
-
-    } catch (e) {
-        console.error("🔥 Exception during lightbox execution:", e);
-        window.open(link, '_blank'); 
-    }
+// [LEGACY] - Function triggerMayarCheckout bisa dihapus jika 100% migrasi
+// Tapi kita simpan dulu kalau-kalau perlu fallback.
+const triggerMayarCheckout = (link) => {
+    // ... (Old logic, kept for reference or removal)
+    console.warn("Legacy Mayar trigger called. Should use Token Purchase instead.");
 };
 
 // =========================================================================
@@ -464,10 +472,29 @@ function setupEventListeners() {
             const password = document.getElementById('reg-password').value;
 
             // Panggil fungsi register dari Auth
-            Auth.registerUser(auth, email, password, name, () => {
-                UI.hideModal('auth-modal'); // Tutup modal kalau sukses
-                registerForm.reset(); // Kosongkan form
-            });
+            // [UPDATED] UI Handling moved here to prevent conflicts
+            Swal.showLoading(); // Show loading indicator
+
+            Auth.registerUser(auth, email, password, name)
+                .then(() => {
+                    UI.hideModal('auth-modal'); // Prioritas 1: Tutup modal dulu
+                    registerForm.reset(); 
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Akun Dibuat!',
+                        text: `Selamat datang, ${name}!`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                })
+                .catch((error) => {
+                    let errorMsg = error.message;
+                    if (error.code === 'auth/email-already-in-use') errorMsg = "Email sudah terdaftar!";
+                    if (error.code === 'auth/weak-password') errorMsg = "Password terlalu lemah (min. 6 karakter).";
+                    
+                    Swal.fire({ icon: 'error', title: 'Gagal Daftar', text: errorMsg });
+                });
         });
     }
 
@@ -495,13 +522,9 @@ function setupEventListeners() {
             // Ambil Status Premium
             const isPremium = document.getElementById('prompt-isPremium').checked;
             
-            // Ambil Link Mayar
-            const mayarLinkInput = document.getElementById('prompt-mayarLink');
-            const mayarLink = mayarLinkInput ? mayarLinkInput.value : '';
-
-            // --- [BARU] AMBIL PRODUCT ID / SKU MAYAR ---
-            const mayarSkuInput = document.getElementById('prompt-mayarSku');
-            const mayarSku = mayarSkuInput ? mayarSkuInput.value.trim() : '';
+            // --- [MIGRASI TOKEN] AMBIL HARGA TOKEN ---
+            const priceInTokensInput = document.getElementById('prompt-tokenPrice');
+            const priceInTokens = priceInTokensInput ? parseInt(priceInTokensInput.value) : 0;
             // -------------------------------------------
 
             const imageFile = document.getElementById('prompt-imageFile').files[0];
@@ -520,9 +543,10 @@ function setupEventListeners() {
                 return;
             }
             
-            // Jika Premium, pastikan Link & SKU diisi (Opsional: bisa diperketat di sini)
-            if (isPremium && (!mayarLink || !mayarSku)) {
-                Swal.fire('Peringatan', 'Untuk Prompt Premium, Link Checkout & Product ID Mayar sebaiknya diisi agar sistem otomatis berjalan.', 'warning');
+            // Jika Premium, pastikan Harga Token > 0
+            if (isPremium && priceInTokens <= 0) {
+                Swal.fire('Peringatan', 'Untuk Prompt Premium, Harga Token harus lebih dari 0.', 'warning');
+                return;
             }
 
             // Tampilkan Loading
@@ -569,9 +593,8 @@ function setupEventListeners() {
                     imageUrl: imageUrl,
                     isPremium: isPremium,
                     
-                    // Simpan Data Mayar (Hanya kalau Premium)
-                    mayarLink: isPremium ? mayarLink : '',
-                    mayarSku: isPremium ? mayarSku : '', // <--- FIELD BARU KITA
+                    // Simpan Harga Token (Hapus field Mayar)
+                    priceInTokens: isPremium ? priceInTokens : 0,
                     
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -625,9 +648,12 @@ function setupEventListeners() {
         if(viewModalCopyBtn) {
             viewModalCopyBtn.addEventListener('click', (e) => {
                 const btn = e.currentTarget;
-                // Jika Premium (Beli), buka link
-                if (btn.dataset.isPremium === "true") {
-                    triggerMayarCheckout(btn.dataset.mayarLink); // <--- UBAH BARIS INI
+                // Jika Premium (Beli), trigger Token Purchase
+                // Class .pay-token-btn sudah kita set di ui.js
+                if (btn.classList.contains('pay-token-btn')) {
+                    const price = parseInt(btn.dataset.tokenPrice);
+                    const id = btn.dataset.id;
+                    purchaseWithToken(id, price);
                     return; 
                 }
 
@@ -699,14 +725,14 @@ function setupEventListeners() {
     if (UI.els.promptGrid) {
         UI.els.promptGrid.addEventListener('click', (e) => {
             
-            // --- [PINDAHAN] D. CEK DULU: TOMBOL PREMIUM / BELI ---
-            // (Wajib ditaruh paling atas sebelum logika kartu/modal)
-            const premiumBtn = e.target.closest('.premium-btn');
-            if (premiumBtn) {
+            // --- [UPDATED] D. CEK DULU: TOMBOL BELI (TOKEN) ---
+            const tokenBtn = e.target.closest('.pay-token-btn');
+            if (tokenBtn) {
                 e.stopPropagation(); 
-                const link = premiumBtn.dataset.mayarLink;
-                triggerMayarCheckout(link); 
-                return; // Stop di sini agar tidak membuka modal
+                const price = parseInt(tokenBtn.dataset.tokenPrice);
+                const id = tokenBtn.dataset.id;
+                purchaseWithToken(id, price);
+                return; 
             }
             
             // A. Handle Tombol Edit

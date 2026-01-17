@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade & Top Up - Promptku</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+
+    <style>
+        .pricing-hero {
+            text-align: center;
+            padding: 4rem 1rem 2rem;
+            background: linear-gradient(to bottom, #f0fdf4, #ffffff);
+        }
+        .pricing-hero h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .pricing-hero p { color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+        .pricing-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            text-align: center;
+            margin: 3rem 0 2rem;
+            position: relative;
+        }
+        .section-title h2 { font-size: 1.8rem; color: var(--text-color); }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        /* MEMBERSHIP CARD */
+        .membership-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            text-align: center;   /* Center text */
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 400px;     /* Limit width for centering */
+            margin: 0 auto;       /* Center the card itself */
+        }
+        .membership-card.premium {
+            border-color: #F59E0B;
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+        }
+        .popular-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #F59E0B;
+            color: white;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-bottom-left-radius: 16px;
+        }
+        .card-header { padding: 2rem; width: 100%; border-bottom: 1px solid #f1f5f9; background: #fffbeb; }
+        .plan-name { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
+        .plan-price { font-size: 2.5rem; font-weight: 800; color: #1e293b; }
+        .plan-price span { font-size: 1rem; color: #64748b; font-weight: 500; }
+        
+        .card-features { padding: 2rem; width: 100%; text-align: left; }
+        .card-features ul { list-style: none; padding: 0; margin: 0; }
+        .card-features li { margin-bottom: 1rem; color: #475569; display: flex; align-items: center; gap: 10px; }
+        .card-features li .material-icons { color: #10B981; font-size: 1.2rem; }
+
+        .card-footer { padding: 0 2rem 2rem; width: 100%; }
+        .btn-pricing {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-premium { background: #F59E0B; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        .btn-premium:hover { background: #d97706; transform: translateY(-2px); }
+
+        /* TOKEN GRID */
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .token-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .token-card:hover { border-color: var(--primary-color); }
+        .token-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .token-amount { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+        .token-price { color: var(--primary-color); font-weight: 600; margin-bottom: 1rem; display: block; }
+        .btn-token {
+            background: #f1f5f9; color: #334155; padding: 0.75rem; border-radius: 8px; width: 100%; font-weight: 600;
+        }
+        .btn-token:hover { background: #e2e8f0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header (Copy dari index.html tapi disederhanakan) -->
+    <header class="sticky-header pinterest-style">
+        <div class="header-left">
+            <a href="index.html" class="logo-link">
+                <img src="img/favicon-32x32.png" alt="Promptku Logo" class="header-logo">
+            </a>
+        </div>
+        <div class="header-center">
+            <!-- Kosong di page ini -->
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="icon-btn-pinterest" title="Kembali ke Home">
+                <span class="material-icons">close</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="pricing-hero">
+        <h1>Upgrade Kreativitas Tuan 🚀</h1>
+        <p>Pilih paket yang cocok untuk kebutuhan generate prompt Tuan.</p>
+        
+        <!-- [BARU] Container Saldo -->
+        <div id="current-balance-container" style="display:none; margin-top: 1.5rem; justify-content: center;">
+            <div style="background: white; padding: 0.8rem 1.5rem; border-radius: 50px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <span style="color: #64748b; font-size: 0.95rem;">Saldo Saat Ini:</span>
+                <strong style="color: #10B981; font-size: 1.2rem; display: flex; align-items: center; gap: 4px;">
+                    <img src="img/promtium.png" style="width: 20px;" alt="P"> 
+                    <span id="user-balance-text">0</span> Promtium
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="pricing-container">
+        
+        <!-- SECTION 1: MEMBERSHIP -->
+        <div class="section-title">
+            <h2>Akun Sultan (Membership)</h2>
+            <p style="color: #64748b; margin-top: 0.5rem;">Akses tanpa batas, fitur eksklusif.</p>
+        </div>
+
+        <div class="membership-card premium">
+            <div class="popular-badge">PALING LARIS 🔥</div>
+            <div class="card-header">
+                <div class="plan-name">Sultan Access</div>
+                <div class="plan-price">Rp 99rb<span>/bulan</span></div>
+            </div>
+            <div class="card-features">
+                <ul>
+                    <li><span class="material-icons">check_circle</span> Akses SEMUA Prompt Premium</li>
+                    <li><span class="material-icons">check_circle</span> Bebas Request Prompt Spesifik</li>
+                    <li><span class="material-icons">check_circle</span> Support Prioritas 24/7</li>
+                    <li><span class="material-icons">check_circle</span> Badge "SULTAN" di Profil</li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <button class="btn-pricing btn-premium" id="btn-buy-membership">
+                    Jadi Sultan Sekarang
+                </button>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">Garansi uang kembali 7 hari.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 2: PROMTIUM -->
+        <div class="section-title">
+            <h2>Top Up Promtium <img src="img/promtium.png" style="width:24px; vertical-align:middle;"></h2>
+            <p style="color: #64748b; margin-top: 0.5rem;">Mata uang khusus untuk membuka prompt premium.</p>
+        </div>
+
+        <div class="token-grid">
+            <!-- Paket Hemat -->
+            <div class="token-card">
+                <img src="img/promtium.png" alt="P" style="width: 50px; height: 50px; margin-bottom: 1rem;">
+                <div class="token-amount">10 Promtium</div>
+                <span class="token-price">Rp 15.000</span>
+                <button class="btn-pricing btn-token" onclick="buyToken('link_mayar_paket_10', 'sku_token_10')">
+                    Beli Paket Hemat
+                </button>
+            </div>
+
+            <!-- Paket Standar -->
+            <div class="token-card" style="border-color: #3b82f6; background: #eff6ff;">
+                <img src="img/promtium.png" alt="P" style="width: 60px; height: 60px; margin-bottom: 1rem;">
+                <div class="token-amount">25 Promtium</div>
+                <span class="token-price">Rp 35.000</span>
+                <button class="btn-pricing btn-token" style="background: #3b82f6; color: white;" onclick="buyToken('link_mayar_paket_25', 'sku_token_25')">
+                    Beli Paket Standar
+                </button>
+            </div>
+
+            <!-- Paket Jumbo -->
+            <div class="token-card">
+                <img src="img/promtium.png" alt="P" style="width: 70px; height: 70px; margin-bottom: 1rem;">
+                <div class="token-amount">50 Promtium</div>
+                <span class="token-price">Rp 60.000</span>
+                <button class="btn-pricing btn-token" onclick="buyToken('link_mayar_paket_50', 'sku_token_50')">
+                    Beli Paket Jumbo
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="site-footer" style="margin-top: 4rem;">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Galeri Prompt Banana</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPT LIBRARY -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://mayarembed.r2.mayar.id/mayar-new-min.js"></script>
+    
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Config Module Import for proper init -->
+    <script type="module">
+        import { initFirebase } from './js/config.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // 1. Init Firebase
+            const fb = await initFirebase();
+            if (!fb) return;
+            const { db, auth } = fb;
+
+            // 2. Auth Listener
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // Listen to User Data
+                    db.collection('users').doc(user.uid).onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            const balance = data.token || 0;
+                            
+                            // Update UI Saldo
+                            const balContainer = document.getElementById('current-balance-container');
+                            const balText = document.getElementById('user-balance-text');
+                            
+                            if(balContainer) balContainer.style.display = 'flex';
+                            if(balText) balText.textContent = balance;
+                        }
+                    });
+                } else {
+                     // Hide balance if not logged in
+                     const balContainer = document.getElementById('current-balance-container');
+                     if(balContainer) balContainer.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // document.getElementById('current-year').textContent = new Date().getFullYear(); // Pindah ke module atas
+
+        // --- KONFIGURASI MAYAR (ISI DISINI YA TUAN) ---
+        const CONFIG = {
+            membership: {
+                link: "https://mayar.id/pl/ISI_LINK_MEMBERSHIP_DISINI", // Ganti dengan Link Payment Mayar
+                sku: "SKU_MEMBERSHIP_SULTAN" // Ganti dengan Product ID Mayar
+            },
+            tokens: {
+                // Contoh pengisian (nanti disesuaikan dengan onclick di HTML atas)
+                'link_mayar_paket_10': "https://mayar.id/pl/LINK_TOKEN_10",
+                'link_mayar_paket_25': "https://mayar.id/pl/LINK_TOKEN_25",
+                'link_mayar_paket_50': "https://mayar.id/pl/LINK_TOKEN_50"
+            }
+        };
+
+        // --- FUNGSI CHECKOUT ---
+        // (Kita copy logika triggerMayarCheckout dari main.js tapi disederhanakan)
+        function triggerCheckout(link) {
+            if (!link || link.includes("ISI_LINK")) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Segera Hadir',
+                    text: 'Link pembayaran belum dikonfigurasi oleh Admin.',
+                });
+                return;
+            }
+
+            console.log("🚀 Starting Checkout: " + link);
+            
+            // Cek Library IframeLightbox
+            if (window.IframeLightbox) {
+                const dummyBtn = document.createElement('a');
+                dummyBtn.href = link;
+                dummyBtn.style.display = 'none';
+                document.body.appendChild(dummyBtn);
+
+                const lightbox = new window.IframeLightbox(dummyBtn, {
+                    scrolling: true,
+                    rate: 500,
+                    onClosed: () => {
+                         Swal.fire({
+                            title: 'Status Pembayaran',
+                            text: 'Sudah selesai bayar Tuan?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sudah, Cek Status',
+                            cancelButtonText: 'Belum'
+                        }).then((res) => {
+                             if(res.isConfirmed) window.location.href = 'index.html'; // Balik ke Home
+                        });
+                        dummyBtn.remove();
+                    }
+                });
+                lightbox.open();
+            } else {
+                // Fallback kalau library gagal load
+                window.open(link, '_blank');
+            }
+        }
+
+        // --- EVENT HANDLERS ---
+        document.getElementById('btn-buy-membership').addEventListener('click', () => {
+            triggerCheckout(CONFIG.membership.link);
+        });
+
+        // Fungsi Global untuk Token (dipanggil via onclick)
+        window.buyToken = (linkKey, skuKey) => {
+            // Di sini kita mapping key ke Link asli dari CONFIG
+            // Tapi untuk sekarang karena masih placeholder, kita ambil direct string/key-nya dulu
+            // Nanti Tuan ganti logic ini kalau sudah isi CONFIG.tokens
+            
+            // Contoh cara pakai yg benar nanti: const realLink = CONFIG.tokens[linkKey];
+            
+            // Sementara:
+            triggerCheckout(CONFIG.tokens[linkKey] || linkKey); 
+        };
+
+    </script>
+</body>
+</html>
