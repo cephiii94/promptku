@@ -19,6 +19,40 @@ const itemsPerPage = 12;
 // INITIALIZATION
 // =========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // === LOADER LOGIC START ===
+    const loader = document.getElementById('full-screen-loader');
+    const loaderText = document.getElementById('loader-text');
+    let loadInterval;
+
+    // A. Text Rotation
+    if (loader && loaderText) {
+        const messages = [
+            "Mohon tunggu sedang loading prompt keren...",
+            "Menyiapkan antarmuka yang ciamik...",
+            "Mengambil data inspirasi terbaru...",
+            "Sebentar lagi, siapkan imajinasimu..."
+        ];
+        let msgIndex = 0;
+        
+        loadInterval = setInterval(() => {
+            msgIndex = (msgIndex + 1) % messages.length;
+            loaderText.style.opacity = 0; // Fade out slightly
+            setTimeout(() => {
+                loaderText.textContent = messages[msgIndex];
+                loaderText.style.opacity = 1;
+            }, 300); // Wait for fade out
+        }, 2000); // Change every 2s
+
+        // B. Failsafe (Max 10s)
+        setTimeout(() => {
+            if (loader && !loader.classList.contains('hidden')) {
+                clearInterval(loadInterval);
+                loader.classList.add('hidden');
+            }
+        }, 10000);
+    }
+    // === LOADER LOGIC END ===
+
     // 1. Cek Pesan Satpam (Titipan dari session)
     if (sessionStorage.getItem('alert_must_login')) {
         Swal.fire({
@@ -104,6 +138,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(yearSpan) yearSpan.textContent = new Date().getFullYear();
 
     await fetchAndRenderPrompts();
+    
+    // === HIDE LOADER OFFICIALLY ===
+    if (loader) {
+        // Minimal delay biar logo "nongol" dikit kalau loading cepet
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            if (loadInterval) clearInterval(loadInterval);
+        }, 1000); 
+    }
+    // ==============================
+
     setupEventListeners();
 });
 
