@@ -82,7 +82,7 @@ Aturan:
         const userQuery = `Tolong ubah input berikut menjadi prompt gambar yang deskriptif dan spesifik (dalam bahasa Inggris):\n\n${userQueryParts.join('\n')}`;
 
         // 5. Panggil Google API
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
         
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
