@@ -709,11 +709,27 @@ function setupEventListeners() {
                 if (isMobile) {
                     const popupTextArea = document.getElementById('popup-prompt-textarea');
                     if(popupTextArea) popupTextArea.value = textToCopy;
-                    UI.showModal('prompt-text-popup'); 
+                    
+                    // [BARU] Sembunyikan tombol dulu
                     const popupCopyBtn = document.getElementById('popup-copy-btn');
                     if (popupCopyBtn) {
+                        popupCopyBtn.style.opacity = '0';
+                        popupCopyBtn.style.transition = 'opacity 0.5s ease-in-out';
+                        popupCopyBtn.style.pointerEvents = 'none'; // Cegah klik saat invisible
+                        
+                        // Validasi button reset
                         popupCopyBtn.classList.remove('copied');
                         popupCopyBtn.querySelector('span:last-child').textContent = 'Salin Prompt';
+                    }
+
+                    UI.showModal('prompt-text-popup'); 
+
+                    // [BARU] Munculkan tombol setelah delay (misal 800ms)
+                    if (popupCopyBtn) {
+                        setTimeout(() => {
+                            popupCopyBtn.style.opacity = '1';
+                            popupCopyBtn.style.pointerEvents = 'auto';
+                        }, 800);
                     }
                 } else {
                     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -730,6 +746,7 @@ function setupEventListeners() {
             });
         }
         
+        
         // Like & Generate Listeners inside View Modal
         const viewModalLikeBtn = document.getElementById('view-modal-like-btn');
         if (viewModalLikeBtn) {
@@ -738,6 +755,29 @@ function setupEventListeners() {
                 if (promptId) toggleLikePrompt(promptId);
             });
         }
+    }
+
+    // [FIX] Mobile Popup Copy Button Listener
+    const popupCopyBtn = document.getElementById('popup-copy-btn');
+    if (popupCopyBtn) {
+        popupCopyBtn.addEventListener('click', () => {
+             const popupTextArea = document.getElementById('popup-prompt-textarea');
+             if (popupTextArea && popupTextArea.value) {
+                 navigator.clipboard.writeText(popupTextArea.value).then(() => {
+                     const originalText = "Salin Prompt";
+                     popupCopyBtn.classList.add('copied');
+                     popupCopyBtn.querySelector('span:last-child').textContent = 'Berhasil Tersalin!';
+                     
+                     setTimeout(() => {
+                         popupCopyBtn.classList.remove('copied');
+                         popupCopyBtn.querySelector('span:last-child').textContent = originalText;
+                     }, 2000);
+                 }).catch(err => {
+                     console.error('Gagal salin: ', err);
+                     Swal.fire({ toast: true, position: 'top', icon: 'error', title: 'Gagal menyalin', timer: 2000, showConfirmButton: false });
+                 });
+             }
+        });
     }
 
     // 5. Filter & Search Inputs
@@ -780,6 +820,34 @@ function setupEventListeners() {
                 return; 
             }
             
+            // --- [FIX] E. HANDLE TOMBOL COPY OVERLAY (Card) ---
+            const copyOverlayBtn = e.target.closest('.copy-btn-overlay');
+            if (copyOverlayBtn) {
+                e.stopPropagation();
+                
+                // Pastikan bukan tombol beli (karena class copy-btn-overlay juga dipakai di tombol beli)
+                // Tapi logika tokenBtn di atas sudah menangkap .pay-token-btn, jadi aman.
+                // Namun kita cek lagi atribut datanya biar pasti.
+                
+                const textToCopy = decodeURIComponent(copyOverlayBtn.dataset.promptText || "");
+                if (textToCopy) {
+                     navigator.clipboard.writeText(textToCopy).then(() => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Prompt Disalin!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                     }).catch(err => {
+                         console.error("Copy failed", err);
+                         Swal.fire({ toast: true, icon: 'error', title: 'Gagal menyalin' });
+                     });
+                }
+                return;
+            }
+
             // A. Handle Tombol Edit
             const editBtn = e.target.closest('.edit-btn');
             if (editBtn) {

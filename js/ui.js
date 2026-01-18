@@ -135,11 +135,7 @@ export const renderPrompts = (
       ) {
         adminActions = `
             <div class="card-actions" style="gap: 4px; align-items: center;">
-                <button type="button" class="action-btn" 
-                    style="width: auto; padding: 0 8px; font-size: 11px; background: rgba(0,0,0,0.7); border-radius: 4px;"
-                    onclick="event.stopPropagation(); navigator.clipboard.writeText('${prompt.id}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'ID Disalin!', showConfirmButton: false, timer: 1000});">
-                    ID
-                </button>
+
                 <button class="action-btn edit-btn" data-id="${prompt.id}"><span class="material-icons">edit</span><span class="tooltip">Edit</span></button>
                 <button class="action-btn delete-btn" data-id="${prompt.id}"><span class="material-icons">delete</span><span class="tooltip">Hapus</span></button>
             </div>`;
@@ -561,18 +557,33 @@ export const showFullViewModal = (
       copyBtn.classList.add("login-btn");
       copyBtn.classList.remove("pay-btn");
       
-      // Cek: Jika ini Premium TAPI Sudah Beli -> Kasih Tampilan Spesial (Hijau)
+      
+      // [UPDATED] Logic Mobile vs Desktop untuk Tombol Utama
+      // Mobile: "Lihat Prompt" (Buka Popup) -> "file_open"
+      // Desktop: "Salin Prompt" (Langsung Copy) -> "content_copy"
+      if (window.innerWidth <= 768) {
+          copyBtn.innerHTML = `<span class="material-icons">file_open</span><span>Lihat Prompt</span>`;
+      } else {
+          copyBtn.innerHTML = `<span class="material-icons">content_copy</span><span>Salin Prompt</span>`;
+      }
+      
+      // Override khusus jika Premium & Sudah Beli (Hijau)
       if (data.isPremium && isOwned) {
           copyBtn.style.backgroundColor = "#10B981"; // Hijau
           copyBtn.style.borderColor = "#059669";
           copyBtn.style.color = "#fff";
-          copyBtn.innerHTML = `<span class="material-icons">check_circle</span><span>Sudah Beli (Salin)</span>`;
+          // Tetap gunakan "Sudah Beli (Salin)" atau "Sudah Beli (Lihat)"?
+          // Agar konsisten, kita pakai logika yang sama:
+          if (window.innerWidth <= 768) {
+             copyBtn.innerHTML = `<span class="material-icons">check_circle</span><span>Sudah Beli (Lihat)</span>`;
+          } else {
+             copyBtn.innerHTML = `<span class="material-icons">check_circle</span><span>Sudah Beli (Salin)</span>`;
+          }
       } else {
-          // Tampilan Standar Gratisan
+          // Reset style gratisan default
           copyBtn.style.backgroundColor = ""; 
           copyBtn.style.borderColor = "";
           copyBtn.style.color = "";
-          copyBtn.innerHTML = `<span class="material-icons">file_open</span><span>Lihat Prompt</span>`;
       }
 
       copyBtn.dataset.promptText = encodeURIComponent(data.promptText);
