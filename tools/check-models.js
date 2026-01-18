@@ -2,7 +2,7 @@
 // const fetch = require('node-fetch');
 
 // API Key dari .env (pastikan di-set di terminal atau hardcode temporary saat run)
-const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCFNGXL8Xr7xK7Iu20C6-Uc4XUqNCraN5M'; 
+const apiKey = process.env.GEMINI_API_KEY || '-'; 
 
 async function listModels() {
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
